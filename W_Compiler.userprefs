@@ -1,0 +1,25 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="WCompiler/Program.cs">
+    <Files>
+      <File FileName="WCompiler/Program.cs" Line="20" Column="16" />
+      <File FileName="WCompiler/CodeGen.cs" Line="217" Column="45" />
+      <File FileName="WCompiler/Ast.cs" Line="1" Column="1" />
+      <File FileName="WCompiler/Parser.cs" Line="248" Column="7" />
+      <File FileName="WCompiler/Scanner.cs" Line="1" Column="1" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="WCompiler" expanded="True">
+            <Node name="Program.cs" selected="True" />
+          </Node>
+        </State>
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
