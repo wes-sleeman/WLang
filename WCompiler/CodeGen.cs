@@ -18,7 +18,7 @@ public sealed class CodeGen
 		Reflect.AssemblyName name = new Reflect.AssemblyName(IO.Path.GetFileNameWithoutExtension(moduleName));
 		Emit.AssemblyBuilder asmb = System.AppDomain.CurrentDomain.DefineDynamicAssembly(name, Emit.AssemblyBuilderAccess.Save);
 		Emit.ModuleBuilder modb = asmb.DefineDynamicModule(moduleName);
-		Emit.TypeBuilder typeBuilder = modb.DefineType("Wes");
+		Emit.TypeBuilder typeBuilder = modb.DefineType("Program");
 
 		Emit.MethodBuilder methb = typeBuilder.DefineMethod("Main", Reflect.MethodAttributes.Static, typeof(void), System.Type.EmptyTypes);
 
@@ -159,7 +159,7 @@ public sealed class CodeGen
 			this.il.MarkLabel(body);
 			this.GenStmt(forLoop.Body);
 
-			System.Console.WriteLine(cntr);
+			//System.Console.WriteLine(cntr);
 
 			// **test** does x equal 100? (do the test)
 			this.il.MarkLabel(test);
@@ -204,7 +204,7 @@ public sealed class CodeGen
 			//System.Console.WriteLine (cond.ExprB.ToString());
 
 			if (cond.ExprB is StringLiteral) {
-				exprB = (byte)(char)((StringLiteral)cond.ExprB).Value.ToCharArray().GetValue(0);
+				exprB = (byte)int.Parse(((StringLiteral)cond.ExprB).Value.ToString());
 			}
 			else if (!int.TryParse(TypeOfExpr(cond.ExprB).ToString(), out ExprB))
 			{
@@ -220,7 +220,7 @@ public sealed class CodeGen
 			}
 			else throw new System.Exception("Cannot evaluate if statement part b.");
 
-			System.Console.WriteLine(exprA + exprB);
+			//System.Console.WriteLine(exprA + exprB);
 
 			// jump to the test
 			Emit.Label test = this.il.DefineLabel();
@@ -308,7 +308,7 @@ public sealed class CodeGen
 			{
 				throw new System.Exception("undeclared variable '" + ident + "'");
 			}
-			System.Console.WriteLine(this.symbolTable[ident]);
+			//System.Console.WriteLine(this.symbolTable[ident]);
 
 			this.il.Emit(Emit.OpCodes.Ldloc, this.symbolTable[ident]);
 		}

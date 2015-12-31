@@ -34,7 +34,7 @@ namespace WCompiler
 		}
 		static void Main(string[] args)
 		{
-			if (args == null) {
+			if (args.Length == 0) {
 				Console.WriteLine ("Usage: W.exe source.w");
 				return;
 			} else {

@@ -65,7 +65,8 @@ public sealed class Scanner
 					}
 					if (char.IsControl((char)input.Peek()) && input.Peek() != -1) {
 						ch = (char)input.Read();
-					}
+                        ch = (char)input.Read();
+                    }
 				}
 			}
 			else if (char.IsLetter(ch) || ch == '_' || ch == '[' || ch == ']')

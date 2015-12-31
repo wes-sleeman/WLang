@@ -13,6 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 }
+refresh
 type "Hello, and welcome to the WCompiler for the "
 forecolor = "red"
 type "W Programming Language!"
@@ -20,15 +21,18 @@ resetcolors
 newline
 pause 7
 refresh
+{
 type "Do you like it so far? (y/n)"
 item x
 read x
-{if x = '1' [
+type x
+if x = '1' [
 type "Great!"
 ]
 if x = '1' [
 type "It'll grow on you when you try using it!"
-]}
+]
+}
 newline
 pause 5
 reset
@@ -42,4 +46,6 @@ type "-\/\/"
 FORECOLOUR = "GREEN"
 TYPE "35"
 nEwliNe
+resetcolors
+reset
 ?Thanks for reading the code. Happy devving!
