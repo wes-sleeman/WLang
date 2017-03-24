@@ -32,10 +32,10 @@ type "Great!"
 if x = '1' [
 type "It'll grow on you when you try using it!"
 ]
-}
 newline
 pause 5
 reset
+}
 type "Why don't you try looking at the source code of this little gizmo? It's located in the same directory as the compiler."
 newline
 pause 10

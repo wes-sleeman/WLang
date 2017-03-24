@@ -15,40 +15,34 @@
    */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace WCompiler
 {
-	class Program
+    class Program
 	{
-		static void testMain(string[] args)
+		static void TestMain(string[] args)
 		{
-			string input = "34";
-			int output = 0;
-			int.TryParse(input, out output);
-			Console.WriteLine(output.ToString());
-			//args[0] = "test.w";
-			//realMain(args);
-		}
+            args = new string[] { "example.w" };
+            //RealMain(args);
+        }
 		static void Main(string[] args)
 		{
-			if (args.Length == 0) {
+			if (args.Length != 1) {
 				Console.WriteLine ("Usage: W.exe source.w");
 				return;
 			} else {
 				try {
 					Scanner scanner = null;
 					using (TextReader input = File.OpenText(args[0])) {
-						System.Console.WriteLine ("Scanning...");
+                        Console.WriteLine ("Scanning...");
 						scanner = new Scanner (input);
 					}
-					System.Console.WriteLine ("Parsing...");
+                    Console.WriteLine ("Parsing...");
 					Parser parser = new Parser (scanner.Tokens);
-					System.Console.WriteLine ("Generating code...");
+                    Console.WriteLine ("Generating code...");
 					CodeGen codeGen = new CodeGen (parser.Result, Path.GetFileNameWithoutExtension (args [0]) + ".exe");
-					System.Console.WriteLine ("Complete!");
+                    Console.WriteLine ("Complete!");
 				} catch (Exception e) {
 					Console.Error.WriteLine (e.Message);
 					for (; ;)
