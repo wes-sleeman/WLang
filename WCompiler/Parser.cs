@@ -30,9 +30,9 @@ public sealed class Parser
 	{
 		Stmt result;
 		Variable temp = new Variable();
-		temp.Ident = "temp";
+		temp.Ident = "$";
 		Variable tempnum = new Variable();
-		tempnum.Ident = "tempnum";
+		tempnum.Ident = "$#";
 
 		//foreach (object item in this.tokens) System.Console.WriteLine (item.ToString());
 
@@ -68,9 +68,9 @@ public sealed class Parser
 			this.index++;
 
 			if (this.index == this.tokens.Count || this.tokens [this.index] != Scanner.Equal) {
-				//throw new System.Exception ("expected = after 'item ident'");
+				// assigns to $
 				this.index--;
-				this.tokens [this.index] = "temp";
+				this.tokens [this.index] = "$";
 				declareVar.Expr = this.ParseExpr();
 				result = declareVar;
 			} else {
@@ -103,7 +103,7 @@ public sealed class Parser
 			}
 			else
 			{
-				pause.Duration = intToExpr(1000);
+				pause.Duration = intToExpr(int.MaxValue);
 				result = pause;
 			}
 		}
@@ -120,7 +120,7 @@ public sealed class Parser
 			}
 			else
 			{
-				read.Ident = "temp";
+				read.Ident = "$";
 				result = read;
 			}
 		}
@@ -137,7 +137,7 @@ public sealed class Parser
 			}
 			else
 			{
-				readnum.Ident = "tempnum";
+				readnum.Ident = "$#";
 				result = readnum;
 			}
 		}
@@ -212,7 +212,7 @@ public sealed class Parser
 			this.index++;
 			if (this.index < this.tokens.Count && (this.tokens [this.index] == Scanner.Equal || this.tokens [this.index] == Scanner.CloseAngle || this.tokens [this.index] == Scanner.OpenAngle))// && this.tokens [this.index + 1] is string)
 			{
-				cond.ExprA = ConvToExpr ("tempnum");
+				cond.ExprA = ConvToExpr ("$#");
 			} else {
 				cond.ExprA = ParseExpr ();
 			}
