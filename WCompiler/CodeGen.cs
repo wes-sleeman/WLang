@@ -420,13 +420,13 @@ public sealed class CodeGen
 		DeclareVar stmt = new DeclareVar();
 		StringLiteral strLit = new StringLiteral();
 		strLit.Value = "";
-		stmt.Ident = "temp";
+		stmt.Ident = "$";
 		stmt.Expr = strLit;
 		GenStmt(stmt);
 
 		IntLiteral intLit = new IntLiteral();
 		intLit.Value = 0;
-		stmt.Ident = "tempnum";
+		stmt.Ident = "$#";
 		stmt.Expr = intLit;
 		GenStmt(stmt);
 	}
