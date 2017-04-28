@@ -455,70 +455,68 @@ public sealed class CodeGen
 
         StringLiteral strLit = new StringLiteral()
         { Value = ""};
-
-		stmt.Ident = "$";
-		stmt.Expr = strLit;
-		GenStmt(stmt);
-
-		IntLiteral intLit = new IntLiteral()
+	stmt.Ident = "$";
+	stmt.Expr = strLit;
+	GenStmt(stmt);
+	IntLiteral intLit = new IntLiteral()
         { Value = 0};
-		stmt.Ident = "$#";
-		stmt.Expr = intLit;
-		GenStmt(stmt);
-	}
-	private void ConvertColor(System.ConsoleColor input)
+	stmt.Ident = "$#";
+	stmt.Expr = intLit;
+	GenStmt(stmt);
+}
+private void ConvertColor(System.ConsoleColor input)
+{
+	switch (input)
 	{
-		switch (input)
-		{
-			case System.ConsoleColor.Black:
-			il.Emit(OpCodes.Ldc_I4_0);
-			break;
-			case System.ConsoleColor.DarkBlue:
-			il.Emit(OpCodes.Ldc_I4_1);
-			break;
-			case System.ConsoleColor.DarkGreen:
-			il.Emit(OpCodes.Ldc_I4_2);
-			break;
-			case System.ConsoleColor.DarkCyan:
-			il.Emit(OpCodes.Ldc_I4_3);
-			break;
-			case System.ConsoleColor.DarkRed:
-			il.Emit(OpCodes.Ldc_I4_4);
-			break;
-			case System.ConsoleColor.DarkMagenta:
-			il.Emit(OpCodes.Ldc_I4_5);
-			break;
-			case System.ConsoleColor.DarkYellow:
-			il.Emit(OpCodes.Ldc_I4_6);
-			break;
-			case System.ConsoleColor.Gray:
-			il.Emit(OpCodes.Ldc_I4_7);
-			break;
-			case System.ConsoleColor.DarkGray:
-			il.Emit(OpCodes.Ldc_I4_8);
-			break;
-			case System.ConsoleColor.Blue:
-			il.Emit(OpCodes.Ldc_I4_S, 9);
-			break;
-			case System.ConsoleColor.Green:
-			il.Emit(OpCodes.Ldc_I4_S, 10);
-			break;
-			case System.ConsoleColor.Cyan:
-			il.Emit(OpCodes.Ldc_I4_S, 11);
-			break;
-			case System.ConsoleColor.Red:
-			il.Emit(OpCodes.Ldc_I4_S, 12);
-			break;
-			case System.ConsoleColor.Magenta:
-			il.Emit(OpCodes.Ldc_I4_S, 13);
-			break;
-			case System.ConsoleColor.Yellow:
-			il.Emit(OpCodes.Ldc_I4_S, 14);
-			break;
-			case System.ConsoleColor.White:
-			il.Emit(OpCodes.Ldc_I4_S, 15);
-			break;
-			default:
+		case System.ConsoleColor.Black:
+		il.Emit(OpCodes.Ldc_I4_0);
+		break;
+		case System.ConsoleColor.DarkBlue:
+		il.Emit(OpCodes.Ldc_I4_1);
+		break;
+		case System.ConsoleColor.DarkGreen:
+		il.Emit(OpCodes.Ldc_I4_2);
+		break;
+		case System.ConsoleColor.DarkCyan:
+		il.Emit(OpCodes.Ldc_I4_3);
+		break;
+		case System.ConsoleColor.DarkRed:
+		il.Emit(OpCodes.Ldc_I4_4);
+		break;
+		case System.ConsoleColor.DarkMagenta:
+		il.Emit(OpCodes.Ldc_I4_5);
+		break;
+		case System.ConsoleColor.DarkYellow:
+		il.Emit(OpCodes.Ldc_I4_6);
+		break;
+		case System.ConsoleColor.Gray:
+		il.Emit(OpCodes.Ldc_I4_7);
+		break;
+		case System.ConsoleColor.DarkGray:
+		il.Emit(OpCodes.Ldc_I4_8);
+		break;
+		case System.ConsoleColor.Blue:
+		il.Emit(OpCodes.Ldc_I4_S, 9);
+		break;
+		case System.ConsoleColor.Green:
+		il.Emit(OpCodes.Ldc_I4_S, 10);
+		break;
+		case System.ConsoleColor.Cyan:
+		il.Emit(OpCodes.Ldc_I4_S, 11);
+		break;
+		case System.ConsoleColor.Red:
+		il.Emit(OpCodes.Ldc_I4_S, 12);
+		break;
+		case System.ConsoleColor.Magenta:
+		il.Emit(OpCodes.Ldc_I4_S, 13);
+		break;
+		case System.ConsoleColor.Yellow:
+		il.Emit(OpCodes.Ldc_I4_S, 14);
+		break;
+		case System.ConsoleColor.White:
+		il.Emit(OpCodes.Ldc_I4_S, 15);
+		break;
+		default:	
 			throw new System.Exception("Unrecognised color.");
 		}
 	}
