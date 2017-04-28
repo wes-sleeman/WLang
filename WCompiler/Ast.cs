@@ -1,6 +1,13 @@
-public abstract class Stmt
-{
-}
+#region AbstractClasses
+public abstract class Stmt { }
+
+public abstract class Expr { }
+
+public abstract class Blt : Stmt { }
+
+public abstract class Color : Stmt
+{ public System.ConsoleColor color; }
+#endregion
 
 // <ident> = <expr>
 public class Assign : Stmt
@@ -9,37 +16,35 @@ public class Assign : Stmt
 	public Expr Expr;
 }
 
-public abstract class Blt : Stmt
+// if <ExprA> <BinOp> <ExprB> [ Body ]
+//      if <ExprB> [ Body ] (if $ = <ExprB> [ Body ])
+public class Conditional : Blt
 {
+    public Expr ExprA;
+    public Expr ExprB;
+    public BinComp Comp;
+    public Stmt True;
+    public Stmt False;
 }
 
-public abstract class Color : Stmt
-{
-	public System.ConsoleColor color;
-}
-
-// var <ident> = <expr>
+// item <ident> = <expr>
 public class DeclareVar : Stmt
 {
 	public string Ident;
 	public Expr Expr;
 }
 
-// Repeat <str> [ <Body> ]
+// repeat <ident> <expr> [ Body ]
+//      repeat <expr> [ Body ] (repeat $ <expr> [ Body ])
 public class ForLoop : Stmt
 {
 	public Stmt Body;
+    public string Ident;
 	public string To;
 }
 
-public class Conditional : Blt
-{
-	public Expr ExprA;
-	public Expr ExprB;
-	public BinComp Comp;
-	public Stmt True;
-	public Stmt False;
-}
+// (Empty Line)
+public class NullStmt : Stmt { }
 
 // pause <int>
 public class Pause : Stmt
@@ -54,60 +59,46 @@ public class Print : Stmt
 }
 
 // newline
-public class PrintReturn : Stmt
-{
+public class PrintReturn : Stmt { }
 
-}
-
-// read <Ident>
+// read <ident>
+//      read (read $)
 public class Read : Stmt
 {
 	public string Ident;
 }
 
-// read_int <ident>
+// readnum <ident>
+//      readnum (readnum $#)
 public class ReadNum : Stmt
 {
 	public string Ident;
 }
 
-public class Refresh : Stmt
-{
+// refresh
+// reset
+public class Refresh : Stmt { }
 
-}
+// resetcolors
+// resetcolours
+public class ResetColor : Color { }
 
-public class ResetColor : Color
-{
-
-}
-
-// <stmt> ; <stmt>
+// (Used for chaining commands into program)
 public class Sequence : Stmt
 {
 	public Stmt First;
 	public Stmt Second;
 }
 
-public class TextBackColor : Color
-{
+// backcolor = "<color>"
+// backcolour = "<colour>"
+public class TextBackColor : Color { }
 
-}
+// forecolor = "<color>"
+// forecolour = "<colour>"
+public class TextForeColor : Color { }
 
-public class TextForeColor : Color
-{
-
-}
-
-/* <expr> := <string>
- *  | <int>
- *  | <arith_expr>
- *  | <ident>
- */
-public abstract class Expr
-{
-}
-
-// <bin_expr> := <expr> <bin_op> <expr>
+#region BinExprs
 public class BinExpr : Expr
 {
 	public Expr Left;
@@ -115,7 +106,7 @@ public class BinExpr : Expr
 	public BinOp Op;
 }
 
-// <bin_op> := + | - | * | /
+// (+ - * /)
 public enum BinOp
 {
 	Add,
@@ -131,22 +122,22 @@ public enum BinComp
 	Equal,
 	NotEqual
 }
+#endregion
 
-// <int> := <digit>+
+#region LiteralsEtc
 public class IntLiteral : Expr
 {
 	public int Value;
 }
 
-// <string> := " <string_elem>* "
 public class StringLiteral : Expr
 {
 	public string Value;
 }
 
-// <ident> := <char> <ident_rest>*
-// <ident_rest> := <char> | <digit>
+
 public class Variable : Expr
 {
 	public string Ident;
 }
+#endregion

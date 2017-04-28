@@ -1,26 +1,25 @@
-using Collections = System.Collections.Generic;
-using IO = System.IO;
-using Text = System.Text;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 public sealed class Scanner
 {
-	private readonly Collections.IList<object> result;
+	private readonly IList<object> result;
 
-	public Scanner(IO.TextReader input)
+	public Scanner(TextReader input)
 	{
-		this.result = new Collections.List<object>();
-		this.Scan(input);
+		result = new List<object>();
+		Scan(input);
 	}
 
-	public Collections.IList<object> Tokens
+	public IList<object> Tokens
 	{
-		get { return this.result; }
+		get { return result; }
 	}
 
 	#region ArithmiticConstants
 
-	// Constants to represent arithmitic tokens. This could
-	// be alternatively written as an enum.
+	// Constants to represent arithmitic tokens.
 	public static readonly object Add = new object();
 	public static readonly object Sub = new object();
 	public static readonly object Mul = new object();
@@ -39,7 +38,7 @@ public sealed class Scanner
 	public static readonly object Bang = new object();
 	#endregion
 
-	private void Scan(IO.TextReader input)
+	private void Scan(TextReader input)
 	{
 		while (input.Peek() != -1)
 		{
@@ -56,6 +55,7 @@ public sealed class Scanner
 					{
 						ch = (char)input.Read();
 					}
+                    if (ch == '\r') input.Read();
 				}
 				else if (ch == '{')
 				{
@@ -65,17 +65,17 @@ public sealed class Scanner
 					}
 					if (char.IsControl((char)input.Peek()) && input.Peek() != -1) {
 						ch = (char)input.Read();
-                        ch = (char)input.Read();
+                        if (ch == '\r') ch = (char)input.Read();
                     }
 				}
 			}
-			else if (char.IsLetter(ch) || ch == '_' || ch == '[' || ch == ']')
+			else if (char.IsLetter(ch) || ch == '_' || ch == '[' || ch == ']' || ch == '$' || ch == '#')
 			{
 				// keyword or identifier
 
-				Text.StringBuilder accum = new Text.StringBuilder();
+				StringBuilder accum = new StringBuilder();
 
-				while (char.IsLetter(ch) || ch == '_' || ch == '[' || ch == ']')
+				while (char.IsLetter(ch) || ch == '_' || ch == '[' || ch == ']' || ch == '$' || ch == '#')
 				{
 					accum.Append(ch);
 					input.Read();
@@ -90,12 +90,12 @@ public sealed class Scanner
 					}
 				}
 
-				this.result.Add(accum.ToString());
+				result.Add(accum.ToString());
 			}
 			else if (ch == '"')
 			{
 				// string literal
-				Text.StringBuilder accum = new Text.StringBuilder();
+				StringBuilder accum = new StringBuilder();
 
 				input.Read(); // skip the '"'
 
@@ -117,12 +117,12 @@ public sealed class Scanner
 
 				// skip the terminating "
 				input.Read();
-				this.result.Add(accum);
+				result.Add(accum);
 			}
 			else if (ch == '\'')
 			{
 				// string literal
-				Text.StringBuilder accum = new Text.StringBuilder();
+				StringBuilder accum = new StringBuilder();
 
 				input.Read(); // skip the '"'
 
@@ -144,13 +144,13 @@ public sealed class Scanner
 
 				// skip the terminating "
 				input.Read();
-				this.result.Add(accum);
+				result.Add(accum);
 			}
 			else if (char.IsDigit(ch))
 			{
 				// numeric literal
 
-				Text.StringBuilder accum = new Text.StringBuilder();
+				StringBuilder accum = new StringBuilder();
 
 				while (char.IsDigit(ch))
 				{
@@ -167,7 +167,7 @@ public sealed class Scanner
 					}
 				}
 
-				this.result.Add(int.Parse(accum.ToString()));
+				result.Add(int.Parse(accum.ToString()));
 			}
 			else if (char.IsControl(ch))
 			{
@@ -176,53 +176,53 @@ public sealed class Scanner
 				{
 					input.Read();
 				}
-				this.result.Add(Scanner.Semi);
+				result.Add(Semi);
 			}
 			else switch (ch)
 			{
 				case '+':
 				input.Read();
-				this.result.Add(Scanner.Add);
+				result.Add(Add);
 				break;
 
 				case '-':
 				input.Read();
-				this.result.Add(Scanner.Sub);
+				result.Add(Sub);
 				break;
 
 				case '*':
 				input.Read();
-				this.result.Add(Scanner.Mul);
+				result.Add(Mul);
 				break;
 
 				case '/':
 				input.Read();
-				this.result.Add(Scanner.Div);
+				result.Add(Div);
 				break;
 
 				case '=':
 				input.Read();
-				this.result.Add(Scanner.Equal);
+				result.Add(Equal);
 				break;
 
 				case '.':
 					input.Read();
-					this.result.Add(Scanner.Dot);
+					result.Add(Dot);
 					break;
 
 				case '<':
 					input.Read ();
-					this.result.Add (Scanner.OpenAngle);
+					result.Add (OpenAngle);
 					break;
 
 				case '>':
 					input.Read ();
-					this.result.Add (Scanner.CloseAngle);
+					result.Add (CloseAngle);
 					break;
 
 				case '!':
 					input.Read ();
-					this.result.Add (Scanner.Bang);
+					result.Add (Bang);
 					break;
 
 				default:
@@ -230,9 +230,9 @@ public sealed class Scanner
 			}
 
 		}
-		if (this.result[this.result.Count - 1] != Scanner.Semi)
+		if (result[result.Count - 1] != Semi)
 		{
-			this.result.Add(Scanner.Semi);
+			result.Add(Semi);
 		}
 	}
 }

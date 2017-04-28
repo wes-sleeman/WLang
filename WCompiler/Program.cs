@@ -1,5 +1,5 @@
 /*
-   Copyright 2015 Wes Sleeman
+   Copyright 2017 Wes Sleeman
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,29 +24,32 @@ namespace WCompiler
 		static void TestMain(string[] args)
 		{
             args = new string[] { "example.w" };
-            //RealMain(args);
+            Main(args);
         }
 		static void Main(string[] args)
 		{
 			if (args.Length != 1) {
-				Console.WriteLine ("Usage: W.exe source.w");
+				Console.WriteLine("Usage: W.exe source.w");
+                TestMain(args);
 				return;
 			} else {
 				try {
 					Scanner scanner = null;
 					using (TextReader input = File.OpenText(args[0])) {
-                        Console.WriteLine ("Scanning...");
-						scanner = new Scanner (input);
+                        Console.WriteLine("Scanning...");
+						scanner = new Scanner(input);
 					}
-                    Console.WriteLine ("Parsing...");
-					Parser parser = new Parser (scanner.Tokens);
-                    Console.WriteLine ("Generating code...");
-					CodeGen codeGen = new CodeGen (parser.Result, Path.GetFileNameWithoutExtension (args [0]) + ".exe");
-                    Console.WriteLine ("Complete!");
-				} catch (Exception e) {
-					Console.Error.WriteLine (e.Message);
-					for (; ;)
-						;
+
+                    Console.WriteLine("Parsing...");
+					Parser parser = new Parser(scanner.Tokens);
+
+                    Console.WriteLine("Generating code...");
+					CodeGen codeGen = new CodeGen(parser.Result, Path.GetFileNameWithoutExtension(args [0]) + ".exe");
+
+                    Console.WriteLine("Complete!");
+                } catch (Exception e) {
+					Console.Error.WriteLine(e.Message);
+					for (; ;);
 				}
 			}
 		}

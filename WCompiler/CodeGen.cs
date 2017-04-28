@@ -27,7 +27,7 @@ public sealed class CodeGen
         symbolTable = new Dictionary<string, LocalBuilder>();
 
         // Go Compile!
-        declareTemp();
+        DeclareTemp();
 		GenStmt(stmt);
 
 		il.Emit(OpCodes.Ret);
@@ -42,15 +42,13 @@ public sealed class CodeGen
 
 	private void GenStmt(Stmt stmt)
 	{
-		if (stmt is Sequence)
+		if (stmt is Sequence seq)
 		{
-			Sequence seq = (Sequence)stmt;
             GenStmt(seq.First);
 			GenStmt(seq.Second);
 		}
-		else if (stmt is Assign)
+		else if (stmt is Assign assign)
 		{
-			Assign assign = (Assign)stmt;
 			GenExpr(assign.Expr, TypeOfExpr(assign.Expr));
 			Store(assign.Ident, TypeOfExpr(assign.Expr));
 		}
@@ -64,29 +62,31 @@ public sealed class CodeGen
 			}
 			else if (stmt is TextBackColor)
 			{
-				convertColor((System.ConsoleColor)(((TextBackColor)stmt).color));
+				ConvertColor((System.ConsoleColor)(((TextBackColor)stmt).color));
 				il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("set_BackgroundColor", new System.Type[] { typeof(System.ConsoleColor) }));
 
 			}
 			else if (stmt is TextForeColor)
 			{
-				convertColor((System.ConsoleColor)(((TextForeColor)stmt).color));
+				ConvertColor(((TextForeColor)stmt).color);
 				il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("set_ForegroundColor", new System.Type[] { typeof(System.ConsoleColor) }));
 			}
 		}
-		else if (stmt is DeclareVar)
+		else if (stmt is DeclareVar declare)
 		{
 			// example:
 			// Item var
 			// ?Creates a new variable named var
-			DeclareVar declare = (DeclareVar)stmt;
 			symbolTable[declare.Ident] = il.DeclareLocal(TypeOfExpr(declare.Expr));
 
-			// set the initial value
-			Assign assign = new Assign();
-			assign.Ident = declare.Ident;
-			assign.Expr = declare.Expr;
-			GenStmt(assign);
+            // set the initial value
+            // sets to $ if nothing provided
+            Assign tmpAssign = new Assign()
+            {
+                Ident = declare.Ident,
+                Expr = declare.Expr
+            };
+            GenStmt(tmpAssign);
 		}
 		else if (stmt is Pause)
 		{
@@ -113,10 +113,10 @@ public sealed class CodeGen
 		else if (stmt is ReadNum)
 		{
 			// reads from console and parses as decimal
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new System.Type[] { }, null));
+			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { }, null));
 			try
 			{
-				il.Emit(OpCodes.Call, typeof(decimal).GetMethod("Parse", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new System.Type[] { typeof(string) }, null));
+				il.Emit(OpCodes.Call, typeof(decimal).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { typeof(string) }, null));
 			}
 			catch(System.ArgumentException)
 			{
@@ -126,142 +126,176 @@ public sealed class CodeGen
 		}
 		else if (stmt is Read)
 		{
-			// reads from console, accepts tmpvar
+			// reads from console, accepts $
 			// example:
 			// read x
 			// ?Puts input into variable x
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, new System.Type[] { }, null));
-			Store(((Read)stmt).Ident, typeof(string));
+			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { }, null));
+            Store(((Read)stmt).Ident, typeof(string));
 		}
 		else if (stmt is Refresh)
 		{
 			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("Clear"));
 		}
 
-		else if (stmt is ForLoop)
-		{
-			// example: 
-			// repeat 10 [
-			//   print "hello"
-			// ]
+		else if (stmt is ForLoop forLoop)
+        {
+          // example: 
+          // repeat 10 [
+          //   print "hello"
+          // ]
+          // x = 0
+            int cntr = 0;
+            if (!int.TryParse(forLoop.To, out int loopTo))
+            {
+                string parseTest = symbolTable[forLoop.To].ToString().Substring(symbolTable[forLoop.To].ToString().IndexOf("(") + 1, (symbolTable[forLoop.To].ToString().Length - 1) - (symbolTable[forLoop.To].ToString().IndexOf("(") + 1));
+                if (!int.TryParse(forLoop.To, out loopTo))
+                {
+                    throw new System.Exception("Cannot evaluate variable " + forLoop.To + " to a number to be repeated. Got:" + parseTest);
+                }
+            }
 
-			// x = 0
-			ForLoop forLoop = (ForLoop)stmt;
-			int cntr = 0;
-			int loopTo = 0;
-			if (!int.TryParse(forLoop.To, out loopTo))
-			{
-				string parseTest = symbolTable[forLoop.To].ToString().Substring(symbolTable[forLoop.To].ToString().IndexOf("(") + 1, (symbolTable[forLoop.To].ToString().Length - 1) - (symbolTable[forLoop.To].ToString().IndexOf("(") + 1));
-				if (!int.TryParse(forLoop.To, out loopTo))
-				{
-					throw new System.Exception("Cannot evaluate variable " + forLoop.To + " to a number to be repeated. Got:" + parseTest);
-				}
-			}
+            // jump to the test
+            Label test = il.DefineLabel();
+            il.Emit(OpCodes.Br, test);
 
-			// jump to the test
-			Label test = il.DefineLabel();
-			il.Emit(OpCodes.Br, test);
+            // statements in the body of the for loop
+            Label body = il.DefineLabel();
+            il.MarkLabel(body);
+            GenStmt(forLoop.Body);
 
-			// statements in the body of the for loop
-			Label body = il.DefineLabel();
-			il.MarkLabel(body);
-			GenStmt(forLoop.Body);
+            // performs actual test
+            il.MarkLabel(test);
+            il.Emit(OpCodes.Ldloc, cntr);
+            il.Emit(OpCodes.Ldc_I4, loopTo);
+            il.Emit(OpCodes.Blt, body);
+        }
 
-			// performs actual test
-			il.MarkLabel(test);
-			il.Emit(OpCodes.Ldloc, cntr);
-			il.Emit(OpCodes.Ldc_I4, loopTo);
-			il.Emit(OpCodes.Blt, body);
-			//}
-		}
+        else if (stmt is Conditional cond)
+        {
+            // example: 
+            // if x = 1 [
+            //   print "hello"
+            // ]
+            
+            string exprA = "", exprB = "";
+            int ExprA = 0, ExprB = 0;
 
-		else if (stmt is Conditional)
-		{
-			// example: 
-			// if x = 1 [
-			//   print "hello"
-			// ]
+            if (cond.ExprA is StringLiteral)
+            {
+                exprA = ((StringLiteral)cond.ExprA).Value;
+            }
+            else if (!int.TryParse(TypeOfExpr(cond.ExprA).ToString(), out ExprA))
+            {
+                string parseTest = symbolTable[((Variable)cond.ExprA).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprA).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1));
+                if (!int.TryParse(parseTest, out ExprA))
+                {
+                    throw new System.Exception("Cannot evaluate variable " + cond.ExprA + " to a number to be tested. Got:" + parseTest);
+                }
+                exprA = parseTest;
+            }
+            else if (int.TryParse(TypeOfExpr(cond.ExprA).ToString(), out ExprA))
+            {
+                exprA = ((byte)ExprA).ToString();
+            }
+            else throw new System.Exception("Cannot evaluate if statement part a.");
 
-			Conditional cond = (Conditional)stmt;
-			byte exprA, exprB;
-			int ExprA = 0;
-			int ExprB = 0;
-			exprA = 0;
-			exprB = 0;
-			
-			if (cond.ExprA is StringLiteral) {
-				exprA = (byte)(char)((StringLiteral)cond.ExprA).Value.ToCharArray().GetValue(0);
-			}
-			else if (!int.TryParse(TypeOfExpr(cond.ExprA).ToString(), out ExprA))
-			{
-				string parseTest = symbolTable[((Variable)cond.ExprA).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprA).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1));
-				if (!int.TryParse(parseTest, out ExprA))
-				{
-					throw new System.Exception("Cannot evaluate variable " + cond.ExprA + " to a number to be tested. Got:" + parseTest);
-				}
-			}
-			else if (int.TryParse(TypeOfExpr(cond.ExprA).ToString(), out ExprA))
-			{
-				exprA = (byte)ExprA;
-			}
-			else throw new System.Exception("Cannot evaluate if statement part a.");
-
-			if (cond.ExprB is StringLiteral) {
-				exprB = (byte)int.Parse(((StringLiteral)cond.ExprB).Value.ToString());
-			}
-			else if (!int.TryParse(TypeOfExpr(cond.ExprB).ToString(), out ExprB))
-			{
-				string parseTest = symbolTable[((Variable)cond.ExprB).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprB).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1));
-				if (!int.TryParse(parseTest, out ExprB))
-				{
-					throw new System.Exception("Cannot evaluate variable " + cond.ExprB + " to a number to be tested. Got:" + parseTest);
-				}
-			}
-			else if (int.TryParse(TypeOfExpr(cond.ExprB).ToString(), out ExprB))
-			{
-				exprB = (byte)ExprB;
-			}
-			else throw new System.Exception("Cannot evaluate if statement part b.");
+            if (cond.ExprB is StringLiteral)
+            {
+                exprB = ((StringLiteral)cond.ExprB).Value;
+            }
+            else if (!int.TryParse(TypeOfExpr(cond.ExprB).ToString(), out ExprB))
+            {
+                string parseTest = symbolTable[((Variable)cond.ExprB).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprB).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1));
+                if (!int.TryParse(parseTest, out ExprB))
+                {
+                    throw new System.Exception("Cannot evaluate variable " + cond.ExprB + " to a number to be tested. Got:" + parseTest);
+                }
+                exprB = parseTest;
+            }
+            else if (int.TryParse(TypeOfExpr(cond.ExprB).ToString(), out ExprB))
+            {
+                exprB = ((byte)ExprB).ToString();
+            }
+            else throw new System.Exception("Cannot evaluate if statement part b.");
 
 
-			// jump to the test
-			Label test = il.DefineLabel();
-			Label End = il.DefineLabel();
-			Label True = il.DefineLabel();
-			il.Emit(OpCodes.Br, test);
+            // jump to the test
+            Label test = il.DefineLabel();
+            Label End = il.DefineLabel();
+            Label True = il.DefineLabel();
+            il.Emit(OpCodes.Br, test);
 
-			// perform the actual test
-			il.MarkLabel(test);
-			il.Emit(OpCodes.Ldloc, exprA);
-			il.Emit(OpCodes.Ldc_I4, exprB);
-			if (cond.Comp == BinComp.Equal) {
-				il.Emit(OpCodes.Beq, True);
-			}
-			else if (cond.Comp == BinComp.Greater) {
-				il.Emit(OpCodes.Bgt, True);
-			}
-			else if (cond.Comp == BinComp.Less) {
-				il.Emit(OpCodes.Blt, True);
-			}
-			else if (cond.Comp == BinComp.NotEqual) {
-				il.Emit(OpCodes.Bne_Un, True);
-			}
+            // perform the actual test
+            il.MarkLabel(test);
 
-			// statements in the body of the if block
-			il.MarkLabel(True);
-			GenStmt(cond.True);
-			il.Emit(OpCodes.Br, End);
-			il.MarkLabel(End);
-		}
-		else
-		{
-			throw new System.Exception("don't know how to gen a " + stmt.GetType().Name);
-		}
+            // checks for the type of the expressions to load the proper value
+            if (cond.ExprA is Variable)
+            {
+                il.Emit(OpCodes.Ldloc_S, byte.Parse(exprA));
+            }
+            else if (int.TryParse(exprA, out int value))
+            {
+                il.Emit(OpCodes.Ldc_I4, value);
+            }
+            else if (cond.ExprA is StringLiteral)
+            {
+                il.Emit(OpCodes.Ldstr, exprA);
+            }
+            else throw new System.Exception("Cannot parse if statement part a.");
+
+            if (cond.ExprB is Variable)
+            {
+                il.Emit(OpCodes.Ldloc_S, byte.Parse(exprB));
+            }
+            else if (int.TryParse(exprB, out int value))
+            {
+                il.Emit(OpCodes.Ldc_I4, value);
+            }
+            else if (cond.ExprB is StringLiteral)
+            {
+                il.Emit(OpCodes.Ldstr, exprB);
+            }
+            else throw new System.Exception("Cannot parse if statement part b.");
+
+            // drops in the proper comparator
+            if (cond.Comp == BinComp.Equal)
+            {
+                il.Emit(OpCodes.Beq, True);
+                il.Emit(OpCodes.Br, End);
+            }
+            else if (cond.Comp == BinComp.Greater)
+            {
+                il.Emit(OpCodes.Bgt, True);
+                il.Emit(OpCodes.Br, End);
+            }
+            else if (cond.Comp == BinComp.Less)
+            {
+                il.Emit(OpCodes.Blt, True);
+                il.Emit(OpCodes.Br, End);
+            }
+            else if (cond.Comp == BinComp.NotEqual)
+            {
+                il.Emit(OpCodes.Bne_Un, True);
+                il.Emit(OpCodes.Br, End);
+            }
+
+            // statements in the body of the if block
+            il.MarkLabel(True);
+            GenStmt(cond.True);
+            il.Emit(OpCodes.Br, End);
+            il.MarkLabel(End);
+        }
+        else if (stmt is NullStmt)
+        {
+            il.Emit(OpCodes.Nop);
+        }
+        else throw new System.Exception("don't know how to gen a " + stmt.GetType().Name);
 
 
 
 
-	}    
+    }    
 
 	private void Store(string name, System.Type type)
 	{
@@ -316,9 +350,11 @@ public sealed class CodeGen
 		else if (expr.ToString().Contains("+"))
 		{
 			int signIndex = expr.ToString().IndexOf('+');
-			StringLiteral tempStringLit = new StringLiteral();
-			tempStringLit.Value = expr.ToString().Substring(0, signIndex);
-			GenExpr(tempStringLit, typeof(string));
+
+            StringLiteral tempStringLit = new StringLiteral()
+            {Value = expr.ToString().Substring(0, signIndex)};
+
+            GenExpr(tempStringLit, typeof(string));
 			tempStringLit.Value = expr.ToString().Substring(signIndex + 1);
 			GenExpr(tempStringLit, typeof(string));
 			il.Emit(OpCodes.Add);
@@ -357,9 +393,8 @@ public sealed class CodeGen
 		{
 			return typeof(int);
 		}
-		else if (expr is Variable)
+		else if (expr is Variable var)
 		{
-			Variable var = (Variable)expr;
 			if (symbolTable.ContainsKey(var.Ident))
 			{
 				LocalBuilder locb = symbolTable[var.Ident];
@@ -385,9 +420,8 @@ public sealed class CodeGen
 		{
 			return (int)(((IntLiteral)expr).Value);
 		}
-		else if (expr is Variable)
+		else if (expr is Variable var)
 		{
-			Variable var = (Variable)expr;
 			if (symbolTable.ContainsKey(var.Ident))
 			{
 				LocalBuilder locb = symbolTable[var.Ident];
@@ -406,31 +440,33 @@ public sealed class CodeGen
 	private Expr IntToExpr(int input)
 	{
 		int intValue = input;
-		IntLiteral intLiteral = new IntLiteral();
-		intLiteral.Value = intValue;
+        IntLiteral intLiteral = new IntLiteral()
+        { Value = intValue };
 		return intLiteral;
 	}
-	private string varName(Expr input)
+	private string VarName(Expr input)
 	{
 		Variable var = (Variable)input;
 		return var.Ident;
 	}
-	private void declareTemp()
-	{
-		DeclareVar stmt = new DeclareVar();
-		StringLiteral strLit = new StringLiteral();
-		strLit.Value = "";
-		stmt.Ident = "temp";
+    private void DeclareTemp()
+    {
+        DeclareVar stmt = new DeclareVar();
+
+        StringLiteral strLit = new StringLiteral()
+        { Value = ""};
+
+		stmt.Ident = "$";
 		stmt.Expr = strLit;
 		GenStmt(stmt);
 
-		IntLiteral intLit = new IntLiteral();
-		intLit.Value = 0;
-		stmt.Ident = "tempnum";
+		IntLiteral intLit = new IntLiteral()
+        { Value = 0};
+		stmt.Ident = "$#";
 		stmt.Expr = intLit;
 		GenStmt(stmt);
 	}
-	private void convertColor(System.ConsoleColor input)
+	private void ConvertColor(System.ConsoleColor input)
 	{
 		switch (input)
 		{
@@ -486,5 +522,4 @@ public sealed class CodeGen
 			throw new System.Exception("Unrecognised color.");
 		}
 	}
-//	public string ConvVarIntToString (
 }

@@ -1,5 +1,5 @@
 {
-   Copyright 2015 Wes Sleeman
+   Copyright 2017 Wes Sleeman
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,26 +19,29 @@ forecolor = "red"
 type "W Programming Language!"
 resetcolors
 newline
-pause 7
+pause 3
 refresh
-{
 type "Do you like it so far? (y/n)"
-item x
-read x
-type x
-if x = '1' [
-type "Great!"
+newline
+read
+item cntr = 0
+repeat cntr 10 [
+type cntr
+type ": "
+type $
+newline
 ]
-if x = '1' [
-type "It'll grow on you when you try using it!"
+if $ = "y" [
+	type "Great!"
+]
+if $ = "n" [
+	type "It'll grow on you when you try using it!"
 ]
 newline
-pause 5
+pause 3
 reset
-}
 type "Why don't you try looking at the source code of this little gizmo? It's located in the same directory as the compiler."
 newline
-pause 10
 type "Good luck and have fun!"
 backcolour = "blue"
 forecolour = "red"
@@ -47,5 +50,6 @@ FORECOLOUR = "GREEN"
 TYPE "35"
 nEwliNe
 resetcolors
+pause 5
 reset
 ?Thanks for reading the code. Happy devving!

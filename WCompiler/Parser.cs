@@ -1,21 +1,21 @@
 
-using Collections = System.Collections.Generic;
-using Text = System.Text;
+using System.Collections.Generic;
+using System.Text;
 
 public sealed class Parser
 {
 	private int index;
-	private Collections.IList<object> tokens;
+	private IList<object> tokens;
 	private readonly Stmt result;
 	private bool isTempVarNum = false;
 
-	public Parser(Collections.IList<object> tokens)
+	public Parser(IList<object> tokens)
 	{
 		this.tokens = tokens;
-		this.index = 0;
-		this.result = this.ParseStmt();
+		index = 0;
+		result = ParseStmt();
 
-		if (this.index != this.tokens.Count)
+		if (index != tokens.Count)
 		{
 			throw new System.Exception("expected newline after expression, are you using Windows?");
 		}
@@ -29,171 +29,177 @@ public sealed class Parser
 	private Stmt ParseStmt()
 	{
 		Stmt result;
-		Variable temp = new Variable();
-		temp.Ident = "temp";
-		Variable tempnum = new Variable();
-		tempnum.Ident = "tempnum";
-
-		//foreach (object item in this.tokens) System.Console.WriteLine (item.ToString());
-
-		if (this.index == this.tokens.Count)
+		Variable temp = new Variable()
+        { Ident = "$" };
+        Variable tempnum = new Variable()
+        { Ident = "$#" };
+        
+		if (index == tokens.Count)
 		{
 			throw new System.Exception("expected statement, got EOF");
 		}
-		if (this.tokens [this.index].Equals ("backcolor") || this.tokens [this.index].Equals ("backcolour")) {
-			this.index++;
-			this.index++;
-			TextBackColor backColor = new TextBackColor ();
-			backColor.color = (System.ConsoleColor)System.Enum.Parse (typeof(System.ConsoleColor), this.tokens [this.index].ToString (), true);
+		if (tokens[index].Equals ("backcolor") || tokens[index].Equals ("backcolour")) {
+			index++;
+			index++;
+            TextBackColor backColor = new TextBackColor()
+            { color = (System.ConsoleColor)System.Enum.Parse(typeof(System.ConsoleColor), tokens[index].ToString(), true) };
 			result = backColor;
-			this.index++;
-		} else if (this.tokens [this.index].Equals ("forecolor") || this.tokens [this.index].Equals ("forecolour")) {
-			this.index++;
-			this.index++;
-			TextForeColor foreColor = new TextForeColor ();
-			foreColor.color = (System.ConsoleColor)System.Enum.Parse (typeof(System.ConsoleColor), this.tokens [this.index].ToString (), true);
+			index++;
+		} else if (tokens [index].Equals ("forecolor") || tokens [index].Equals ("forecolour")) {
+			index++;
+			index++;
+			TextForeColor foreColor = new TextForeColor()
+            { color = (System.ConsoleColor)System.Enum.Parse(typeof(System.ConsoleColor), tokens[index].ToString(), true) };
 			result = foreColor;
-			this.index++;
-		} else if (this.tokens [this.index].Equals ("item")) {
-			this.index++;
+			index++;
+		} else if (tokens [index].Equals ("item")) {
+			index++;
 			DeclareVar declareVar = new DeclareVar ();
 
-			if (this.index < this.tokens.Count &&
-				this.tokens [this.index] is string) {
-				declareVar.Ident = (string)this.tokens [this.index];
+			if (index < tokens.Count &&
+				tokens [index] is string) {
+				declareVar.Ident = (string)tokens [index];
 			} else {
 				throw new System.Exception ("expected variable name after 'item'");
 			}
 
-			this.index++;
+			index++;
 
-			if (this.index == this.tokens.Count || this.tokens [this.index] != Scanner.Equal) {
+			if (index == tokens.Count || tokens [index] != Scanner.Equal) {
 				//throw new System.Exception ("expected = after 'item ident'");
-				this.index--;
-				this.tokens [this.index] = "temp";
-				declareVar.Expr = this.ParseExpr();
+				index--;
+				tokens [index] = "$";
+				declareVar.Expr = ParseExpr();
 				result = declareVar;
 			} else {
-				this.index++;
+				index++;
 
-				declareVar.Expr = this.ParseExpr();
+				declareVar.Expr = ParseExpr();
 				result = declareVar;
 			}
 		}
-		else if (this.tokens[this.index].Equals("newline"))
+		else if (tokens[index].Equals("newline"))
 		{
-			this.index++;
+			index++;
 			PrintReturn newline = new PrintReturn();
 			result = newline;
 		}
-		else if (this.tokens[this.index].Equals("pause"))
+		else if (tokens[index].Equals("pause"))
 		{
-			this.index++;
+			index++;
 			Pause pause = new Pause();
-			if (this.index < this.tokens.Count && this.tokens[this.index] is int && this.tokens[this.index + 1] == Scanner.Semi)
+			if (index < tokens.Count && tokens[index] is int && tokens[index + 1] == Scanner.Semi)
 			{
-				pause.Duration = this.intToExpr(((IntLiteral)this.intToExpr((int)this.tokens[this.index])).Value * 1000);
+				pause.Duration = IntToExpr(((IntLiteral)IntToExpr((int)tokens[index])).Value * 1000);
 				result = pause;
-				this.index--;
+				index--;
 			}
-			else if (this.index < this.tokens.Count && this.tokens[this.index] is int && this.tokens [this.index + 1] != Scanner.Semi)
+			else if (index < tokens.Count && tokens[index] is int && tokens [index + 1] != Scanner.Semi)
 			{
-				pause.Duration = this.intToExpr(((IntLiteral)this.intToExpr((int)this.tokens[this.index])).Value * 1000);
+				pause.Duration = IntToExpr(((IntLiteral)IntToExpr((int)tokens[index])).Value * 1000);
 				result = pause;
 			}
 			else
 			{
-				pause.Duration = intToExpr(1000);
+				pause.Duration = IntToExpr(1000);
 				result = pause;
 			}
 		}
-		else if (this.tokens[this.index].Equals("read"))
+		else if (tokens[index].Equals("read"))
 		{
-			this.index++;
+			index++;
 			Read read = new Read();
 			isTempVarNum = false;
 
-			if (this.index < this.tokens.Count && this.tokens[this.index] is string)
+			if (index < tokens.Count && tokens[index] is string)
 			{
-				read.Ident = (string)this.tokens[this.index++];
+				read.Ident = (string)tokens[index++];
 				result = read;
 			}
 			else
 			{
-				read.Ident = "temp";
+				read.Ident = "$";
 				result = read;
 			}
 		}
-		else if (this.tokens[this.index].Equals("readnum"))
+		else if (tokens[index].Equals("readnum"))
 		{
-			this.index++;
+			index++;
 			ReadNum readnum = new ReadNum();
 			isTempVarNum = true;
 
-			if (this.index < this.tokens.Count && this.tokens[this.index] is string)
+			if (index < tokens.Count && tokens[index] is string)
 			{
-				readnum.Ident = (string)this.tokens[this.index++];
+				readnum.Ident = (string)tokens[index++];
 				result = readnum;
 			}
 			else
 			{
-				readnum.Ident = "tempnum";
+				readnum.Ident = "$#";
 				result = readnum;
 			}
 		}
-		else if (this.tokens[this.index].Equals("refresh") || this.tokens[this.index].Equals("reset"))
+		else if (tokens[index].Equals("refresh") || tokens[index].Equals("reset"))
 		{
-			this.index++;
+			index++;
 			Refresh refresh = new Refresh();
 			result = refresh;
 		}
-		else if (this.tokens[this.index].Equals("repeat"))
+		else if (tokens[index].Equals("repeat"))
 		{
-			this.index++;
+			index++;
 			ForLoop forLoop = new ForLoop();
 
-			Expr parsedExpr = this.ParseExpr();
+			Expr parsedExpr = ParseExpr();
+            if (tokens[index + 2].Equals("["))
+            {
+                forLoop.Ident = ((Variable)parsedExpr).Ident;
+
+                parsedExpr = ParseExpr();
+            }
+            else forLoop.Ident = "$";
+
 			string tempForLoopToString = parsedExpr.ToString();
 
 			if (tempForLoopToString == "Variable")
 			{
 
-				forLoop.To = ((Variable)parsedExpr).Ident.ToString();
+				forLoop.To = ((Variable)parsedExpr).Ident;
 			}
 			else if (tempForLoopToString == "IntLiteral")
 			{
 				forLoop.To = ((IntLiteral)parsedExpr).Value.ToString();
 			}
 
-			if (this.index == this.tokens.Count ||
-			    !this.tokens[this.index].Equals("["))
+			if (index == tokens.Count ||
+			    !tokens[index].Equals("["))
 			{
 				throw new System.Exception("expected opening \"[\" after expression in for loop");
 			}
 
-			this.index += 2;
+			index += 2;
 
-			forLoop.Body = this.ParseStmt();
+			forLoop.Body = ParseStmt();
 			result = forLoop;
 
-			if (this.index == this.tokens.Count || !this.tokens[this.index].Equals("]"))
+			if (index == tokens.Count || !tokens[index].Equals("]"))
 			{
 				throw new System.Exception("unterminated loop body");
 			}
 
-			this.index++;
+			index++;
 		}
-		else if (this.tokens[this.index].Equals("resetcolors") || this.tokens[this.index].Equals("resetcolours"))
+		else if (tokens[index].Equals("resetcolors") || tokens[index].Equals("resetcolours"))
 		{
-			this.index++;
+			index++;
 			ResetColor resetColor = new ResetColor();
 			result = resetColor;
 		}
-		else if (this.tokens[this.index].Equals("type"))
+		else if (tokens[index].Equals("type"))
 		{
-			this.index++;
+			index++;
 			Print print = new Print();
-			if (this.tokens[this.index] == Scanner.Semi)
+			if (tokens[index] == Scanner.Semi)
 			{
 				if (isTempVarNum == true)
 					print.Expr = tempnum;
@@ -202,82 +208,85 @@ public sealed class Parser
 			}
 			else
 			{
-				print.Expr = this.ParseExpr();
+				print.Expr = ParseExpr();
 			}
 			result = print;
 		}		
-		else if (this.tokens[this.index].Equals("if"))
+		else if (tokens[index].Equals("if"))
 		{
 			Conditional cond = new Conditional ();
-			this.index++;
-			if (this.index < this.tokens.Count && (this.tokens [this.index] == Scanner.Equal || this.tokens [this.index] == Scanner.CloseAngle || this.tokens [this.index] == Scanner.OpenAngle))// && this.tokens [this.index + 1] is string)
+			index++;
+			if (index < tokens.Count && (tokens [index] == Scanner.Equal || tokens [index] == Scanner.CloseAngle || tokens [index] == Scanner.OpenAngle))// && tokens [index + 1] is string)
 			{
-				cond.ExprA = ConvToExpr ("tempnum");
+				cond.ExprA = ConvToExpr ("$#");
 			} else {
 				cond.ExprA = ParseExpr ();
 			}
-			if (this.tokens [this.index] == Scanner.Equal) cond.Comp = BinComp.Equal;
-			if (this.tokens [this.index] == Scanner.CloseAngle) cond.Comp = BinComp.Greater;
-			if (this.tokens [this.index] == Scanner.OpenAngle) cond.Comp = BinComp.Less;
-			if (this.tokens [this.index] == Scanner.Bang) cond.Comp = BinComp.NotEqual;
+			if (tokens [index] == Scanner.Equal) cond.Comp = BinComp.Equal;
+			if (tokens [index] == Scanner.CloseAngle) cond.Comp = BinComp.Greater;
+			if (tokens [index] == Scanner.OpenAngle) cond.Comp = BinComp.Less;
+			if (tokens [index] == Scanner.Bang) cond.Comp = BinComp.NotEqual;
 
-			this.index++;
+			index++;
 			cond.ExprB = ParseExpr ();
-			//this.index--;
-			if (this.index == this.tokens.Count ||
-			    !this.tokens[this.index].Equals("["))
+			//index--;
+			if (index == tokens.Count ||
+			    !tokens[index].Equals("["))
 			{
 				throw new System.Exception("expected opening \"[\" after expression in if block");
 			}
 
-			this.index += 2;
+			index += 2;
 
-			cond.True = this.ParseStmt();
-			//System.Console.WriteLine ("CONDCONDCOND" + cond.ExprA.ToString() + cond.Comp.ToString() + cond.ExprB.ToString() + "\nCONDCONDCOND" + cond.True.ToString());
+			cond.True = ParseStmt();
 			result = cond;
 
-			if (this.index == this.tokens.Count || !this.tokens[this.index].Equals("]"))
+			if (index == tokens.Count || !tokens[index].Equals("]"))
 			{
 				throw new System.Exception("unterminated if block");
 			}
 
-			this.index++;
+			index++;
 		}
-		else if (this.tokens[this.index] is string)
+		else if (tokens[index] is string)
 		{
-			// assignment
+            // assignment
 
-			Assign assign = new Assign();
-			assign.Ident = (string)this.tokens[this.index++];
+            Assign assign = new Assign()
+            { Ident = (string)tokens[index++] };
 
-			if (this.index == this.tokens.Count ||
-			    this.tokens[this.index] != Scanner.Equal)
+			if (index == tokens.Count ||
+			    tokens[index] != Scanner.Equal)
 			{
 				throw new System.Exception("expected '='");
 			}
 
-			this.index++;
+			index++;
 
-			StringLiteral parsedExpr = (StringLiteral)this.ParseExpr();
+			StringLiteral parsedExpr = (StringLiteral)ParseExpr();
 			assign.Expr = parsedExpr;
 			result = assign;
 		}
 		else
 		{
-			throw new System.Exception("parse error at token " + this.index + ": " + this.tokens[this.index]);
+            // unrecongnised token, probably not supported. SKIP
+            //throw new System.Exception("parse error at token " + index + ": " + tokens[index].ToString());
+            result = new NullStmt();
 		}
 
-		if (this.index < this.tokens.Count && this.tokens[this.index] == Scanner.Semi)
+		if (index < tokens.Count && tokens[index] == Scanner.Semi)
 		{
-			this.index++;
+			index++;
 
-			if (this.index < this.tokens.Count &&
-			    !this.tokens[this.index].Equals("]"))
+			if (index < tokens.Count &&
+			    !tokens[index].Equals("]"))
 			{
-				Sequence sequence = new Sequence();
-				sequence.First = result;
-				sequence.Second = this.ParseStmt();
-				result = sequence;
+                Sequence sequence = new Sequence()
+                {
+                    First = result,
+                    Second = ParseStmt()
+                };
+                result = sequence;
 			}
 		}
 
@@ -286,45 +295,39 @@ public sealed class Parser
 
 	private Expr ParseExpr()
 	{
-		if (this.index == this.tokens.Count)
+		if (index == tokens.Count)
 		{
 			throw new System.Exception("expected expression, got EOF");
 		}
 
-		if (this.tokens[this.index + 1] == Scanner.Add)
+		if (tokens[index + 1] == Scanner.Add)
 		{
 
 		}
 
-		if (this.tokens[this.index] is Text.StringBuilder)
+		if (tokens[index] is StringBuilder)
 		{
-			string value = ((Text.StringBuilder)this.tokens[this.index++]).ToString();
-			StringLiteral stringLiteral = new StringLiteral();
-			stringLiteral.Value = value;
-			return stringLiteral;
+			string value = ((StringBuilder)tokens[index++]).ToString();
+			return new StringLiteral() { Value = value };
 		}
-		else if (this.tokens[this.index] is int)
+		else if (tokens[index] is int)
 		{
-			int intValue = (int)this.tokens[this.index++];
-			if (this.tokens[this.index] == Scanner.Add || this.tokens[this.index] == Scanner.Sub || this.tokens[this.index] == Scanner.Mul || this.tokens[this.index] == Scanner.Div)
+			int intValue = (int)tokens[index++];
+			if (tokens[index] == Scanner.Add || tokens[index] == Scanner.Sub || tokens[index] == Scanner.Mul || tokens[index] == Scanner.Div)
 			{
-				this.index++;
-				this.Math(intValue, (int)this.tokens[this.index], (object)this.tokens[this.index - 1]);
+				index++;
+				Math(intValue, (int)tokens[index], (object)tokens[index - 1]);
 			}
-			IntLiteral intLiteral = new IntLiteral();
-			intLiteral.Value = intValue;
-			this.index++;
-			return intLiteral;
+			index++;
+			return new IntLiteral { Value = intValue };
 		}
-		else if (this.tokens[this.index] is string)
+		else if (tokens[index] is string)
 		{
-			string ident = (string)this.tokens[this.index++];
-			Variable var = new Variable();
-			var.Ident = ident;
-			return var;
+			string ident = (string)tokens[index++];
+			return new Variable { Ident = ident };
 		}
-		/* Add support for function calls e.g. "item x = .read"
-		 else if (this.tokens[this.index] == Scanner.Dot) {
+		/* Add support for lambda-type function calls e.g. "item x = .read"
+		 else if (tokens[index] == Scanner.Dot) {
 
 		}*/
 		else
@@ -337,18 +340,14 @@ public sealed class Parser
 	{
 		if (obj is int)
 		{
-			IntLiteral intLiteral = new IntLiteral();
-			intLiteral.Value = (int)obj;
-			return intLiteral;
+			return new IntLiteral { Value = (int)obj };
 		}
 		else if (obj is string)
 		{
-			Variable var = new Variable();
-			var.Ident = (string)obj;
-			return var;
+			return new Variable { Ident = (string)obj };
 		}
-		/* Add support for function calls e.g. "item x = .read"
-		 else if (this.tokens[this.index] == Scanner.Dot) {
+		/* Add support for inline function calls e.g. "item x = .read"
+		 else if (tokens[index] == Scanner.Dot) {
 
 		}*/
 		else
@@ -357,18 +356,16 @@ public sealed class Parser
 		}
 	}
 
-	private Expr intToExpr(int input)
+	private Expr IntToExpr(int input)
 	{
 		int intValue = input;
-		this.index++;
-		if (this.tokens[this.index] == Scanner.Add || this.tokens[this.index] == Scanner.Sub|| this.tokens[this.index] == Scanner.Mul || this.tokens[this.index] == Scanner.Div)
+		index++;
+		if (tokens[index] == Scanner.Add || tokens[index] == Scanner.Sub|| tokens[index] == Scanner.Mul || tokens[index] == Scanner.Div)
 		{
-			this.index++;
-			intValue = this.Math(intValue, (int)this.tokens[this.index], (object)this.tokens[this.index - 1]);
+			index++;
+			intValue = Math(intValue, (int)tokens[index], (object)tokens[index - 1]);
 		}
-		IntLiteral intLiteral = new IntLiteral();
-		intLiteral.Value = intValue;
-		return intLiteral;
+		return new IntLiteral { Value = intValue };
 	}
 	private int Math(int a, int b, object op)
 	{
