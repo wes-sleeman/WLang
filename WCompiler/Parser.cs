@@ -1,4 +1,4 @@
-
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,10 +15,7 @@ public sealed class Parser
 		index = 0;
 		result = ParseStmt();
 
-		if (index != tokens.Count)
-		{
-			throw new System.Exception("expected newline after expression, are you using Windows?");
-		}
+		if (index != tokens.Count) throw new Exception("expected newline after expression, are you using Windows?");
 	}
 
 	public Stmt Result
@@ -36,7 +33,7 @@ public sealed class Parser
         
 		if (index == tokens.Count)
 		{
-			throw new System.Exception("expected statement, got EOF");
+			throw new Exception("expected statement, got EOF");
 		}
 		if (tokens[index].Equals ("backcolor") || tokens[index].Equals ("backcolour")) {
 			index++;
@@ -45,30 +42,29 @@ public sealed class Parser
             { color = (System.ConsoleColor)System.Enum.Parse(typeof(System.ConsoleColor), tokens[index].ToString(), true) };
 			result = backColor;
 			index++;
-		} else if (tokens [index].Equals ("forecolor") || tokens [index].Equals ("forecolour")) {
+		} else if (tokens[index].Equals ("forecolor") || tokens[index].Equals ("forecolour")) {
 			index++;
 			index++;
 			TextForeColor foreColor = new TextForeColor()
             { color = (System.ConsoleColor)System.Enum.Parse(typeof(System.ConsoleColor), tokens[index].ToString(), true) };
 			result = foreColor;
 			index++;
-		} else if (tokens [index].Equals ("item")) {
+		} else if (tokens[index].Equals ("item")) {
 			index++;
 			DeclareVar declareVar = new DeclareVar ();
 
 			if (index < tokens.Count &&
-				tokens [index] is string) {
-				declareVar.Ident = (string)tokens [index];
+				tokens[index] is string) {
+				declareVar.Ident = (string)tokens[index];
 			} else {
-				throw new System.Exception ("expected variable name after 'item'");
+				throw new Exception ("expected variable name after 'item'");
 			}
 
 			index++;
 
-			if (index == tokens.Count || tokens [index] != Scanner.Equal) {
-				//throw new System.Exception ("expected = after 'item ident'");
+			if (index == tokens.Count || tokens[index] != Scanner.Equal) {
 				index--;
-				tokens [index] = "$";
+				tokens[index] = "$";
 				declareVar.Expr = ParseExpr();
 				result = declareVar;
 			} else {
@@ -90,18 +86,21 @@ public sealed class Parser
 			Pause pause = new Pause();
 			if (index < tokens.Count && tokens[index] is int && tokens[index + 1] == Scanner.Semi)
 			{
-				pause.Duration = IntToExpr(((IntLiteral)IntToExpr((int)tokens[index])).Value * 1000);
+				pause.Duration = NumLitToExpr(((int)tokens[index]) * 1000);
 				result = pause;
-				index--;
 			}
-			else if (index < tokens.Count && tokens[index] is int && tokens [index + 1] != Scanner.Semi)
+			else if (index < tokens.Count && tokens[index] is int && tokens[index + 1] != Scanner.Semi)
 			{
-				pause.Duration = IntToExpr(((IntLiteral)IntToExpr((int)tokens[index])).Value * 1000);
+                //Creates new token pool for expression
+                //List<object> pauseExpr = new List<object> { tokens[index] };
+                //while (tokens[++index] != Scanner.Semi) pauseExpr.Add(tokens[index]);
+
+                pause.Duration = NumLitToExpr(((IntLiteral)NumLitToExpr((int)tokens[index])).Value * 1000);
 				result = pause;
 			}
 			else
 			{
-				pause.Duration = IntToExpr(1000);
+				pause.Duration = NumLitToExpr(1000);
 				result = pause;
 			}
 		}
@@ -174,7 +173,7 @@ public sealed class Parser
 			if (index == tokens.Count ||
 			    !tokens[index].Equals("["))
 			{
-				throw new System.Exception("expected opening \"[\" after expression in for loop");
+				throw new Exception("expected opening \"[\" after expression in for loop");
 			}
 
 			index += 2;
@@ -184,7 +183,7 @@ public sealed class Parser
 
 			if (index == tokens.Count || !tokens[index].Equals("]"))
 			{
-				throw new System.Exception("unterminated loop body");
+				throw new Exception("unterminated loop body");
 			}
 
 			index++;
@@ -216,16 +215,16 @@ public sealed class Parser
 		{
 			Conditional cond = new Conditional ();
 			index++;
-			if (index < tokens.Count && (tokens [index] == Scanner.Equal || tokens [index] == Scanner.CloseAngle || tokens [index] == Scanner.OpenAngle))// && tokens [index + 1] is string)
+			if (index < tokens.Count && (tokens[index] == Scanner.Equal || tokens[index] == Scanner.CloseAngle || tokens[index] == Scanner.OpenAngle))// && tokens[index + 1] is string)
 			{
 				cond.ExprA = ConvToExpr ("$#");
 			} else {
 				cond.ExprA = ParseExpr ();
 			}
-			if (tokens [index] == Scanner.Equal) cond.Comp = BinComp.Equal;
-			if (tokens [index] == Scanner.CloseAngle) cond.Comp = BinComp.Greater;
-			if (tokens [index] == Scanner.OpenAngle) cond.Comp = BinComp.Less;
-			if (tokens [index] == Scanner.Bang) cond.Comp = BinComp.NotEqual;
+			if (tokens[index] == Scanner.Equal) cond.Comp = BinComp.Equal;
+			if (tokens[index] == Scanner.CloseAngle) cond.Comp = BinComp.Greater;
+			if (tokens[index] == Scanner.OpenAngle) cond.Comp = BinComp.Less;
+			if (tokens[index] == Scanner.Bang) cond.Comp = BinComp.NotEqual;
 
 			index++;
 			cond.ExprB = ParseExpr ();
@@ -233,7 +232,7 @@ public sealed class Parser
 			if (index == tokens.Count ||
 			    !tokens[index].Equals("["))
 			{
-				throw new System.Exception("expected opening \"[\" after expression in if block");
+				throw new Exception("expected opening \"[\" after expression in if block");
 			}
 
 			index += 2;
@@ -243,7 +242,7 @@ public sealed class Parser
 
 			if (index == tokens.Count || !tokens[index].Equals("]"))
 			{
-				throw new System.Exception("unterminated if block");
+				throw new Exception("unterminated if block");
 			}
 
 			index++;
@@ -258,7 +257,7 @@ public sealed class Parser
 			if (index == tokens.Count ||
 			    tokens[index] != Scanner.Equal)
 			{
-				throw new System.Exception("expected '='");
+				throw new Exception("expected '='");
 			}
 
 			index++;
@@ -270,7 +269,7 @@ public sealed class Parser
 		else
 		{
             // unrecongnised token, probably not supported. SKIP
-            //throw new System.Exception("parse error at token " + index + ": " + tokens[index].ToString());
+            //throw new Exception("parse error at token " + index + ": " + tokens[index].ToString());
             result = new NullStmt();
 		}
 
@@ -295,45 +294,34 @@ public sealed class Parser
 
 	private Expr ParseExpr()
 	{
-		if (index == tokens.Count)
-		{
-			throw new System.Exception("expected expression, got EOF");
-		}
+		if (index == tokens.Count) throw new Exception("expected expression, got EOF");
 
-		if (tokens[index + 1] == Scanner.Add)
-		{
-
-		}
-
-		if (tokens[index] is StringBuilder)
-		{
-			string value = ((StringBuilder)tokens[index++]).ToString();
-			return new StringLiteral() { Value = value };
-		}
-		else if (tokens[index] is int)
-		{
-			int intValue = (int)tokens[index++];
-			if (tokens[index] == Scanner.Add || tokens[index] == Scanner.Sub || tokens[index] == Scanner.Mul || tokens[index] == Scanner.Div)
-			{
-				index++;
-				Math(intValue, (int)tokens[index], (object)tokens[index - 1]);
-			}
-			index++;
-			return new IntLiteral { Value = intValue };
-		}
-		else if (tokens[index] is string)
-		{
-			string ident = (string)tokens[index++];
-			return new Variable { Ident = ident };
-		}
-		/* Add support for lambda-type function calls e.g. "item x = .read"
+        if (tokens[index] is StringBuilder)
+        {
+            string value = ((StringBuilder)tokens[index++]).ToString();
+            return new StringLiteral() { Value = value };
+        }
+        else if (tokens[index] is int)
+        {
+            int intValue = (int)tokens[index++];
+            if (tokens[index] == Scanner.Add || tokens[index] == Scanner.Sub || tokens[index] == Scanner.Mul || tokens[index] == Scanner.Div)
+            {
+                index++;
+                Math(intValue, (int)tokens[index], tokens[index - 1]);
+            }
+            index++;
+            return new IntLiteral { Value = intValue };
+        }
+        else if (tokens[index] is string)
+        {
+            string ident = (string)tokens[index++];
+            return new Variable { Ident = ident };
+        }
+        /* Add support for lambda-type function calls e.g. "item x = .read"
 		 else if (tokens[index] == Scanner.Dot) {
 
 		}*/
-		else
-		{
-			throw new System.Exception("expected string literal, int literal, or variable");
-		}
+        else throw new Exception("Can't parse at token " + index);
 	}
 
 	private Expr ConvToExpr(object obj)
@@ -346,28 +334,29 @@ public sealed class Parser
 		{
 			return new Variable { Ident = (string)obj };
 		}
-		/* Add support for inline function calls e.g. "item x = .read"
+		/* Add support for lambda-type function calls e.g. "item x = .read"
 		 else if (tokens[index] == Scanner.Dot) {
 
 		}*/
 		else
 		{
-			throw new System.Exception("expected string literal, int literal, or variable");
+			throw new Exception("expected string literal, int literal, or variable");
 		}
 	}
 
-	private Expr IntToExpr(int input)
+	private Expr NumLitToExpr(float input)
 	{
-		int intValue = input;
+		float value = input;
 		index++;
 		if (tokens[index] == Scanner.Add || tokens[index] == Scanner.Sub|| tokens[index] == Scanner.Mul || tokens[index] == Scanner.Div)
 		{
 			index++;
-			intValue = Math(intValue, (int)tokens[index], (object)tokens[index - 1]);
+            //Parse avoids casting error
+			value = Math(value, float.Parse(tokens[index].ToString()), tokens[index - 1]);
 		}
-		return new IntLiteral { Value = intValue };
+		return new IntLiteral { Value = value };
 	}
-	private int Math(int a, int b, object op)
+	private float Math(float a, float b, object op)
 	{
 		if (op == Scanner.Add)
 		{
@@ -394,7 +383,7 @@ public sealed class Parser
 		}
 		else
 		{
-			throw new System.Exception("Unrecognised operator '" + op + "'.");
+			throw new Exception("Unrecognised operator '" + op + "'.");
 		}
 
 	}

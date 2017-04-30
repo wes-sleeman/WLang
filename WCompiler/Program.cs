@@ -49,7 +49,7 @@ namespace WCompiler
                     Console.WriteLine("Complete!");
                 } catch (Exception e) {
 					Console.Error.WriteLine(e.Message);
-					for (; ;);
+                    while (true) ;
 				}
 			}
 		}

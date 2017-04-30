@@ -1,55 +1,28 @@
 {
-   Copyright 2017 Wes Sleeman
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+	This is a simple W program to demonstrate some of the basic functionality.
+	Expected output:
+	Welcome to the W Programming Language
+	What is your name?
+	(Waits for input)
+	(Pause a beat, Screen clears)
+	Hello, <name>!
+	(Pause, then terminate program)
 }
-refresh
-type "Hello, and welcome to the WCompiler for the "
+
+type "Welcome to the "
 forecolor = "red"
-type "W Programming Language!"
+backcolor = "blue"
+type "W Programming Language"
 resetcolors
 newline
-pause 3
-refresh
-type "Do you like it so far? (y/n)"
+pause 1
+type "What is your name?"
 newline
 read
-item cntr = 0
-repeat cntr 10 [
-type cntr
-type ": "
+pause 1
+reset
+type "Hello, "
 type $
-newline
-]
-if $ = "y" [
-	type "Great!"
-]
-if $ = "n" [
-	type "It'll grow on you when you try using it!"
-]
-newline
-pause 3
+type "!"
+pause 3 + 2
 reset
-type "Why don't you try looking at the source code of this little gizmo? It's located in the same directory as the compiler."
-newline
-type "Good luck and have fun!"
-backcolour = "blue"
-forecolour = "red"
-type "-\/\/"
-FORECOLOUR = "GREEN"
-TYPE "35"
-nEwliNe
-resetcolors
-pause 5
-reset
-?Thanks for reading the code. Happy devving!

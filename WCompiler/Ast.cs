@@ -127,7 +127,7 @@ public enum BinComp
 #region LiteralsEtc
 public class IntLiteral : Expr
 {
-	public int Value;
+	public float Value;
 }
 
 public class StringLiteral : Expr

@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.IO;
+using System.Threading;
 
 public sealed class CodeGen
 {
@@ -12,15 +14,15 @@ public sealed class CodeGen
 	{
 		if (Path.GetFileName(moduleName) != moduleName)
 		{
-			throw new System.Exception("can only output into current directory!");
+			throw new Exception("can only output into current directory!");
 		}
 
 		AssemblyName name = new AssemblyName(Path.GetFileNameWithoutExtension(moduleName));
-		AssemblyBuilder asmb = System.AppDomain.CurrentDomain.DefineDynamicAssembly(name, AssemblyBuilderAccess.Save);
+		AssemblyBuilder asmb = AppDomain.CurrentDomain.DefineDynamicAssembly(name, AssemblyBuilderAccess.Save);
 		ModuleBuilder modb = asmb.DefineDynamicModule(moduleName);
 		TypeBuilder typeBuilder = modb.DefineType("Program");
 
-		MethodBuilder methb = typeBuilder.DefineMethod("Main", MethodAttributes.Static, typeof(void), System.Type.EmptyTypes);
+		MethodBuilder methb = typeBuilder.DefineMethod("Main", MethodAttributes.Static, typeof(void), Type.EmptyTypes);
 
         // CodeGenerator
         il = methb.GetILGenerator();
@@ -58,18 +60,18 @@ public sealed class CodeGen
 
 			if (stmt is ResetColor)
 			{
-				il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ResetColor"));
+				il.Emit(OpCodes.Call, typeof(Console).GetMethod("ResetColor"));
 			}
 			else if (stmt is TextBackColor)
 			{
-				ConvertColor((System.ConsoleColor)(((TextBackColor)stmt).color));
-				il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("set_BackgroundColor", new System.Type[] { typeof(System.ConsoleColor) }));
+				ConvertColor((ConsoleColor)(((TextBackColor)stmt).color));
+				il.Emit(OpCodes.Call, typeof(Console).GetMethod("set_BackgroundColor", new Type[] { typeof(ConsoleColor) }));
 
 			}
 			else if (stmt is TextForeColor)
 			{
 				ConvertColor(((TextForeColor)stmt).color);
-				il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("set_ForegroundColor", new System.Type[] { typeof(System.ConsoleColor) }));
+				il.Emit(OpCodes.Call, typeof(Console).GetMethod("set_ForegroundColor", new Type[] { typeof(ConsoleColor) }));
 			}
 		}
 		else if (stmt is DeclareVar declare)
@@ -94,7 +96,7 @@ public sealed class CodeGen
 			// Pause 5
 			// ?Pauses for 5 seconds
 			GenExpr(((Pause)stmt).Duration, typeof(int));
-			il.Emit(OpCodes.Call, typeof(System.Threading.Thread).GetMethod("Sleep", new System.Type[] { typeof(int) }));
+			il.Emit(OpCodes.Call, typeof(Thread).GetMethod("Sleep", new Type[] { typeof(int) }));
 		}
 		else if (stmt is Print)
 		{
@@ -102,26 +104,23 @@ public sealed class CodeGen
 			// Type "Hello, world"
 			// ?Writes "Hello, world" to console
 			GenExpr(((Print)stmt).Expr, typeof(string));
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("Write", new System.Type[] { typeof(string) }));
+			il.Emit(OpCodes.Call, typeof(Console).GetMethod("Write", new Type[] { typeof(string) }));
 		}
 		else if (stmt is PrintReturn)
 		{
 			// used without arguments, prints newline char
 			il.Emit(OpCodes.Ldstr, "");
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("WriteLine", new System.Type[] { typeof(string) }));
+			il.Emit(OpCodes.Call, typeof(Console).GetMethod("WriteLine", new Type[] { typeof(string) }));
 		}
 		else if (stmt is ReadNum)
 		{
 			// reads from console and parses as decimal
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { }, null));
-			try
-			{
-				il.Emit(OpCodes.Call, typeof(decimal).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { typeof(string) }, null));
-			}
-			catch(System.ArgumentException)
-			{
-
-			}
+			il.Emit(OpCodes.Call, typeof(Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new Type[] { }, null));
+            try
+            {
+                il.Emit(OpCodes.Call, typeof(float).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(string) }, null));
+            }
+            catch (ArgumentException) { }
 			Store(((ReadNum)stmt).Ident, typeof(decimal));
 		}
 		else if (stmt is Read)
@@ -130,12 +129,12 @@ public sealed class CodeGen
 			// example:
 			// read x
 			// ?Puts input into variable x
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new System.Type[] { }, null));
+			il.Emit(OpCodes.Call, typeof(Console).GetMethod("ReadLine", BindingFlags.Public | BindingFlags.Static, null, new Type[] { }, null));
             Store(((Read)stmt).Ident, typeof(string));
 		}
 		else if (stmt is Refresh)
 		{
-			il.Emit(OpCodes.Call, typeof(System.Console).GetMethod("Clear"));
+			il.Emit(OpCodes.Call, typeof(Console).GetMethod("Clear"));
 		}
 
 		else if (stmt is ForLoop forLoop)
@@ -151,7 +150,7 @@ public sealed class CodeGen
                 string parseTest = symbolTable[forLoop.To].ToString().Substring(symbolTable[forLoop.To].ToString().IndexOf("(") + 1, (symbolTable[forLoop.To].ToString().Length - 1) - (symbolTable[forLoop.To].ToString().IndexOf("(") + 1));
                 if (!int.TryParse(forLoop.To, out loopTo))
                 {
-                    throw new System.Exception("Cannot evaluate variable " + forLoop.To + " to a number to be repeated. Got:" + parseTest);
+                    throw new Exception("Cannot evaluate variable " + forLoop.To + " to a number to be repeated. Got:" + parseTest);
                 }
             }
 
@@ -190,7 +189,7 @@ public sealed class CodeGen
                 string parseTest = symbolTable[((Variable)cond.ExprA).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprA).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprA).Ident].ToString().IndexOf("(") + 1));
                 if (!int.TryParse(parseTest, out ExprA))
                 {
-                    throw new System.Exception("Cannot evaluate variable " + cond.ExprA + " to a number to be tested. Got:" + parseTest);
+                    throw new Exception("Cannot evaluate variable " + cond.ExprA + " to a number to be tested. Got:" + parseTest);
                 }
                 exprA = parseTest;
             }
@@ -198,7 +197,7 @@ public sealed class CodeGen
             {
                 exprA = ((byte)ExprA).ToString();
             }
-            else throw new System.Exception("Cannot evaluate if statement part a.");
+            else throw new Exception("Cannot evaluate if statement part a.");
 
             if (cond.ExprB is StringLiteral)
             {
@@ -209,7 +208,7 @@ public sealed class CodeGen
                 string parseTest = symbolTable[((Variable)cond.ExprB).Ident].ToString().Substring(symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1, (symbolTable[((Variable)cond.ExprB).Ident].ToString().Length - 1) - (symbolTable[((Variable)cond.ExprB).Ident].ToString().IndexOf("(") + 1));
                 if (!int.TryParse(parseTest, out ExprB))
                 {
-                    throw new System.Exception("Cannot evaluate variable " + cond.ExprB + " to a number to be tested. Got:" + parseTest);
+                    throw new Exception("Cannot evaluate variable " + cond.ExprB + " to a number to be tested. Got:" + parseTest);
                 }
                 exprB = parseTest;
             }
@@ -217,7 +216,7 @@ public sealed class CodeGen
             {
                 exprB = ((byte)ExprB).ToString();
             }
-            else throw new System.Exception("Cannot evaluate if statement part b.");
+            else throw new Exception("Cannot evaluate if statement part b.");
 
 
             // jump to the test
@@ -242,7 +241,7 @@ public sealed class CodeGen
             {
                 il.Emit(OpCodes.Ldstr, exprA);
             }
-            else throw new System.Exception("Cannot parse if statement part a.");
+            else throw new Exception("Cannot parse if statement part a.");
 
             if (cond.ExprB is Variable)
             {
@@ -256,9 +255,9 @@ public sealed class CodeGen
             {
                 il.Emit(OpCodes.Ldstr, exprB);
             }
-            else throw new System.Exception("Cannot parse if statement part b.");
+            else throw new Exception("Cannot parse if statement part b.");
 
-            // drops in the proper comparator
+            // Drops in the proper comparator
             if (cond.Comp == BinComp.Equal)
             {
                 il.Emit(OpCodes.Beq, True);
@@ -286,43 +285,35 @@ public sealed class CodeGen
             il.Emit(OpCodes.Br, End);
             il.MarkLabel(End);
         }
-        else if (stmt is NullStmt)
-        {
-            il.Emit(OpCodes.Nop);
-        }
-        else throw new System.Exception("don't know how to gen a " + stmt.GetType().Name);
+        // Error handling & sneaky shortcuts
+        else if (stmt is NullStmt) il.Emit(OpCodes.Nop);
+        else throw new Exception("don't know how to gen a " + stmt.GetType().Name);
 
 
 
 
     }    
 
-	private void Store(string name, System.Type type)
+	private void Store(string name, Type type)
 	{
 		if (symbolTable.ContainsKey(name))
 		{
 			LocalBuilder locb = symbolTable[name];
 
-			if (locb.LocalType == type)
-			{
-				il.Emit(OpCodes.Stloc, symbolTable[name]);
-			}
-			else
-			{
-				throw new System.Exception("'" + name + "' is of type " + locb.LocalType.Name + " but attempted to store value of type " + type.Name);
-			}
+            if (locb.LocalType == type)
+            {
+                il.Emit(OpCodes.Stloc, symbolTable[name]);
+            }
+            else throw new Exception($"Attempted to store value {symbolTable[name]}({type.Name}) into variable {name}({locb.LocalType.Name})");
 		}
-		else
-		{
-			throw new System.Exception("undeclared variable '" + name + "'");
-		}
+		else throw new Exception("Use of undeclared variable '" + name + "'");
 	}
 
 
 
-	private void GenExpr(object expr, System.Type expectedType)
+	private void GenExpr(object expr, Type expectedType)
 	{
-		System.Type deliveredType;
+        Type deliveredType;
 
 		if (expr is StringLiteral)
 		{
@@ -331,19 +322,15 @@ public sealed class CodeGen
 		}
 		else if (expr is IntLiteral)
 		{
-			deliveredType = typeof(int);
-			il.Emit(OpCodes.Ldc_I4, ((IntLiteral)expr).Value);
+			deliveredType = typeof(float);
+			il.Emit(OpCodes.Ldc_R4, ((IntLiteral)expr).Value);
 		}        
 		else if (expr is Variable)
 		{
 			string ident = ((Variable)expr).Ident;
 			deliveredType = TypeOfExpr(expr);
 
-			if (!symbolTable.ContainsKey(ident))
-			{
-				throw new System.Exception("undeclared variable '" + ident + "'");
-			}
-			//System.Console.WriteLine(symbolTable[ident]);
+			if (!symbolTable.ContainsKey(ident)) throw new Exception($"Use of undeclared variable '{ident}'");
 
 			il.Emit(OpCodes.Ldloc, symbolTable[ident]);
 		}
@@ -362,20 +349,33 @@ public sealed class CodeGen
 		}
 		else
 		{
-			throw new System.Exception("don't know how to generate " + expr.GetType().Name);
+			throw new Exception("don't know how to generate " + expr.GetType().Name);
 		}
 
 		if (deliveredType != expectedType)
 		{
-			if (deliveredType == typeof(int) &&
+			if (deliveredType == typeof(Single) &&
 			    expectedType == typeof(string))
 			{
-				il.Emit(OpCodes.Box, typeof(int));
+				il.Emit(OpCodes.Box, typeof(Single));
 				il.Emit(OpCodes.Callvirt, typeof(object).GetMethod("ToString"));
 			}
-			else
+            //Parse int32 to single
+            else if (deliveredType == typeof(Int32) &&
+                expectedType == typeof(Single))
+            {
+                il.Emit(OpCodes.Call, typeof(float).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(Int32) }, null));
+            }
+            else if (deliveredType == typeof(Single) &&
+                expectedType == typeof(Int32))
+            {
+                il.Emit(OpCodes.Box, typeof(Single));
+                il.Emit(OpCodes.Callvirt, typeof(object).GetMethod("ToString"));
+                il.Emit(OpCodes.Call, typeof(Int32).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null, new Type[] { typeof(string) }, null));
+            }
+            else
 			{
-				throw new System.Exception("can't coerce a " + deliveredType.Name + " to a " + expectedType.Name);
+				throw new Exception("can't coerce a " + deliveredType.Name + " to a " + expectedType.Name);
 			}
 		}
 
@@ -383,7 +383,7 @@ public sealed class CodeGen
 
 
 
-	private System.Type TypeOfExpr(object expr)
+	private Type TypeOfExpr(object expr)
 	{
 		if (expr is StringLiteral)
 		{
@@ -391,7 +391,7 @@ public sealed class CodeGen
 		}
 		else if (expr is IntLiteral)
 		{
-			return typeof(int);
+			return typeof(float);
 		}
 		else if (expr is Variable var)
 		{
@@ -400,25 +400,19 @@ public sealed class CodeGen
 				LocalBuilder locb = symbolTable[var.Ident];
 				return locb.LocalType;
 			}
-			else
-			{
-				throw new System.Exception("undeclared variable '" + var.Ident + "'");
-			}
+			else throw new Exception("undeclared variable '" + var.Ident + "'");
 		}
-		else
-		{
-			throw new System.Exception("don't know how to calculate the type of " + expr.GetType().Name);
-		}
+		else throw new Exception("don't know how to calculate the type of " + expr.GetType().Name);
 	}
 	private object TypeOfExprEquivalent(object expr)
 	{
 		if (expr is StringLiteral)
 		{
-			return (string)(((StringLiteral)expr).Value);
+			return ((StringLiteral)expr).Value;
 		}
 		else if (expr is IntLiteral)
 		{
-			return (int)(((IntLiteral)expr).Value);
+			return ((IntLiteral)expr).Value;
 		}
 		else if (expr is Variable var)
 		{
@@ -427,21 +421,15 @@ public sealed class CodeGen
 				LocalBuilder locb = symbolTable[var.Ident];
 				return locb;
 			}
-			else
-			{
-				throw new System.Exception("undeclared variable '" + var.Ident + "'");
-			}
+			else throw new Exception("undeclared variable '" + var.Ident + "'");
 		}
-		else
-		{
-			throw new System.Exception("don't know how to calculate the type of " + expr.GetType().Name);
-		}
+		else throw new Exception("don't know how to calculate the type of " + expr.GetType().Name);
 	}
-	private Expr IntToExpr(int input)
+	private Expr IntToExpr(float input)
 	{
-		int intValue = input;
+		float value = input;
         IntLiteral intLiteral = new IntLiteral()
-        { Value = intValue };
+        { Value = value };
 		return intLiteral;
 	}
 	private string VarName(Expr input)
@@ -455,69 +443,68 @@ public sealed class CodeGen
 
         StringLiteral strLit = new StringLiteral()
         { Value = ""};
-	stmt.Ident = "$";
-	stmt.Expr = strLit;
-	GenStmt(stmt);
-	IntLiteral intLit = new IntLiteral()
-        { Value = 0};
-	stmt.Ident = "$#";
-	stmt.Expr = intLit;
-	GenStmt(stmt);
-}
-private void ConvertColor(System.ConsoleColor input)
+	    stmt.Ident = "$";
+	    stmt.Expr = strLit;
+	    GenStmt(stmt);
+	    IntLiteral intLit = new IntLiteral() { Value = 0};
+	    stmt.Ident = "$#";
+	    stmt.Expr = intLit;
+	    GenStmt(stmt);
+    }
+private void ConvertColor(ConsoleColor input)
 {
 	switch (input)
 	{
-		case System.ConsoleColor.Black:
+		case ConsoleColor.Black:
 		il.Emit(OpCodes.Ldc_I4_0);
 		break;
-		case System.ConsoleColor.DarkBlue:
+		case ConsoleColor.DarkBlue:
 		il.Emit(OpCodes.Ldc_I4_1);
 		break;
-		case System.ConsoleColor.DarkGreen:
+		case ConsoleColor.DarkGreen:
 		il.Emit(OpCodes.Ldc_I4_2);
 		break;
-		case System.ConsoleColor.DarkCyan:
+		case ConsoleColor.DarkCyan:
 		il.Emit(OpCodes.Ldc_I4_3);
 		break;
-		case System.ConsoleColor.DarkRed:
+		case ConsoleColor.DarkRed:
 		il.Emit(OpCodes.Ldc_I4_4);
 		break;
-		case System.ConsoleColor.DarkMagenta:
+		case ConsoleColor.DarkMagenta:
 		il.Emit(OpCodes.Ldc_I4_5);
 		break;
-		case System.ConsoleColor.DarkYellow:
+		case ConsoleColor.DarkYellow:
 		il.Emit(OpCodes.Ldc_I4_6);
 		break;
-		case System.ConsoleColor.Gray:
+		case ConsoleColor.Gray:
 		il.Emit(OpCodes.Ldc_I4_7);
 		break;
-		case System.ConsoleColor.DarkGray:
+		case ConsoleColor.DarkGray:
 		il.Emit(OpCodes.Ldc_I4_8);
 		break;
-		case System.ConsoleColor.Blue:
+		case ConsoleColor.Blue:
 		il.Emit(OpCodes.Ldc_I4_S, 9);
 		break;
-		case System.ConsoleColor.Green:
+		case ConsoleColor.Green:
 		il.Emit(OpCodes.Ldc_I4_S, 10);
 		break;
-		case System.ConsoleColor.Cyan:
+		case ConsoleColor.Cyan:
 		il.Emit(OpCodes.Ldc_I4_S, 11);
 		break;
-		case System.ConsoleColor.Red:
+		case ConsoleColor.Red:
 		il.Emit(OpCodes.Ldc_I4_S, 12);
 		break;
-		case System.ConsoleColor.Magenta:
+		case ConsoleColor.Magenta:
 		il.Emit(OpCodes.Ldc_I4_S, 13);
 		break;
-		case System.ConsoleColor.Yellow:
+		case ConsoleColor.Yellow:
 		il.Emit(OpCodes.Ldc_I4_S, 14);
 		break;
-		case System.ConsoleColor.White:
+		case ConsoleColor.White:
 		il.Emit(OpCodes.Ldc_I4_S, 15);
 		break;
 		default:	
-			throw new System.Exception("Unrecognised color.");
+			throw new Exception("Unrecognised color.");
 		}
 	}
 }

@@ -1,5 +1,4 @@
 C:\Users\westo\Documents\GitHub\WCompiler\WCompiler\bin\Debug\WCompiler.exe
 C:\Users\westo\Documents\GitHub\WCompiler\WCompiler\bin\Debug\WCompiler.pdb
-C:\Users\westo\Documents\GitHub\WCompiler\WCompiler\obj\x86\Debug\WCompiler.csprojResolveAssemblyReference.cache
 C:\Users\westo\Documents\GitHub\WCompiler\WCompiler\obj\x86\Debug\WCompiler.exe
 C:\Users\westo\Documents\GitHub\WCompiler\WCompiler\obj\x86\Debug\WCompiler.pdb
