@@ -1,0 +1,22 @@
+﻿Program			= {<Block>}
+Block			= { <Statement> | <Conditional> | <Loop> | <Declaration> | <Assignment> }*
+
+Expr			= <Term> { (+ | -) <Term> }*
+Term			= <SignedFactor> { (* | / | %) <SignedFactor> }*
+SignedFactor	= { + | - } <Factor>
+Factor			= (<IntLiteral> | <Ident> | (<Expr>))
+IntOp			= (> | >= | < | <= | =)
+
+BooleanExpr		= ( <BooleanExpr> <BoolOp> <BooleanExpr> | <Expr> <IntOp> <Expr> | {Not} <BooleanExpr> )
+Boolean			= ( True | False )
+BoolOp			= ( And / Or / & / | )
+
+If				= If <BooleanExpr> [ {<Block>} ]
+Loop			= Repeat {<Expr>} [ {<Block>} ]
+
+Declaration		= Item <Ident> { = <Expr> }
+Assignment		= <Ident> = <Expr>
+
+Statement		= { <Type> }
+
+Type			= Type <Expr>
