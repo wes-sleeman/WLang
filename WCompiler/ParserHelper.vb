@@ -14,58 +14,68 @@
 		End Select
 	End Function
 
+	Private IndentLevel% = 0
 	Private Sub Emit(output$)
-		outputbuffer.Add(vbTab & output)
+		Dim tabBuffer$ = String.Empty
+		For cntr% = 1 To IndentLevel
+			tabBuffer &= vbTab
+		Next
+		outputbuffer.Add(tabBuffer & output)
 	End Sub
 
 	Private Sub Setup()
 		Emit("Imports System : Imports System.Collections.Generic
 Module Program
-    Class VariableDictionary
-        Inherits Dictionary(Of String, Object)
+	Class VariableDictionary
+		Inherits Dictionary(Of String, Object)
 
-        Default Public Shadows Property Subscript(key As String) As Object
-            Get
-                If ContainsKey(key) Then
-                    Return Item(key)
-                Else
-                    Return 0
-                End If
-            End Get
-            Set(val As Object)
-                Item(key) = val
-            End Set
-        End Property
-    End Class
+		Default Public Shadows Property Subscript(key As String) As Object
+			Get
+				If ContainsKey(key) Then
+					Return Item(key)
+				Else
+					Return 0
+				End If
+			End Get
+			Set(val As Object)
+				Item(key) = val
+			End Set
+		End Property
+	End Class
 
-    Dim Register As Object
-    ReadOnly Variable As New VariableDictionary()
-    Dim Stack As New Stack(Of Object)
+	Dim Register As Object
+	Dim Parent As Object
+	Dim Counter% = 0
+	Dim LoopEnd% = 0
+	ReadOnly Variable As New VariableDictionary()
+	Dim Stack As New Stack(Of Object)
 	Function ReadStr() As String
 		Return Console.ReadLine()
 	End Function
-    Function ReadInt() As Integer
-        Dim input = ReadStr()
-        Try
-            Return Convert.ToInt32(input)
-        Catch ex As FormatException
-            Return 0
-        End Try
-    End Function
+	Function ReadInt() As Integer
+		Dim input = ReadStr()
+		Try
+			Return Convert.ToInt32(input)
+		Catch ex As FormatException
+			Return 0
+		End Try
+	End Function
 	Sub Print(data As Object)
 		Console.WriteLine(data.ToString())
 	End Sub
 
-    Sub Main()
+	Sub Main()
 
-    'BEGIN USER GENERATED CODE")
+		'BEGIN USER GENERATED CODE")
+		IndentLevel = 2
 	End Sub
 
 	Private Sub Teardown()
+		IndentLevel = 0
 		Emit("  'END USER GENERATED CODE
 
-    Console.WriteLine(""Press any key to continue..."")
-    Console.ReadKey()
+	Console.WriteLine(""Press any key to continue..."")
+	Console.ReadKey()
 End Sub
 End Module")
 	End Sub
@@ -121,8 +131,19 @@ End Module")
 			Case TokenType.IntLiteral
 				Emit($"Register = {Match(TokenType.IntLiteral)}")
 
+			Case TokenType.StringLiteral
+				Emit($"Register = ""{Match(TokenType.StringLiteral)}""")
+
 			Case TokenType.Variable
 				Emit($"Register = Variable(""{Match(TokenType.Variable)}"")")
+
+			Case TokenType.Dollar
+				Match(TokenType.Dollar)
+				Emit("Register = Parent")
+
+			Case TokenType.HashSign
+				Match(TokenType.HashSign)
+				Emit("Register = Counter")
 
 			Case Else
 				Match(TokenType.LeftParen)
@@ -130,7 +151,6 @@ End Module")
 				Match(TokenType.RightParen)
 		End Select
 	End Sub
-
 
 	Private Sub BooleanExpr()
 		If Lexer.Current.Type = TokenType.Boolean Then
@@ -141,9 +161,13 @@ End Module")
 			Emit($"Register = Not Register")
 		Else
 			Try
-				Expr()
-				Emit($"Register = CBool(Register)")
-			Catch ex As Exception
+				Try
+					[Boolean]()
+				Catch ex As ArgumentException
+					Expr()
+					Emit($"Register = CBool(Register)")
+				End Try
+			Catch ex As ArgumentException
 				BooleanExpr()
 				Push()
 				Dim op = Lexer.Current.Type

@@ -19,4 +19,4 @@ Assignment		= <Ident> = <Expr>
 
 Statement		= { <Type> }
 
-Type			= Type <Expr>
+Type			= Type(<Expr>)

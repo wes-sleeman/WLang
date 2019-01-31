@@ -5,6 +5,12 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
+		Console.WriteLine("W Compiler Version 1.0.0" & vbCrLf)
+
+#If DEBUG Then
+		If args.Length = 0 Then args = Directory.EnumerateFiles(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests")).Where(Function(in$) [in].EndsWith(".w")).ToArray()
+#End If
+
 		Console.WriteLine("Reading input file(s).")
 		For Each filename In args
 			If filename.StartsWith("/") Then Continue For
@@ -37,10 +43,10 @@ Module Main
 				Console.WriteLine()
 			Catch ex As FileNotFoundException
 				Console.WriteLine($"File {filename} not found!")
-				Return
+				Continue For
 			Catch ex As ArgumentException
 				Console.WriteLine($"Error: {ex.Message}")
-				Return
+				Continue For
 			End Try
 		Next
 

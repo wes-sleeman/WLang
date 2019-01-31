@@ -49,6 +49,17 @@ Module Tokens
 		End Sub
 	End Structure
 
+	Structure StringLiteral
+		Implements IToken
+		Public ReadOnly Property Type As TokenType Implements IToken.Type
+		Public ReadOnly Property Value As String Implements IToken.Value
+
+		Public Sub New(content$)
+			Value = content
+			Type = TokenType.StringLiteral
+		End Sub
+	End Structure
+
 	Structure Symbol
 		Implements IToken
 
@@ -148,6 +159,7 @@ Module Tokens
 		'Categories
 		Variable
 		IntLiteral
+		StringLiteral
 
 		'Comments and blocks
 		QuestionMark

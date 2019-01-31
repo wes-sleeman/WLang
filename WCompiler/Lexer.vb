@@ -32,6 +32,12 @@
 			Case "0"c To "9"c
 				Return New IntLiteral(TakeWhileLike("#"))
 
+			Case """"c, "'"c
+				Index += 1
+				Dim retval As New StringLiteral(TakeWhileLike("[!""]"))
+				Index += 1
+				Return retval
+
 			Case vbCr, vbLf, vbCrLf, Environment.NewLine, vbTab, " "c
 				TakeWhileIn(vbCr, vbLf, vbCrLf, Environment.NewLine, vbTab, " "c)
 				Return TakeNext()
@@ -54,7 +60,8 @@
 				End If
 
 			Case Else
-				Return New Symbol(Code(Index))
+				Index += 1
+				Return New Symbol(Code(Index - 1))
 		End Select
 	End Function
 
