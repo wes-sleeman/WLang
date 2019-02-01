@@ -13,10 +13,10 @@
 
 	Private Sub AddLib(filepath$)
 		If filepath.ToLower.StartsWith("runtime.") Then
-			Emit($"Assemblies.Add(GetType({filepath.Substring(filepath.IndexOf("."c) + 1)}).Assembly)")
+			Emit($"Assemblies.Add(GetType(Runtime.{filepath.Substring(filepath.IndexOf("."c) + 1)}).Assembly)")
 		Else
 			filepath = IO.Path.GetFullPath(filepath & ".dll")
-			References &= $" /r:""{filepath}"""
+			References &= $",""{filepath}"""
 			Emit($"Assemblies.Add(Assembly.LoadFile({filepath}))")
 		End If
 	End Sub
@@ -45,8 +45,8 @@ Module {Filename}
 			For Each type In asm.GetTypes()
 				Try
 					Dim AsmName$ = Asm.GetName().Name
-					Return Asm.GetType(AsmName & ""."" & type, True, True).GetMethod(name).Invoke(Nothing, args)
-				Catch ex As TypeLoadException
+					Return Asm.GetType(AsmName & ""."" & type.Name, True, True).GetMethod(name).Invoke(Nothing, args)
+				Catch ex As TypeLoadException : Catch ex As NullReferenceException
 				End Try
 			Next
 		Next

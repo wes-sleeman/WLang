@@ -1,3 +1,5 @@
+Ref "Runtime.IO"
+
 Repeat 15
 [
 	Item x = 1

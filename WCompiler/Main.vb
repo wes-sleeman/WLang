@@ -7,12 +7,13 @@ Module Main
 		Console.WriteLine("W Compiler Version 1.0.0" & vbCrLf)
 
 #If DEBUG Then
-		If args.Length = 0 Then args = {"/cross"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
+		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
 #End If
 
 		Dim cross = False, norun = False, [lib] = False
 		Console.WriteLine("Reading input file(s).")
 		For Each filename In args
+			If String.IsNullOrWhiteSpace(filename) Then Continue For
 			If filename.StartsWith("/") Then
 				Select Case filename.ToLower
 					Case "/norun"
@@ -45,14 +46,14 @@ Module Main
 					If [lib] Then
 						Dim outpath$ = Path.ChangeExtension(filename, ".dll")
 						Console.WriteLine($"Compiling to {outpath}.")
-						Dim startInfo As New ProcessStartInfo With {.FileName = VBCPATH, .CreateNoWindow = True, .UseShellExecute = False, .RedirectStandardOutput = True, .Arguments = $"/out:""{outpath}"" /langversion:11 /t:library /r:Runtime.dll{References} /nologo {emitpath}"}
+						Dim startInfo As New ProcessStartInfo With {.FileName = VBCPATH, .CreateNoWindow = True, .UseShellExecute = False, .RedirectStandardOutput = True, .Arguments = $"/out:""{outpath}"" /langversion:latest /t:library /r:Runtime.dll{References} /nologo {emitpath}"}
 						Dim vbc = Process.Start(startInfo)
 						Dim stdout = vbc.StandardOutput.ReadToEnd()
 						File.Delete(emitpath)
 					Else
 						Dim outpath$ = Path.ChangeExtension(filename, ".exe")
 						Console.WriteLine($"Compiling to {outpath}.")
-						Dim startInfo As New ProcessStartInfo With {.FileName = VBCPATH, .CreateNoWindow = True, .UseShellExecute = False, .RedirectStandardOutput = True, .Arguments = $"/out:""{outpath}"" /langversion:11 /t:exe /r:Runtime.dll{References} /nologo {emitpath}"}
+						Dim startInfo As New ProcessStartInfo With {.FileName = VBCPATH, .CreateNoWindow = True, .UseShellExecute = False, .RedirectStandardOutput = True, .Arguments = $"/out:""{outpath}"" /langversion:latest /t:exe /r:Runtime.dll{References} /nologo {emitpath}"}
 						Dim vbc = Process.Start(startInfo)
 						Dim stdout = vbc.StandardOutput.ReadToEnd()
 						File.Delete(emitpath)

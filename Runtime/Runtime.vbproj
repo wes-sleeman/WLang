@@ -101,4 +101,8 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy Runtime.dll ..\..\..\WCompiler\bin\Debug
+copy Runtime.dll ..\..\..\Tests</PostBuildEvent>
+  </PropertyGroup>
 </Project>

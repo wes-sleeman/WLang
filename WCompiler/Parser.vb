@@ -1,5 +1,5 @@
 ﻿Partial Module Parser
-	Public References As String
+	Public References As String = String.Empty
 
 	Private Property Lexer As Lexer
 	Private outputbuffer As List(Of String)
@@ -121,6 +121,32 @@
 
 	Private Sub [Function]()
 		Dim funcName = Match(TokenType.Variable)
+		Match(TokenType.LeftParen)
+		Dim args As New List(Of String)
+		Do
+			Select Case Lexer.Current.Type
+				Case TokenType.RightParen
+					Exit Do
 
+				Case TokenType.IntLiteral
+					args.Add(Match(TokenType.IntLiteral))
+
+				Case TokenType.StringLiteral
+					args.Add($"""{Match(TokenType.StringLiteral)}""")
+
+				Case TokenType.Variable
+					args.Add($"Variable(""{Match(TokenType.Variable)}"")")
+
+				Case TokenType.Dollar
+					Match(TokenType.Dollar)
+					args.Add("Parent")
+
+				Case TokenType.HashSign
+					Match(TokenType.HashSign)
+					args.Add("Counter")
+			End Select
+		Loop
+		Match(TokenType.RightParen)
+		Emit($"InvokeMethod(""{funcName}"", {{ {args.Aggregate(Function(aggr$, item$) aggr & ", " & item)} }})")
 	End Sub
 End Module
