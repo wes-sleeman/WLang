@@ -24,7 +24,7 @@
             <Keywords name="Folders in comment, open"></Keywords>
             <Keywords name="Folders in comment, middle"></Keywords>
             <Keywords name="Folders in comment, close"></Keywords>
-            <Keywords name="Keywords1">if&#x000D;&#x000A;repeat&#x000D;&#x000A;item&#x000D;&#x000A;pause</Keywords>
+            <Keywords name="Keywords1">if&#x000D;&#x000A;repeat&#x000D;&#x000A;item&#x000D;&#x000A;pause&#x000D;&#x000A;break</Keywords>
             <Keywords name="Keywords2">type&#x000D;&#x000A;read&#x000D;&#x000A;refresh&#x000D;&#x000A;reset&#x000D;&#x000A;forecolor&#x000D;&#x000A;forecolour&#x000D;&#x000A;backcolor&#x000D;&#x000A;backcolour&#x000D;&#x000A;resetcolors&#x000D;&#x000A;resetcolours&#x000D;&#x000A;newline</Keywords>
             <Keywords name="Keywords3">$&#x000D;&#x000A;#</Keywords>
             <Keywords name="Keywords4"></Keywords>

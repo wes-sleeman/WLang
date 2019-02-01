@@ -1,6 +1,4 @@
-﻿Imports WCompiler
-
-Module Tokens
+﻿Module Tokens
 	Interface IToken
 		ReadOnly Property Type As TokenType
 		ReadOnly Property Value As String
@@ -201,11 +199,11 @@ Module Tokens
 		[If]
 		Repeat
 		[Boolean]
+		Escape
 
 		'Declaration
 		Item
-
-		'Statements
-		Type
+		Ref
+		Link
 	End Enum
 End Module

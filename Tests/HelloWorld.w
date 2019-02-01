@@ -1,1 +1,1 @@
-Type "Hello, World!"
+Type("Hello, World!")

@@ -6,15 +6,21 @@
 
 		Dim retval$ = Lexer.Current.Value
 		If Advance Then Lexer.Advance()
-		Select Case Type
-			Case TokenType.Variable
-				Return retval.ToLower()
-			Case Else
-				Return retval
-		End Select
+		Return retval
 	End Function
 
 	Private IndentLevel% = 0
+
+	Private Sub AddLib(filepath$)
+		If filepath.ToLower.StartsWith("runtime.") Then
+			Emit($"Assemblies.Add(GetType({filepath.Substring(filepath.IndexOf("."c) + 1)}).Assembly)")
+		Else
+			filepath = IO.Path.GetFullPath(filepath & ".dll")
+			References &= $" /r:""{filepath}"""
+			Emit($"Assemblies.Add(Assembly.LoadFile({filepath}))")
+		End If
+	End Sub
+
 	Private Sub Emit(output$)
 		Dim tabBuffer$ = String.Empty
 		For cntr% = 1 To IndentLevel
@@ -24,45 +30,28 @@
 	End Sub
 
 	Private Sub Setup()
-		Emit("Imports System : Imports System.Collections.Generic
-Module Program
-	Class VariableDictionary
-		Inherits Dictionary(Of String, Object)
-
-		Default Public Shadows Property Subscript(key As String) As Object
-			Get
-				If ContainsKey(key) Then
-					Return Item(key)
-				Else
-					Return 0
-				End If
-			End Get
-			Set(val As Object)
-				Item(key) = val
-			End Set
-		End Property
-	End Class
-
+		Emit($"Imports System : Imports System.Collections.Generic : Imports System.Reflection
+Module {Filename}
 	Dim Register As Object
 	Dim Parent As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0
-	ReadOnly Variable As New VariableDictionary()
-	Dim Stack As New Stack(Of Object)
-	Function ReadStr() As String
-		Return Console.ReadLine()
+	ReadOnly Variable As New Dictionary(Of String, Object)
+	ReadOnly Functions As New Dictionary(Of String, Object)
+	ReadOnly Stack As New Stack(Of Object)
+	ReadOnly Assemblies As New List(Of Assembly) From {{ GetType({Filename}).Assembly }}
+	Function InvokeMethod(name$, ParamArray args As Object()) As Object
+		For Each asm In Assemblies
+			For Each type In asm.GetTypes()
+				Try
+					Dim AsmName$ = Asm.GetName().Name
+					Return Asm.GetType(AsmName & ""."" & type, True, True).GetMethod(name).Invoke(Nothing, args)
+				Catch ex As TypeLoadException
+				End Try
+			Next
+		Next
+		Throw New MissingMethodException(""Unable to find method "" & name)
 	End Function
-	Function ReadInt() As Integer
-		Dim input = ReadStr()
-		Try
-			Return Convert.ToInt32(input)
-		Catch ex As FormatException
-			Return 0
-		End Try
-	End Function
-	Sub Print(data As Object)
-		Console.WriteLine(data.ToString())
-	End Sub
 
 	Sub Main()
 
@@ -72,11 +61,12 @@ Module Program
 
 	Private Sub Teardown()
 		IndentLevel = 0
-		Emit("  'END USER GENERATED CODE
+		Emit(
+"		'END USER GENERATED CODE
 
-	Console.WriteLine(""Press any key to continue..."")
-	Console.ReadKey()
-End Sub
+		Console.WriteLine(""Press any key to continue..."")
+		Console.ReadKey()
+	End Sub
 End Module")
 	End Sub
 

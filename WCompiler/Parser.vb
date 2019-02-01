@@ -1,10 +1,14 @@
 ﻿Partial Module Parser
+	Public References As String
+
 	Private Property Lexer As Lexer
 	Private outputbuffer As List(Of String)
+	Private Filename As String
 
-	Function Parse(Lexer As Lexer) As String()
-		outputbuffer = New List(Of String)()
+	Function Parse(Lexer As Lexer, filename As String) As String()
+		outputbuffer = New List(Of String)
 		Parser.Lexer = Lexer
+		Parser.Filename = filename
 		Program()
 		Return outputbuffer.ToArray
 	End Function
@@ -19,6 +23,9 @@
 		If InLoop OrElse InCond Then IndentLevel += 1
 		Do Until Lexer.Current.Type = TokenType.EOF OrElse ((InLoop OrElse InCond) AndAlso Lexer.Current.Type = TokenType.RightSquare)
 			Select Case Lexer.Current.Type
+				Case TokenType.Escape
+					Break()
+
 				Case TokenType.If
 					[If]()
 
@@ -29,10 +36,14 @@
 					Declaration()
 
 				Case TokenType.Variable
-					Assignment()
+					Try
+						Assignment()
+					Catch ex As MissingFieldException
+						[Function]()
+					End Try
 
-				Case Else
-					Statement()
+				Case TokenType.Link, TokenType.Ref
+					Import()
 			End Select
 		Loop
 		If InLoop OrElse InCond Then IndentLevel -= 1
@@ -69,9 +80,15 @@
 		Emit("Register = Stack.Pop()")
 	End Sub
 
+	Private Sub Break()
+		Match(TokenType.Escape)
+		Emit("Exit Do")
+	End Sub
+
+	Private ReadOnly Varlist As New List(Of String)
 	Private Sub Declaration()
 		Match(TokenType.Item)
-		Dim varname = Match(TokenType.Variable)
+		Dim varname = Match(TokenType.Variable).ToLower()
 		If Lexer.Current.Type = TokenType.Equals Then
 			Match(TokenType.Equals)
 			Expr()
@@ -79,24 +96,31 @@
 		Else
 			Emit($"Variable(""{varname}"") = Nothing")
 		End If
+		Varlist.Add(varname)
 	End Sub
 
 	Private Sub Assignment()
-		Dim varname = Match(TokenType.Variable)
+		Dim varname = Match(TokenType.Variable, False).ToLower()
+		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
+		Lexer.Advance()
 		Match(TokenType.Equals)
 		Expr()
 		Emit($"Variable(""{varname}"") = Register")
 	End Sub
 
-	Private Sub Statement()
-		Dim token = Lexer.Current
-		Match(token.Type)
-		Select Case token.Type
-			Case TokenType.Type
-				Expr()
-				Emit("Print(Register)")
-			Case Else
-				Throw New ArgumentException($"Invalid statement {Lexer.Current.Value}.")
+	Private Sub Import()
+		Select Case Lexer.Current.Type
+			Case TokenType.Link
+				Match(TokenType.Link)
+				Throw New NotImplementedException("Statically linked libraries are currently unsupported.")
+			Case TokenType.Ref
+				Match(TokenType.Ref)
+				AddLib(Match(TokenType.StringLiteral))
 		End Select
+	End Sub
+
+	Private Sub [Function]()
+		Dim funcName = Match(TokenType.Variable)
+
 	End Sub
 End Module

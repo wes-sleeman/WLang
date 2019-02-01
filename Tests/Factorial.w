@@ -5,5 +5,5 @@ Repeat 15
 	[
 		x = x * #
 	]
-	Type x
+	Type(x)
 ]
