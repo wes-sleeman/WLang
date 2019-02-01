@@ -5,7 +5,7 @@ LoopBlock		= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assign
 Expr			= <Term> { (+ | -) <Term> }*
 Term			= <SignedFactor> { (* | / | %) <SignedFactor> }*
 SignedFactor	= { + | - } <Factor>
-Factor			= (<IntLiteral> | <Ident> | <FunctionCall> | (<Expr>))
+Factor			= (<IntLiteral> | <Ident>{.<Property>} | <FunctionCall> | (<Expr>))
 IntOp			= (> | >= | < | <= | =)
 
 BooleanExpr		= ( <BooleanExpr> <BoolOp> <BooleanExpr> | <Expr> <IntOp> <Expr> | {Not} <BooleanExpr> )

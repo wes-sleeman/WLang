@@ -157,29 +157,27 @@ End Module")
 
 	Private Sub CheckProperty()
 		Select Case Lexer.Current.Type
+			Case TokenType.LeftParen
+				Push()
+				Expr()
+				Emit("Register = (Stack.Pop())(Register)")
+
 			Case TokenType.Variable
-				If Varlist.Contains(Lexer.Current.Value.ToLower) Then
-					Emit($"Register = Register(Variables(""{Match(TokenType.Variable, False).ToLower}""))")
-				Else
-					Select Case Lexer.Current.Value.ToLower()
-						Case "num"
-							Emit("Try : Register = Register.Length : Catch : Register = Register.Count : End Try")
-						Case Else
-							Emit("Register = Register." & Lexer.Current.Value)
-					End Select
-				End If
-				Match(TokenType.Variable)
+				Select Case Lexer.Current.Value.ToLower()
+					Case "num"
+						Emit("Try : Register = Register.Length : Catch : Register = Register.Count : End Try")
+						Match(TokenType.Variable)
+					Case "pos"
+						Match(TokenType.Variable)
+						Push()
+						Expr()
+						Emit("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
+					Case Else
+						Emit("Register = Register." & Match(TokenType.Variable))
+				End Select
 
 			Case TokenType.IntLiteral
 				Emit($"Register = Register({Match(TokenType.IntLiteral)})")
-
-			Case TokenType.Dollar
-				Match(TokenType.Dollar)
-				Emit("Register = Register(Parent)")
-
-			Case TokenType.HashSign
-				Match(TokenType.HashSign)
-				Emit("Register = Register(Counter)")
 
 			Case Else
 				Throw New ArgumentException($"Got unexpected {Lexer.Current.Type} after dot.")

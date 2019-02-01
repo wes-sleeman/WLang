@@ -1,6 +1,6 @@
 REF "Runtime.IO"
 
-Repeat Args.Num
+Repeat Args.Pos('end')
 [
-	Type(Args.#)
+	Type(Args.(#))
 ]

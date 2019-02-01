@@ -59,10 +59,11 @@
 
 			Case "<"c, ">"c
 				If Code(Index + 1) = "="c Then
-					Index += 1
-					Return New Symbol(Code(Index - 1) & "=")
+					Index += 2
+					Return New Symbol(Code(Index - 2) & "=")
 				Else
-					Return New Symbol(Code(Index))
+					Index += 1
+					Return New Symbol(Code(Index - 1))
 				End If
 
 			Case Else
