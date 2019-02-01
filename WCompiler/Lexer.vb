@@ -32,9 +32,15 @@
 			Case "0"c To "9"c
 				Return New IntLiteral(TakeWhileLike("#"))
 
-			Case """"c, "'"c
+			Case """"c
 				Index += 1
 				Dim retval As New StringLiteral(TakeWhileLike("[!""]"))
+				Index += 1
+				Return retval
+
+			Case "'"c
+				Index += 1
+				Dim retval As New StringLiteral(TakeWhileLike("[!']"))
 				Index += 1
 				Return retval
 

@@ -69,6 +69,8 @@
 			Value = input
 
 			Select Case input
+				Case "."
+					Type = TokenType.Dot
 				Case "?"
 					Type = TokenType.QuestionMark
 				Case "{"
@@ -92,6 +94,8 @@
 					Type = TokenType.Asterisk
 				Case "/"
 					Type = TokenType.Slash
+				Case "\"
+					Type = TokenType.BackSlash
 				Case "%"
 					Type = TokenType.Percent
 				Case "="
@@ -167,12 +171,14 @@
 		RightSquare
 		LeftCurly
 		RightCurly
+		Dot
 
 		'Operators
 		Cross
 		Hyphen
 		Asterisk
 		Slash
+		BackSlash
 		Percent
 		[And]
 		[Or]

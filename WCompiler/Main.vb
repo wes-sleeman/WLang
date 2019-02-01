@@ -7,7 +7,7 @@ Module Main
 		Console.WriteLine("W Compiler Version 1.0.0" & vbCrLf)
 
 #If DEBUG Then
-		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
+		If args.Length = 0 Then args = {"/norun"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
 #End If
 
 		Dim cross = False, norun = False, [lib] = False
@@ -61,7 +61,10 @@ Module Main
 						If String.IsNullOrWhiteSpace(stdout) Then
 							If Not norun Then
 								Console.WriteLine("Running…")
+								Dim curDir = Environment.CurrentDirectory
+								Environment.CurrentDirectory &= "..\..\..\..\Tests"
 								Process.Start(outpath)
+								Environment.CurrentDirectory = curDir
 							End If
 						Else
 							Console.WriteLine(stdout)

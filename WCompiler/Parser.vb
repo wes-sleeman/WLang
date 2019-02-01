@@ -39,7 +39,7 @@
 					Try
 						Assignment()
 					Catch ex As MissingFieldException
-						[Function]()
+						FunctionCall()
 					End Try
 
 				Case TokenType.Link, TokenType.Ref
@@ -69,8 +69,8 @@
 		Match(TokenType.LeftSquare)
 		Emit("Stack.Push(Register)")
 		Emit("Stack.Push(LoopEnd) : LoopEnd = Register")
-		Emit("Stack.Push(Counter) : Counter = 1")
-		Emit(If(inf, "Do", $"Do While Counter <= LoopEnd"))
+		Emit("Stack.Push(Counter) : Counter = 0")
+		Emit(If(inf, "Do", $"Do While Counter < LoopEnd"))
 		Block(InLoop:=True)
 		Match(TokenType.RightSquare)
 		Emit(vbTab & "Counter += 1")
@@ -85,7 +85,7 @@
 		Emit("Exit Do")
 	End Sub
 
-	Private ReadOnly Varlist As New List(Of String)
+	Private ReadOnly Varlist As New List(Of String) From {"args"}
 	Private Sub Declaration()
 		Match(TokenType.Item)
 		Dim varname = Match(TokenType.Variable).ToLower()
@@ -119,34 +119,23 @@
 		End Select
 	End Sub
 
-	Private Sub [Function]()
-		Dim funcName = Match(TokenType.Variable)
+	Private Sub FunctionCall()
+		Dim funcName$ = Match(TokenType.Variable)
 		Match(TokenType.LeftParen)
+		Emit("Stack.Push(FuncArgs.ToList())")
 		Dim args As New List(Of String)
 		Do
 			Select Case Lexer.Current.Type
 				Case TokenType.RightParen
 					Exit Do
 
-				Case TokenType.IntLiteral
-					args.Add(Match(TokenType.IntLiteral))
-
-				Case TokenType.StringLiteral
-					args.Add($"""{Match(TokenType.StringLiteral)}""")
-
-				Case TokenType.Variable
-					args.Add($"Variable(""{Match(TokenType.Variable)}"")")
-
-				Case TokenType.Dollar
-					Match(TokenType.Dollar)
-					args.Add("Parent")
-
-				Case TokenType.HashSign
-					Match(TokenType.HashSign)
-					args.Add("Counter")
+				Case Else
+					Expr()
+					Emit("FuncArgs.Add(Register)")
 			End Select
 		Loop
 		Match(TokenType.RightParen)
-		Emit($"InvokeMethod(""{funcName}"", {{ {args.Aggregate(Function(aggr$, item$) aggr & ", " & item)} }})")
+		Emit($"Register = If(InvokeMethod(""{funcName}"", FuncArgs), Register)")
+		Emit("FuncArgs = Stack.Pop()")
 	End Sub
 End Module

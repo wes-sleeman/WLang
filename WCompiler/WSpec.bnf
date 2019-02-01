@@ -1,11 +1,11 @@
 ﻿Program			= {<Block>}
-Block			= { <Function> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> }*
-LoopBlock		= { <Function> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Break> }*
+Block			= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> }*
+LoopBlock		= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Break> }*
 
 Expr			= <Term> { (+ | -) <Term> }*
 Term			= <SignedFactor> { (* | / | %) <SignedFactor> }*
 SignedFactor	= { + | - } <Factor>
-Factor			= (<IntLiteral> | <Ident> | <Function> | (<Expr>))
+Factor			= (<IntLiteral> | <Ident> | <FunctionCall> | (<Expr>))
 IntOp			= (> | >= | < | <= | =)
 
 BooleanExpr		= ( <BooleanExpr> <BoolOp> <BooleanExpr> | <Expr> <IntOp> <Expr> | {Not} <BooleanExpr> )
@@ -23,5 +23,5 @@ Reference		= Ref <Ident>
 Declaration		= Item <Ident> { = <Expr> }
 Assignment		= <Ident> = <Expr>
 
-Function		= <Ident>({<Params>})
+FunctionCall	= <Ident>({<Params>})
 Params			= { <Expr> | <Expr>, <Params> }

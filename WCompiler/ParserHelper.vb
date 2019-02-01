@@ -1,7 +1,7 @@
 ﻿Partial Module Parser
 	Private Function Match(Type As TokenType, Optional Advance As Boolean = True) As String
 		If Not Lexer.Current.Type = Type Then
-			Throw New ArgumentException($"Error: Expected {Type} but received {Lexer.Current.Type}.")
+			Throw New ArgumentException($"Expected {Type} but received {Lexer.Current.Type}.")
 		End If
 
 		Dim retval$ = Lexer.Current.Value
@@ -31,21 +31,22 @@
 
 	Private Sub Setup()
 		Emit($"Imports System : Imports System.Collections.Generic : Imports System.Reflection
-Module {Filename}
+Public Module {Filename}
 	Dim Register As Object
 	Dim Parent As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0
+	Dim FuncArgs As New List(Of Object)
 	ReadOnly Variable As New Dictionary(Of String, Object)
 	ReadOnly Functions As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Assemblies As New List(Of Assembly) From {{ GetType({Filename}).Assembly }}
-	Function InvokeMethod(name$, ParamArray args As Object()) As Object
+	Function InvokeMethod(name$, args As List(Of Object)) As Object
 		For Each asm In Assemblies
+			Dim AsmName$ = Asm.GetName().Name, ArgArr = args.ToArray()
 			For Each type In asm.GetTypes()
 				Try
-					Dim AsmName$ = Asm.GetName().Name
-					Return Asm.GetType(AsmName & ""."" & type.Name, True, True).GetMethod(name).Invoke(Nothing, args)
+					Return Asm.GetType(AsmName & ""."" & type.Name, True, True).GetMethod(name).Invoke(Nothing, ArgArr)
 				Catch ex As TypeLoadException : Catch ex As NullReferenceException
 				End Try
 			Next
@@ -53,7 +54,8 @@ Module {Filename}
 		Throw New MissingMethodException(""Unable to find method "" & name)
 	End Function
 
-	Sub Main()
+	Public Sub Main(args As String())
+		Variable(""args"") = args
 
 		'BEGIN USER GENERATED CODE")
 		IndentLevel = 2
@@ -93,7 +95,7 @@ End Module")
 	Private Sub Term()
 		SignedFactor()
 
-		While Lexer.Current.Value Like "[*/%]"
+		While Lexer.Current.Value Like "[*/%\]"
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -125,7 +127,13 @@ End Module")
 				Emit($"Register = ""{Match(TokenType.StringLiteral)}""")
 
 			Case TokenType.Variable
-				Emit($"Register = Variable(""{Match(TokenType.Variable)}"")")
+				Dim name$ = Match(TokenType.Variable, False)
+				If Varlist.Contains(name.ToLower) Then
+					Lexer.Advance()
+					Emit($"Register = Variable(""{name.ToLower}"")")
+				Else
+					FunctionCall()
+				End If
 
 			Case TokenType.Dollar
 				Match(TokenType.Dollar)
@@ -139,6 +147,42 @@ End Module")
 				Match(TokenType.LeftParen)
 				Expr()
 				Match(TokenType.RightParen)
+		End Select
+
+		If Lexer.Current.Type = TokenType.Dot Then
+			Match(TokenType.Dot)
+			CheckProperty()
+		End If
+	End Sub
+
+	Private Sub CheckProperty()
+		Select Case Lexer.Current.Type
+			Case TokenType.Variable
+				If Varlist.Contains(Lexer.Current.Value.ToLower) Then
+					Emit($"Register = Register(Variables(""{Match(TokenType.Variable, False).ToLower}""))")
+				Else
+					Select Case Lexer.Current.Value.ToLower()
+						Case "num"
+							Emit("Try : Register = Register.Length : Catch : Register = Register.Count : End Try")
+						Case Else
+							Emit("Register = Register." & Lexer.Current.Value)
+					End Select
+				End If
+				Match(TokenType.Variable)
+
+			Case TokenType.IntLiteral
+				Emit($"Register = Register({Match(TokenType.IntLiteral)})")
+
+			Case TokenType.Dollar
+				Match(TokenType.Dollar)
+				Emit("Register = Register(Parent)")
+
+			Case TokenType.HashSign
+				Match(TokenType.HashSign)
+				Emit("Register = Register(Counter)")
+
+			Case Else
+				Throw New ArgumentException($"Got unexpected {Lexer.Current.Type} after dot.")
 		End Select
 	End Sub
 
@@ -155,7 +199,6 @@ End Module")
 					[Boolean]()
 				Catch ex As ArgumentException
 					Expr()
-					Emit($"Register = CBool(Register)")
 				End Try
 			Catch ex As ArgumentException
 				BooleanExpr()
@@ -191,6 +234,8 @@ End Module")
 			Case TokenType.Asterisk
 				op = "*"
 			Case TokenType.Slash
+				op = "/"
+			Case TokenType.BackSlash
 				op = "\"
 			Case TokenType.Percent
 				op = "Mod"
@@ -204,6 +249,8 @@ End Module")
 				op = ">"
 			Case TokenType.RightAngleEquals
 				op = ">="
+			Case TokenType.Equals
+				op = "="
 
 			'Boolean -> Boolean
 			Case TokenType.Ampersand
