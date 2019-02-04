@@ -88,8 +88,16 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(SolutionDir)Runtime\IO\bin\Debug\Runtime.IO.dll $(OutDir)
-copy $(SolutionDir)Runtime\Math\bin\Debug\Runtime.Math.dll $(OutDir)
-copy $(SolutionDir)Runtime\Util\bin\Debug\Runtime.Util.dll $(OutDir)</PostBuildEvent>
+    <PostBuildEvent>del $(TargetDir)*.dll
+
+copy $(SolutionDir)Runtime\IO\$(OutDir)Runtime.IO.dll $(TargetDir)
+copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
+copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
+
+ilmerge /wildcards /out:Runtime.dll $(TargetDir)*.dll
+copy Runtime.dll $(SolutionDir)Runtime
+del $(TargetDir)*.dll
+del $(TargetDir)*.pdb
+del $(TargetDir)*.xml</PostBuildEvent>
   </PropertyGroup>
 </Project>
