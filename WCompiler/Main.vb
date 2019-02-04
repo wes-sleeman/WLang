@@ -4,7 +4,7 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.1.0" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.2.0" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
