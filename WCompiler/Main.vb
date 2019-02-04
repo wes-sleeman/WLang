@@ -4,10 +4,10 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.1.0" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.2.0" & vbCrLf)
 
 #If DEBUG Then
-		If args.Length = 0 Then args = {"/norun"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
+		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
 #End If
 
 		Dim cross = False, norun = False, [lib] = False
@@ -32,6 +32,7 @@ Module Main
 				Continue For
 			End If
 			Try
+				filename = Path.GetFullPath(filename)
 				Console.WriteLine($"Building lexer for file <{filename}>.")
 				Dim lex As New Lexer(File.ReadAllText(filename))
 
@@ -39,10 +40,11 @@ Module Main
 				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename))
 
 				Dim emitpath$ = Path.ChangeExtension(filename, ".vb")
-				Console.WriteLine("Emitting.")
+				Console.WriteLine("Emitting")
 				File.WriteAllLines(emitpath, code)
 
 				If Not cross Then
+					If Not File.Exists(Path.Combine(Path.GetDirectoryName(emitpath), "Runtime.dll")) Then File.Copy(GetRuntimePath(), Path.Combine(Path.GetDirectoryName(emitpath), "Runtime.dll"))
 					If [lib] Then
 						Dim outpath$ = Path.ChangeExtension(filename, ".dll")
 						Console.WriteLine($"Compiling to {outpath}.")
@@ -62,7 +64,9 @@ Module Main
 							If Not norun Then
 								Console.WriteLine("Running…")
 								Dim curDir = Environment.CurrentDirectory
+#If DEBUG Then
 								Environment.CurrentDirectory &= "..\..\..\..\Tests"
+#End If
 								Process.Start(outpath)
 								Environment.CurrentDirectory = curDir
 							End If
@@ -85,11 +89,26 @@ Module Main
 		Console.ReadKey()
 	End Sub
 
+	Private Function GetRuntimePath() As String
+		Dim Syspath$() = Environment.GetEnvironmentVariable("PATH").Split({";"c}, StringSplitOptions.RemoveEmptyEntries)
+
+		Dim retval$ = (From s In Syspath
+					   Where Directory.Exists(s) AndAlso Directory.EnumerateFiles(s).Contains(Path.Combine(s, "Runtime.dll"))
+					   Select Path.Combine(s, "Runtime.dll")).FirstOrDefault()
+		If Not File.Exists(retval) Then
+			Console.WriteLine("Runtime.dll not found. Have you added the WCompiler to your PATH?")
+			Console.WriteLine("Press any key to continue…")
+			Console.ReadKey()
+			End
+		End If
+		Return retval
+	End Function
+
 	Private Function GetVBCPath() As String
 		Dim Syspath$() = Environment.GetEnvironmentVariable("PATH").Split({";"c}, StringSplitOptions.RemoveEmptyEntries)
 
 		Dim retval$ = (From s In Syspath
-					   Where Directory.EnumerateFiles(s).Contains(Path.Combine(s, "vbc.exe"))
+					   Where Directory.Exists(s) AndAlso Directory.EnumerateFiles(s).Contains(Path.Combine(s, "vbc.exe"))
 					   Select Path.Combine(s, "vbc.exe")).FirstOrDefault()
 		If Not File.Exists(retval) Then
 			Console.WriteLine("vbc.exe not found. Have you added C:\Windows\Microsoft.NET\Framework[64]\<version>\ to your PATH?")

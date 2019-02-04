@@ -11,15 +11,23 @@
 
 	Private IndentLevel% = 0
 
-	Private Sub AddLib(filepath$)
-		If filepath.ToLower.StartsWith("runtime.") Then
-			Emit($"Assemblies.Add(GetType(Runtime.{filepath.Substring(filepath.IndexOf("."c) + 1)}).Assembly)")
+	Private Sub AddLib(filepath$, Optional typename$ = Nothing)
+		If filepath.ToLower = "runtime" Then
+			If typename Is Nothing Then
+				Emit("Types.AddRange(Assembly.Load(""Runtime"").GetExportedTypes())")
+			Else
+				Emit($"Types.Add(GetType(Runtime.{typename}))")
+			End If
 		Else
-			filepath = IO.Path.GetFullPath(filepath & ".dll")
+				filepath = IO.Path.GetFullPath(filepath & ".dll")
 			References &= $",""{filepath}"""
-			Emit($"Assemblies.Add(Assembly.LoadFile({filepath}))")
+			If typename Is Nothing Then
+				Emit($"Types.AddRange(Assembly.LoadFile({filepath}).GetExportedTypes())")
+			Else
+				Emit($"Types.AddRange(Assembly.LoadFile({filepath}).GetType({typename}, False, True))")
+			End If
 		End If
-	End Sub
+    End Sub
 
 	Private Sub Emit(output$)
 		Dim tabBuffer$ = String.Empty
@@ -40,22 +48,21 @@ Public Module {Filename}
 	ReadOnly Variable As New Dictionary(Of String, Object)
 	ReadOnly Functions As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
-	ReadOnly Assemblies As New List(Of Assembly) From {{ GetType({Filename}).Assembly }}
+	ReadOnly Types As New List(Of Type)
 	Function InvokeMethod(name$, args As List(Of Object)) As Object
-		For Each asm In Assemblies
-			Dim AsmName$ = Asm.GetName().Name, ArgArr = args.ToArray()
-			For Each type In asm.GetTypes()
-				Try
-					Return Asm.GetType(AsmName & ""."" & type.Name, True, True).GetMethod(name).Invoke(Nothing, ArgArr)
-				Catch ex As TypeLoadException : Catch ex As NullReferenceException
-				End Try
-			Next
+		Dim ArgArr = args.ToArray()
+		For Each type In Types
+			Try
+				Return type.GetMethod(name).Invoke(Nothing, ArgArr)
+			Catch ex As TypeLoadException : Catch ex As NullReferenceException
+			End Try
 		Next
 		Throw New MissingMethodException(""Unable to find method "" & name)
 	End Function
 
 	Public Sub Main(args As String())
 		Variable(""args"") = args
+		Types.AddRange(GetType({Filename}).Assembly.GetTypes())
 
 		'BEGIN USER GENERATED CODE")
 		IndentLevel = 2

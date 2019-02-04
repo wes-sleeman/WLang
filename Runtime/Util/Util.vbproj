@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{74184619-B44D-4A38-8F3F-263EBA5A0FE0}</ProjectGuid>
+    <ProjectGuid>{89AB8F73-BB38-4B22-AA89-5D782C20C6AA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Runtime</RootNamespace>
-    <AssemblyName>Runtime</AssemblyName>
+    <AssemblyName>Runtime.Util</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -19,7 +19,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>Runtime.xml</DocumentationFile>
+    <DocumentationFile>Runtime.Util.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -28,7 +28,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>Runtime.xml</DocumentationFile>
+    <DocumentationFile>Runtime.Util.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -64,8 +64,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IO.vb" />
-    <Compile Include="Math.vb" />
+    <Compile Include="Util.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -102,8 +101,4 @@
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy Runtime.dll ..\..\..\WCompiler\bin\Debug
-copy Runtime.dll ..\..\..\Tests</PostBuildEvent>
-  </PropertyGroup>
 </Project>

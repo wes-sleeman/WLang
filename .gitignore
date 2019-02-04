@@ -340,3 +340,10 @@ ASALocalRun/
 # BeatPulse healthcheck temp database 
 healthchecksdb
 *.exe
+
+
+#################################################################
+# Custom
+Tests/*.vb
+Tests/*.exe
+Tests/*.dll
