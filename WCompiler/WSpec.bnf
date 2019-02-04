@@ -12,7 +12,7 @@ BooleanExpr		= ( <BooleanExpr> <BoolOp> <BooleanExpr> | <Expr> <IntOp> <Expr> | 
 Boolean			= ( True | False )
 BoolOp			= ( And / Or / & / | )
 
-If				= If <BooleanExpr> [ {<Block>} ]
+If				= If <BooleanExpr> [ {<Block>} ] {[ {<Block>} ]}
 Loop			= Repeat {<Expr>} [ {<LoopBlock>} ]
 Break			= Escape
 

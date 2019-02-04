@@ -56,6 +56,12 @@
 		Emit("If Register Then")
 		Block(InCond:=True)
 		Match(TokenType.RightSquare)
+		If Lexer.Current.Type = TokenType.LeftSquare Then
+			Match(TokenType.LeftSquare)
+			Emit("Else")
+			Block(InCond:=True)
+			Match(TokenType.RightSquare)
+		End If
 		Emit("End If")
 	End Sub
 

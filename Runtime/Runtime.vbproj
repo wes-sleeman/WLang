@@ -103,7 +103,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy Runtime.dll ..\..\..\WCompiler\bin\Debug
+    <PostBuildEvent>copy Runtime.dll ..\..\..\WCompiler\bin\Release
+copy Runtime.dll ..\..\..\WCompiler\bin\Debug
 copy Runtime.dll ..\..\..\Tests</PostBuildEvent>
   </PropertyGroup>
 </Project>
