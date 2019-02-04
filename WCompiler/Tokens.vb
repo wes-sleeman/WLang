@@ -123,6 +123,8 @@
 					Type = TokenType.Ampersand
 				Case "|"
 					Type = TokenType.Pipe
+				Case ","
+					Type = TokenType.Comma
 
 				Case Else
 					Throw New ArgumentException($"{input} is not a valid symbol.")
@@ -199,6 +201,7 @@
 		Caret
 		Ampersand
 		Pipe
+		Comma
 		EOF
 
 		'Control flow
@@ -210,6 +213,6 @@
 		'Declaration
 		Item
 		Ref
-		Link
+		From
 	End Enum
 End Module

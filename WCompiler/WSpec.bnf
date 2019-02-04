@@ -16,9 +16,8 @@ If				= If <BooleanExpr> [ {<Block>} ] {[ {<Block>} ]}
 Loop			= Repeat {<Expr>} [ {<LoopBlock>} ]
 Break			= Escape
 
-Import			= { <Link> | <Reference> }
-Link			= Link <Ident>
-Reference		= Ref <Ident>
+Import			= { <Reference> }
+Reference		= Ref <Ident> { From <FilePath> }
 
 Declaration		= Item <Ident> { = <Expr> }
 Assignment		= <Ident> = <Expr>

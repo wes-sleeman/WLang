@@ -42,7 +42,7 @@
 						FunctionCall()
 					End Try
 
-				Case TokenType.Link, TokenType.Ref
+				Case TokenType.Ref
 					Import()
 			End Select
 		Loop
@@ -115,14 +115,23 @@
 	End Sub
 
 	Private Sub Import()
-		Select Case Lexer.Current.Type
-			Case TokenType.Link
-				Match(TokenType.Link)
-				Throw New NotImplementedException("Statically linked libraries are currently unsupported.")
-			Case TokenType.Ref
-				Match(TokenType.Ref)
-				AddLib(Match(TokenType.StringLiteral))
-		End Select
+		Match(TokenType.Ref)
+		Dim filenames As New List(Of String) From {Match(TokenType.StringLiteral)}
+		While Lexer.Current.Type = TokenType.Comma
+			Match(TokenType.Comma)
+			filenames.Add(Match(TokenType.StringLiteral))
+		End While
+		If Lexer.Current.Type = TokenType.From Then
+			Match(TokenType.From)
+			Dim path$ = Match(TokenType.StringLiteral)
+			For Each type In filenames
+				AddLib(path, type)
+			Next
+		Else
+			For Each Filename In filenames
+				AddLib(Filename)
+			Next
+		End If
 	End Sub
 
 	Private Sub FunctionCall()

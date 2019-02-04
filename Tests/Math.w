@@ -1,5 +1,4 @@
-REF "Runtime.IO"
-REF "Runtime.Math"
+REF 'IO', 'Math' FROM 'Runtime'
 
 {
 	Tests Runtime.Math functions.

@@ -94,7 +94,7 @@ copy $(SolutionDir)Runtime\IO\$(OutDir)Runtime.IO.dll $(TargetDir)
 copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
 copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
 
-ilmerge /wildcards /out:Runtime.dll $(TargetDir)*.dll
+ilmerge /wildcards /ndebug /out:Runtime.dll $(TargetDir)*.dll
 copy Runtime.dll $(SolutionDir)Runtime
 del $(TargetDir)*.dll
 del $(TargetDir)*.pdb

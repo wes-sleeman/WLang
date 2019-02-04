@@ -1,4 +1,4 @@
-REF "Runtime.IO"
+REF 'IO' FROM 'Runtime'
 
 {
 	Standard test algorithm
