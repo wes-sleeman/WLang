@@ -4,7 +4,7 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.2.0" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.2.1" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
@@ -44,7 +44,7 @@ Module Main
 				File.WriteAllLines(emitpath, code)
 
 				If Not cross Then
-					If Not File.Exists(Path.Combine(Path.GetDirectoryName(emitpath), "Runtime.dll")) Then File.Copy(GetRuntimePath(), Path.Combine(Path.GetDirectoryName(emitpath), "Runtime.dll"))
+					CopyRuntime(emitpath)
 					If [lib] Then
 						Dim outpath$ = Path.ChangeExtension(filename, ".dll")
 						Console.WriteLine($"Compiling to {outpath}.")
@@ -118,4 +118,14 @@ Module Main
 		End If
 		Return retval
 	End Function
+
+	Dim copyOnceFlag = False
+	Private Sub CopyRuntime(emitpath$)
+		If Not copyOnceFlag Then
+			Dim rPath$ = GetRuntimePath(), rTarget$ = Path.Combine(Path.GetDirectoryName(emitpath), "Runtime.dll")
+			If File.Exists(rPath) Then File.Delete(rTarget)
+			File.Copy(rPath, rTarget)
+			copyOnceFlag = True
+		End If
+	End Sub
 End Module

@@ -1,4 +1,4 @@
-REF 'IO' FROM 'Runtime'
+REF 'IO', 'Util' FROM 'Runtime'
 
 {
 	Prints out all args.
@@ -6,17 +6,15 @@ REF 'IO' FROM 'Runtime'
 }
 
 ? Check number of arguments
-If Args.Num > 0
+If Args.Num <= 0
 [
-	? For the number of arguments
-	Repeat Args.Num
-	[
-		? Print the argument at # (iteration counter)
-		Type(Args.(#))
-	]
-]
-? Else
-[
-	? Print a failure message
 	Type("No arguments found!")
+	Exit(1)
+]
+
+? For the number of arguments
+Repeat Args.Num
+[
+	? Print the argument at # (iteration counter)
+	Type(Args.(#))
 ]
