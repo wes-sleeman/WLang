@@ -4,11 +4,21 @@
 	Private Property Lexer As Lexer
 	Private outputbuffer As List(Of String)
 	Private Filename As String
+	Private [Lib] As Boolean
 
-	Function Parse(Lexer As Lexer, filename As String) As String()
+	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean) As String()
+		References = String.Empty
 		outputbuffer = New List(Of String)
 		Parser.Lexer = Lexer
+
+		While filename.Contains(".") OrElse filename(0) Like "#"
+			filename = filename.Trim()
+			If filename.Contains("."c) Then filename = filename.Substring(0, filename.IndexOf("."c))
+			If filename(0) Like "#" Then filename = filename.Substring(1)
+		End While
+
 		Parser.Filename = filename
+		[Lib] = isLib
 		Program()
 		Return outputbuffer.ToArray
 	End Function
@@ -136,7 +146,13 @@
 
 	Private Sub FunctionCall()
 		Dim funcName$ = Match(TokenType.Variable)
-		Match(TokenType.LeftParen)
+		Try
+			Match(TokenType.LeftParen)
+		Catch ex As ArgumentException
+			If Lexer.Current.Type = TokenType.Equals Then
+				Throw New ArgumentException($"Assignment to undeclared variable '{funcName}' on line {Lexer.Line}.")
+			End If
+		End Try
 		Emit("Stack.Push(FuncArgs.ToList())")
 		Dim args As New List(Of String)
 		Do

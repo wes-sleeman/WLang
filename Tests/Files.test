@@ -6,4 +6,4 @@ REF 'IO' FROM 'Runtime'
 		the test has succeeded.
 }
 
-Type(FileContents("Files.w"))
+Type(FileContents("Files.test"))

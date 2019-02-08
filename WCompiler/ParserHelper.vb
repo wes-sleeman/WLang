@@ -1,7 +1,7 @@
 ﻿Partial Module Parser
 	Private Function Match(Type As TokenType, Optional Advance As Boolean = True) As String
 		If Not Lexer.Current.Type = Type Then
-			Throw New ArgumentException($"Expected {Type} but received {Lexer.Current.Type}.")
+			Throw New ArgumentException($"Expected {Type} but received {Lexer.Current.Type} on line {Lexer.Line}.")
 		End If
 
 		Dim retval$ = Lexer.Current.Value
@@ -19,12 +19,12 @@
 				Emit($"Types.Add(GetType(Runtime.{typename}))")
 			End If
 		Else
-				filepath = IO.Path.GetFullPath(filepath & ".dll")
+			filepath = IO.Path.GetFullPath(If(IO.File.Exists(filepath & ".dll"), filepath & ".dll", filepath))
 			References &= $",""{filepath}"""
 			If typename Is Nothing Then
-				Emit($"Types.AddRange(Assembly.LoadFile({filepath}).GetExportedTypes())")
+				Emit($"Types.AddRange(Assembly.LoadFile(""{filepath}"").GetExportedTypes())")
 			Else
-				Emit($"Types.AddRange(Assembly.LoadFile({filepath}).GetType({typename}, False, True))")
+				Emit($"Types.AddRange(Assembly.LoadFile(""{filepath}"").GetType(""{typename}"", False, True))")
 			End If
 		End If
     End Sub
@@ -60,7 +60,7 @@ Public Module {Filename}
 		Throw New MissingMethodException(""Unable to find method "" & name)
 	End Function
 
-	Public Sub Main(args As String())
+	Public Sub {If([Lib], $"{Filename}(Optional args As Object() = Nothing)", "Main(args As String())")}
 		Variable(""args"") = args
 		Types.AddRange(GetType({Filename}).Assembly.GetTypes())
 
@@ -80,6 +80,30 @@ End Module")
 	End Sub
 
 	Private Sub Expr()
+		CompExpr()
+
+		While Lexer.Current.Value Like "[|&]" OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
+			Push()
+			Dim op = Lexer.Current.Type
+			Match(op)
+			CompExpr()
+			Pop(op)
+		End While
+	End Sub
+
+	Private Sub CompExpr()
+		MathExpr()
+
+		While Lexer.Current.Value Like "[<>]=" OrElse Lexer.Current.Value Like "[<>=]"
+			Push()
+			Dim op = Lexer.Current.Type
+			Match(op)
+			MathExpr()
+			Pop(op)
+		End While
+	End Sub
+
+	Private Sub MathExpr()
 		Term()
 
 		While Lexer.Current.Value Like "[+-]"
@@ -87,14 +111,6 @@ End Module")
 			Dim op = Lexer.Current.Type
 			Match(op)
 			Term()
-			Pop(op)
-		End While
-
-		While Lexer.Current.Value Like "[<>]=" OrElse Lexer.Current.Value Like "[<>=]"
-			Push()
-			Dim op = Lexer.Current.Type
-			Match(op)
-			Expr()
 			Pop(op)
 		End While
 	End Sub

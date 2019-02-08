@@ -4,13 +4,17 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.2.1" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.2.2" & vbCrLf)
 
 #If DEBUG Then
-		If args.Length = 0 Then args = {""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".w"))).ToArray()
+		If args.Length = 0 Then
+			Main({"/lib", "/noconf"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".testlib"))).ToArray())
+			Main({"/norun"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".test"))).ToArray())
+			Return
+		End If
 #End If
 
-		Dim cross = False, norun = False, [lib] = False
+		Dim cross = False, norun = False, [lib] = False, conf = True
 		Console.WriteLine("Reading input file(s).")
 		For Each filename In args
 			If String.IsNullOrWhiteSpace(filename) Then Continue For
@@ -25,19 +29,26 @@ Module Main
 					Case "/lib"
 						[lib] = True
 						Console.WriteLine("Building to library")
+					Case "/noconf", "/quit"
+						conf = False
+						Console.WriteLine("Automatically quitting after compilation")
 					Case Else
 						Console.WriteLine("Invalid program flag " & filename)
 						Return
 				End Select
 				Continue For
 			End If
+#If DEBUG Then
+			Dim curDir = Environment.CurrentDirectory
+			Environment.CurrentDirectory &= "..\..\..\..\Tests"
+#End If
 			Try
 				filename = Path.GetFullPath(filename)
 				Console.WriteLine($"Building lexer for file <{filename}>.")
 				Dim lex As New Lexer(File.ReadAllText(filename))
 
 				Console.WriteLine("Parsing")
-				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename))
+				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename), [lib])
 
 				Dim emitpath$ = Path.ChangeExtension(filename, ".vb")
 				Console.WriteLine("Emitting")
@@ -63,12 +74,7 @@ Module Main
 						If String.IsNullOrWhiteSpace(stdout) Then
 							If Not norun Then
 								Console.WriteLine("Running…")
-								Dim curDir = Environment.CurrentDirectory
-#If DEBUG Then
-								Environment.CurrentDirectory &= "..\..\..\..\Tests"
-#End If
 								Process.Start(outpath)
-								Environment.CurrentDirectory = curDir
 							End If
 						Else
 							Console.WriteLine(stdout)
@@ -82,11 +88,17 @@ Module Main
 			Catch ex As ArgumentException
 				Console.WriteLine($"Error: {ex.Message}")
 				Continue For
+#If DEBUG Then
+			Finally
+				Environment.CurrentDirectory = curDir
+#End If
 			End Try
 		Next
 
-		Console.WriteLine($"Done!{vbCrLf}Press any key to continue…")
-		Console.ReadKey()
+		If conf Then
+			Console.WriteLine($"Done!{vbCrLf}Press any key to continue…")
+			Console.ReadKey()
+		End If
 	End Sub
 
 	Private Function GetRuntimePath() As String
