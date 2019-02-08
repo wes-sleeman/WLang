@@ -31,7 +31,7 @@
 
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
 		If InLoop OrElse InCond Then IndentLevel += 1
-		Do Until Lexer.Current.Type = TokenType.EOF OrElse ((InLoop OrElse InCond) AndAlso Lexer.Current.Type = TokenType.RightSquare)
+		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond) AndAlso Lexer.Current.Type = TokenType._RightSquare)
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Break()
@@ -45,7 +45,7 @@
 				Case TokenType.Item
 					Declaration()
 
-				Case TokenType.Variable
+				Case TokenType._Variable
 					Try
 						Assignment()
 					Catch ex As MissingFieldException
@@ -62,15 +62,15 @@
 	Private Sub [If]()
 		Match(TokenType.If)
 		BooleanExpr()
-		Match(TokenType.LeftSquare)
+		Match(TokenType._LeftSquare)
 		Emit("If Register Then")
 		Block(InCond:=True)
-		Match(TokenType.RightSquare)
-		If Lexer.Current.Type = TokenType.LeftSquare Then
-			Match(TokenType.LeftSquare)
+		Match(TokenType._RightSquare)
+		If Lexer.Current.Type = TokenType._LeftSquare Then
+			Match(TokenType._LeftSquare)
 			Emit("Else")
 			Block(InCond:=True)
-			Match(TokenType.RightSquare)
+			Match(TokenType._RightSquare)
 		End If
 		Emit("End If")
 	End Sub
@@ -78,17 +78,17 @@
 	Private Sub [Loop]()
 		Match(TokenType.Repeat)
 		Dim inf As Boolean = True
-		If Lexer.Current.Type <> TokenType.LeftSquare Then
+		If Lexer.Current.Type <> TokenType._LeftSquare Then
 			Expr()
 			inf = False
 		End If
-		Match(TokenType.LeftSquare)
+		Match(TokenType._LeftSquare)
 		Emit("Stack.Push(Register)")
 		Emit("Stack.Push(LoopEnd) : LoopEnd = Register")
 		Emit("Stack.Push(Counter) : Counter = 0")
 		Emit(If(inf, "Do", $"Do While Counter < LoopEnd"))
 		Block(InLoop:=True)
-		Match(TokenType.RightSquare)
+		Match(TokenType._RightSquare)
 		Emit(vbTab & "Counter += 1")
 		Emit("Loop")
 		Emit("Counter = Stack.Pop()")
@@ -104,9 +104,9 @@
 	Private ReadOnly Varlist As New List(Of String) From {"args"}
 	Private Sub Declaration()
 		Match(TokenType.Item)
-		Dim varname = Match(TokenType.Variable).ToLower()
-		If Lexer.Current.Type = TokenType.Equals Then
-			Match(TokenType.Equals)
+		Dim varname = Match(TokenType._Variable).ToLower()
+		If Lexer.Current.Type = TokenType._Equals Then
+			Match(TokenType._Equals)
 			Expr()
 			Emit($"Variable(""{varname}"") = Register")
 		Else
@@ -116,24 +116,24 @@
 	End Sub
 
 	Private Sub Assignment()
-		Dim varname = Match(TokenType.Variable, False).ToLower()
+		Dim varname = Match(TokenType._Variable, False).ToLower()
 		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
 		Lexer.Advance()
-		Match(TokenType.Equals)
+		Match(TokenType._Equals)
 		Expr()
 		Emit($"Variable(""{varname}"") = Register")
 	End Sub
 
 	Private Sub Import()
 		Match(TokenType.Ref)
-		Dim filenames As New List(Of String) From {Match(TokenType.StringLiteral)}
-		While Lexer.Current.Type = TokenType.Comma
-			Match(TokenType.Comma)
-			filenames.Add(Match(TokenType.StringLiteral))
+		Dim filenames As New List(Of String) From {Match(TokenType._StringLiteral)}
+		While Lexer.Current.Type = TokenType._Comma
+			Match(TokenType._Comma)
+			filenames.Add(Match(TokenType._StringLiteral))
 		End While
 		If Lexer.Current.Type = TokenType.From Then
 			Match(TokenType.From)
-			Dim path$ = Match(TokenType.StringLiteral)
+			Dim path$ = Match(TokenType._StringLiteral)
 			For Each type In filenames
 				AddLib(path, type)
 			Next
@@ -145,11 +145,11 @@
 	End Sub
 
 	Private Sub FunctionCall()
-		Dim funcName$ = Match(TokenType.Variable)
+		Dim funcName$ = Match(TokenType._Variable)
 		Try
-			Match(TokenType.LeftParen)
+			Match(TokenType._LeftParen)
 		Catch ex As ArgumentException
-			If Lexer.Current.Type = TokenType.Equals Then
+			If Lexer.Current.Type = TokenType._Equals Then
 				Throw New ArgumentException($"Assignment to undeclared variable '{funcName}' on line {Lexer.Line}.")
 			End If
 		End Try
@@ -157,7 +157,7 @@
 		Dim args As New List(Of String)
 		Do
 			Select Case Lexer.Current.Type
-				Case TokenType.RightParen
+				Case TokenType._RightParen
 					Exit Do
 
 				Case Else
@@ -165,7 +165,7 @@
 					Emit("FuncArgs.Add(Register)")
 			End Select
 		Loop
-		Match(TokenType.RightParen)
+		Match(TokenType._RightParen)
 		Emit($"Register = If(InvokeMethod(""{funcName}"", FuncArgs), Register)")
 		Emit("FuncArgs = Stack.Pop()")
 	End Sub

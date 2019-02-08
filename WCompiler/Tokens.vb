@@ -43,7 +43,7 @@
 
 		Public Sub New(number$)
 			Value = number
-			Type = TokenType.IntLiteral
+			Type = TokenType._IntLiteral
 		End Sub
 	End Structure
 
@@ -54,7 +54,7 @@
 
 		Public Sub New(content$)
 			Value = content
-			Type = TokenType.StringLiteral
+			Type = TokenType._StringLiteral
 		End Sub
 	End Structure
 
@@ -70,61 +70,61 @@
 
 			Select Case input
 				Case "."
-					Type = TokenType.Dot
+					Type = TokenType._Dot
 				Case "?"
-					Type = TokenType.QuestionMark
+					Type = TokenType._QuestionMark
 				Case "{"
-					Type = TokenType.LeftCurly
+					Type = TokenType._LeftCurly
 				Case "}"
-					Type = TokenType.RightCurly
+					Type = TokenType._RightCurly
 				Case "["
-					Type = TokenType.LeftSquare
+					Type = TokenType._LeftSquare
 				Case "]"
-					Type = TokenType.RightSquare
+					Type = TokenType._RightSquare
 				Case "("
-					Type = TokenType.LeftParen
+					Type = TokenType._LeftParen
 				Case ")"
-					Type = TokenType.RightParen
+					Type = TokenType._RightParen
 
 				Case "+"
-					Type = TokenType.Cross
+					Type = TokenType._Cross
 				Case "-"
-					Type = TokenType.Hyphen
+					Type = TokenType._Hyphen
 				Case "*"
-					Type = TokenType.Asterisk
+					Type = TokenType._Asterisk
 				Case "/"
-					Type = TokenType.Slash
+					Type = TokenType._Slash
 				Case "\"
-					Type = TokenType.BackSlash
+					Type = TokenType._BackSlash
 				Case "%"
-					Type = TokenType.Percent
+					Type = TokenType._Percent
 				Case "="
-					Type = TokenType.Equals
+					Type = TokenType._Equals
 				Case "<"
-					Type = TokenType.LeftAngle
+					Type = TokenType._LeftAngle
 				Case ">"
-					Type = TokenType.RightAngle
+					Type = TokenType._RightAngle
 				Case "<="
-					Type = TokenType.LeftAngleEquals
+					Type = TokenType._LeftAngleEquals
 				Case ">="
-					Type = TokenType.RightAngleEquals
+					Type = TokenType._RightAngleEquals
 
 				Case "!"
-					Type = TokenType.ExclamationPoint
+					Type = TokenType._ExclamationPoint
 				Case "@"
-					Type = TokenType.AtSign
+					Type = TokenType._AtSign
 				Case "#"
-					Type = TokenType.HashSign
+					Type = TokenType._HashSign
 				Case "$"
-					Type = TokenType.Dollar
+					Type = TokenType._Dollar
 				Case "^"
-					Type = TokenType.Caret
+					Type = TokenType._Caret
 				Case "&"
-					Type = TokenType.Ampersand
+					Type = TokenType._Ampersand
 				Case "|"
-					Type = TokenType.Pipe
+					Type = TokenType._Pipe
 				Case ","
-					Type = TokenType.Comma
+					Type = TokenType._Comma
 
 				Case Else
 					Throw New ArgumentException($"{input} is not a valid symbol.")
@@ -139,7 +139,7 @@
 
 		Public Sub New(name$)
 			Value = name
-			Type = TokenType.Variable
+			Type = TokenType._Variable
 		End Sub
 	End Structure
 
@@ -147,13 +147,13 @@
 		Implements IToken
 		Public ReadOnly Property Type As TokenType Implements IToken.Type
 			Get
-				Return TokenType.EOF
+				Return TokenType._EOF
 			End Get
 		End Property
 
 		Public ReadOnly Property Value As String Implements IToken.Value
 			Get
-				Return [Enum].GetName(GetType(TokenType), TokenType.EOF)
+				Return [Enum].GetName(GetType(TokenType), TokenType._EOF)
 			End Get
 		End Property
 	End Structure
@@ -161,48 +161,48 @@
 
 	Enum TokenType
 		'Categories
-		Variable
-		IntLiteral
-		StringLiteral
+		_Variable
+		_IntLiteral
+		_StringLiteral
 
 		'Comments and blocks
-		QuestionMark
-		LeftParen
-		RightParen
-		LeftSquare
-		RightSquare
-		LeftCurly
-		RightCurly
-		Dot
+		_QuestionMark
+		_LeftParen
+		_RightParen
+		_LeftSquare
+		_RightSquare
+		_LeftCurly
+		_RightCurly
+		_Dot
 
 		'Operators
-		Cross
-		Hyphen
-		Asterisk
-		Slash
-		BackSlash
-		Percent
+		_Cross
+		_Hyphen
+		_Asterisk
+		_Slash
+		_BackSlash
+		_Percent
 		[And]
 		[Or]
 		[Not]
 
 		'Comparisons
-		Equals
-		LeftAngle
-		RightAngle
-		LeftAngleEquals
-		RightAngleEquals
+		_Equals
+		_LeftAngle
+		_RightAngle
+		_LeftAngleEquals
+		_RightAngleEquals
 
 		'Other symbols
-		ExclamationPoint
-		AtSign
-		HashSign
-		Dollar
-		Caret
-		Ampersand
-		Pipe
-		Comma
-		EOF
+		_ExclamationPoint
+		_AtSign
+		_HashSign
+		_Dollar
+		_Caret
+		_Ampersand
+		_Pipe
+		_Comma
+		_EOF
 
 		'Control flow
 		[If]

@@ -128,7 +128,7 @@ End Module")
 	End Sub
 
 	Private Sub SignedFactor()
-		Dim op = TokenType.Cross
+		Dim op = TokenType._Cross
 		If Lexer.Current.Value Like "[+-]" Then
 			op = Lexer.Current.Type
 			Match(op)
@@ -136,21 +136,21 @@ End Module")
 
 		Factor()
 
-		If op = TokenType.Hyphen Then
+		If op = TokenType._Hyphen Then
 			Emit("Register = -Register")
 		End If
 	End Sub
 
 	Private Sub Factor()
 		Select Case Lexer.Current.Type
-			Case TokenType.IntLiteral
-				Emit($"Register = {Match(TokenType.IntLiteral)}")
+			Case TokenType._IntLiteral
+				Emit($"Register = {Match(TokenType._IntLiteral)}")
 
-			Case TokenType.StringLiteral
-				Emit($"Register = ""{Match(TokenType.StringLiteral)}""")
+			Case TokenType._StringLiteral
+				Emit($"Register = ""{Match(TokenType._StringLiteral)}""")
 
-			Case TokenType.Variable
-				Dim name$ = Match(TokenType.Variable, False)
+			Case TokenType._Variable
+				Dim name$ = Match(TokenType._Variable, False)
 				If Varlist.Contains(name.ToLower) Then
 					Lexer.Advance()
 					Emit($"Register = Variable(""{name.ToLower}"")")
@@ -158,49 +158,49 @@ End Module")
 					FunctionCall()
 				End If
 
-			Case TokenType.Dollar
-				Match(TokenType.Dollar)
+			Case TokenType._Dollar
+				Match(TokenType._Dollar)
 				Emit("Register = Parent")
 
-			Case TokenType.HashSign
-				Match(TokenType.HashSign)
+			Case TokenType._HashSign
+				Match(TokenType._HashSign)
 				Emit("Register = Counter")
 
 			Case Else
-				Match(TokenType.LeftParen)
+				Match(TokenType._LeftParen)
 				Expr()
-				Match(TokenType.RightParen)
+				Match(TokenType._RightParen)
 		End Select
 
-		If Lexer.Current.Type = TokenType.Dot Then
-			Match(TokenType.Dot)
+		If Lexer.Current.Type = TokenType._Dot Then
+			Match(TokenType._Dot)
 			CheckProperty()
 		End If
 	End Sub
 
 	Private Sub CheckProperty()
 		Select Case Lexer.Current.Type
-			Case TokenType.LeftParen
+			Case TokenType._LeftParen
 				Push()
 				Expr()
 				Emit("Register = (Stack.Pop())(Register)")
 
-			Case TokenType.Variable
+			Case TokenType._Variable
 				Select Case Lexer.Current.Value.ToLower()
 					Case "num"
 						Emit("Try : Register = Register.Length : Catch : Register = Register.Count : End Try")
-						Match(TokenType.Variable)
+						Match(TokenType._Variable)
 					Case "pos"
-						Match(TokenType.Variable)
+						Match(TokenType._Variable)
 						Push()
 						Expr()
 						Emit("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
 					Case Else
-						Emit("Register = Register." & Match(TokenType.Variable))
+						Emit("Register = Register." & Match(TokenType._Variable))
 				End Select
 
-			Case TokenType.IntLiteral
-				Emit($"Register = Register({Match(TokenType.IntLiteral)})")
+			Case TokenType._IntLiteral
+				Emit($"Register = Register({Match(TokenType._IntLiteral)})")
 
 			Case Else
 				Throw New ArgumentException($"Got unexpected {Lexer.Current.Type} after dot.")
@@ -248,35 +248,35 @@ End Module")
 		Dim op$ = ""
 		Select Case optype.Value
 			'Numeric -> Numeric type operators
-			Case TokenType.Cross
+			Case TokenType._Cross
 				op = "+"
-			Case TokenType.Hyphen
+			Case TokenType._Hyphen
 				op = "-"
-			Case TokenType.Asterisk
+			Case TokenType._Asterisk
 				op = "*"
-			Case TokenType.Slash
+			Case TokenType._Slash
 				op = "/"
-			Case TokenType.BackSlash
+			Case TokenType._BackSlash
 				op = "\"
-			Case TokenType.Percent
+			Case TokenType._Percent
 				op = "Mod"
 
 			'Numeric -> Boolean
-			Case TokenType.LeftAngle
+			Case TokenType._LeftAngle
 				op = "<"
-			Case TokenType.LeftAngleEquals
+			Case TokenType._LeftAngleEquals
 				op = "<="
-			Case TokenType.RightAngle
+			Case TokenType._RightAngle
 				op = ">"
-			Case TokenType.RightAngleEquals
+			Case TokenType._RightAngleEquals
 				op = ">="
-			Case TokenType.Equals
+			Case TokenType._Equals
 				op = "="
 
 			'Boolean -> Boolean
-			Case TokenType.Ampersand
+			Case TokenType._Ampersand
 				op = "And"
-			Case TokenType.Pipe
+			Case TokenType._Pipe
 				op = "Or"
 			Case TokenType.And
 				op = "AndAlso"
