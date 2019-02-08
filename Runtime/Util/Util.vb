@@ -2,4 +2,8 @@
 	Public Sub [Exit](ReturnCode As Object)
 		Environment.Exit(ReturnCode)
 	End Sub
+
+	Public Function Collect(ParamArray Data() As Object) As Object
+		Return Data.ToList()
+	End Function
 End Module

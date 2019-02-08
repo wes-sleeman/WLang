@@ -27,7 +27,7 @@
 				Emit($"Types.AddRange(Assembly.LoadFile(""{filepath}"").GetType(""{typename}"", False, True))")
 			End If
 		End If
-    End Sub
+	End Sub
 
 	Private Sub Emit(output$)
 		Dim tabBuffer$ = String.Empty
@@ -49,12 +49,16 @@ Public Module {Filename}
 	ReadOnly Functions As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
-	Function InvokeMethod(name$, args As List(Of Object)) As Object
+	Function InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
 		Dim ArgArr = args.ToArray()
 		For Each type In Types
 			Try
-				Return type.GetMethod(name).Invoke(Nothing, ArgArr)
-			Catch ex As TypeLoadException : Catch ex As NullReferenceException
+				Try
+					Return type.GetMethod(name).Invoke(Nothing, ArgArr)
+				Catch e As Exception When TypeOf e Is Reflection.TargetParameterCountException OrElse TypeOf e Is ArgumentException
+					Return type.GetMethod(name).Invoke(Nothing, {{ArgArr}})
+				End Try
+			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
 			End Try
 		Next
 		Throw New MissingMethodException(""Unable to find method "" & name)
@@ -66,6 +70,11 @@ Public Module {Filename}
 
 		'BEGIN USER GENERATED CODE")
 		IndentLevel = 2
+		Try
+
+		Catch ex As System.Reflection.TargetParameterCountException
+
+		End Try
 	End Sub
 
 	Private Sub Teardown()
@@ -195,6 +204,11 @@ End Module")
 						Push()
 						Expr()
 						Emit("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
+					Case "concat"
+						Match(TokenType._Variable)
+						Push()
+						Expr()
+						Emit("Register = If(TypeOf Stack.Peek() Is String OrElse Not TypeOf Stack.Peek() Is IEnumerable(Of Object), Stack.Pop() & Register, New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})))")
 					Case Else
 						Emit("Register = Register." & Match(TokenType._Variable))
 				End Select
@@ -203,7 +217,7 @@ End Module")
 				Emit($"Register = Register({Match(TokenType._IntLiteral)})")
 
 			Case Else
-				Throw New ArgumentException($"Got unexpected {Lexer.Current.Type} after dot.")
+				Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
 		End Select
 	End Sub
 

@@ -119,9 +119,30 @@
 		Dim varname = Match(TokenType._Variable, False).ToLower()
 		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
 		Lexer.Advance()
-		Match(TokenType._Equals)
-		Expr()
-		Emit($"Variable(""{varname}"") = Register")
+		If Lexer.Current.Type = TokenType._Dot Then
+			Match(TokenType._Dot)
+			Select Case Lexer.Current.Type
+				Case TokenType._LeftParen
+					Expr()
+					Push()
+					Match(TokenType._Equals)
+					Expr()
+					Emit($"Variable(""{varname}"")(Stack.Pop()) = Register")
+
+				Case TokenType._IntLiteral
+					Dim index% = Match(TokenType._IntLiteral)
+					Match(TokenType._Equals)
+					Expr()
+					Emit($"Variable(""{varname}"")({index}) = Register")
+
+				Case Else
+					Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
+			End Select
+		Else
+			Match(TokenType._Equals)
+			Expr()
+			Emit($"Variable(""{varname}"") = Register")
+		End If
 	End Sub
 
 	Private Sub Import()
@@ -159,6 +180,9 @@
 			Select Case Lexer.Current.Type
 				Case TokenType._RightParen
 					Exit Do
+
+				Case TokenType._Comma
+					Match(TokenType._Comma)
 
 				Case Else
 					Expr()

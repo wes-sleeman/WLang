@@ -1,14 +1,17 @@
 ﻿Imports System.IO
 
 Public Module IO
-	Public Sub Type(Data As Object)
-		If (Not TypeOf Data Is String) AndAlso TypeOf Data Is IEnumerable Then
-			For Each item In Data
-				Console.WriteLine(item)
-			Next
-		Else
-			Console.WriteLine(Data)
-		End If
+	Public Sub Type(ParamArray Data() As Object)
+		For Each item In Data
+			If (Not TypeOf item Is String) AndAlso TypeOf item Is IEnumerable Then
+				For Each index In item
+					Console.Write(index)
+				Next
+			Else
+				Console.Write(item)
+			End If
+		Next
+		Console.WriteLine()
 	End Sub
 
 	Public Function Read()

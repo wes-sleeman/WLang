@@ -92,7 +92,7 @@
 copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
 copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
 
-ilmerge /wildcards /ndebug /out:Runtime.dll $(TargetDir)*.dll
+ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /ndebug /out:Runtime.dll $(TargetDir)*.dll
 copy Runtime.dll $(SolutionDir)Runtime
 del $(TargetDir)*.dll
 del $(TargetDir)*.pdb
