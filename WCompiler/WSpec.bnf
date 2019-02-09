@@ -1,25 +1,26 @@
 ﻿Program			= {<Block>}
-Block			= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Func> }*
-LoopBlock		= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Func> | <Break> }*
+Block			= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Reference> | <Func> | <Break> }*
 
-Expr			= <Term> { (+ | -) <Term> }*
-Term			= <SignedFactor> { (* | / | %) <SignedFactor> }*
+Expr			= <CompExpr> { <BoolOp> <CompExpr> }*
+CompExpr		= <MathExpr> { <IntOp> <MathExpr> }*
+MathExpr		= <Term> { (+ | -) <Term> }*
+Term			= <SignedFactor> { (* | / | % | \) <SignedFactor> }*
 SignedFactor	= { + | - } <Factor>
 Factor			= (<IntLiteral> | <Ident>{.<Property>} | <FunctionCall> | (<Expr>))
-IntOp			= (> | >= | < | <= | =)
-
-BooleanExpr		= ( <BooleanExpr> <BoolOp> <BooleanExpr> | <Expr> <IntOp> <Expr> | {Not} <BooleanExpr> )
-Boolean			= ( True | False )
+IntOp			= ( > | >= | < | <= | = )
 BoolOp			= ( And / Or / & / | )
+
+BooleanExpr		= ( <Boolean> | Not <BooleanExpr> | <Expr> )
+Boolean			= ( True | False )
 
 If				= If <BooleanExpr> [ {<Block>} ] {[ {<Block>} ]}
 Loop			= Repeat {<Expr>} [ {<LoopBlock>} ]
 Break			= Escape
 
 Import			= { <Reference> }
-Reference		= Ref <Ident> { From <FilePath> }
+Reference		= REF <Ident> { FROM <FilePath> }
 
-Func			= Func <Ident> [ {<Block>} ]
+Func			= { Public } Func <Ident> [ {<Block>} ]
 
 Declaration		= Item <Ident> { = <Expr> }
 Assignment		= <Ident> = <Expr>

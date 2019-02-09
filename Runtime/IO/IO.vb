@@ -1,4 +1,4 @@
-﻿Imports System.IO
+Imports System.IO
 
 Public Module IO
 	Public Sub Type(ParamArray Data() As Object)
@@ -22,7 +22,7 @@ Public Module IO
 		Return Console.ReadLine()
 	End Function
 
-	Public Function FileContents(Filepath As Object)
+	Public Function ReadFile(Filepath As Object)
 		Return File.ReadAllLines(Path.GetFullPath(Filepath.ToString()))
 	End Function
 End Module

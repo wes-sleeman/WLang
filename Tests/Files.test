@@ -1,4 +1,4 @@
-REF 'IO' FROM 'Runtime'
+REF 'IO', 'Util' FROM 'Runtime'
 
 {
 	Tests file reading.
@@ -6,4 +6,4 @@ REF 'IO' FROM 'Runtime'
 		the test has succeeded.
 }
 
-Type(FileContents("Files.test"))
+Type(Thread("\n", ReadFile("Files.test")))

@@ -1,4 +1,4 @@
-﻿Partial Module Parser
+Partial Module Parser
 	Private Function Match(Type As TokenType, Optional Advance As Boolean = True) As String
 		If Not Lexer.Current.Type = Type Then
 			Throw New ArgumentException($"Expected {Type} but received {Lexer.Current.Type} on line {Lexer.Line}.")
@@ -243,7 +243,7 @@ Public Module {Filename}
 							Case "concat"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
-								indexers.Add("Register = If(TypeOf Stack.Peek() Is String OrElse Not TypeOf Stack.Peek() Is IEnumerable(Of Object), Stack.Pop() & Register, New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})))")
+								indexers.Add("Register = If(TypeOf Stack.Peek() Is String, Stack.Pop() & Register, New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})).ToList())")
 							Case Else
 								indexers.Add("Register = (Stack.Pop())." & Match(TokenType._Variable))
 						End Select

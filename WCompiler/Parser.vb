@@ -210,7 +210,7 @@
 
 				Case Else
 					Expr()
-					Emit("FuncArgs.Add(Register)")
+					Emit("FuncArgs.Add(If(TypeOf Register Is List(Of Object), Register.ToArray(), Register))")
 			End Select
 		Loop
 		Match(TokenType._RightParen)
