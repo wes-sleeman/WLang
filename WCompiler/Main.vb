@@ -4,7 +4,7 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.3.0" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.3.1" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then
@@ -102,6 +102,9 @@ Module Main
 	End Sub
 
 	Private Function GetRuntimePath() As String
+#If DEBUG Then
+		Return Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\Runtime\Runtime.dll"))
+#Else
 		Dim Syspath$() = Environment.GetEnvironmentVariable("PATH").Split({";"c}, StringSplitOptions.RemoveEmptyEntries)
 
 		Dim retval$ = (From s In Syspath
@@ -114,6 +117,7 @@ Module Main
 			End
 		End If
 		Return retval
+#End If
 	End Function
 
 	Private Function GetVBCPath() As String

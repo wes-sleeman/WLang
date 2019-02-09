@@ -144,20 +144,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Runtime\IO\IO.vbproj">
-      <Project>{3d727e63-90bd-4718-83d3-40ecac83df72}</Project>
-      <Name>IO</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Runtime\Math\Math.vbproj">
-      <Project>{c1e4471b-0c73-4fc9-92bf-9a8cc0252b08}</Project>
-      <Name>Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Runtime\Util\Util.vbproj">
-      <Project>{89ab8f73-bb38-4b22-aa89-5d782c20c6aa}</Project>
-      <Name>Util</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
