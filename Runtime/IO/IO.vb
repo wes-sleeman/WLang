@@ -18,11 +18,11 @@ Public Module IO
 		Console.WriteLine()
 	End Sub
 
-	Public Function Read()
+	Public Function Read() As Object
 		Return Console.ReadLine()
 	End Function
 
-	Public Function ReadFile(Filepath As Object)
-		Return File.ReadAllLines(Path.GetFullPath(Filepath.ToString()))
+	Public Function Read(Filepath As Object) As Object
+		Return File.ReadAllLines(Path.GetFullPath(Filepath.ToString())).ToList()
 	End Function
 End Module

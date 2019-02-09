@@ -4,12 +4,12 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.3.2" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.3.3" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then
 			Main({"/lib", "/noconf"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".testlib"))).ToArray())
-			Main({"/norun"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".test"))).ToArray())
+			Main({""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".test"))).ToArray())
 			Return
 		End If
 #End If

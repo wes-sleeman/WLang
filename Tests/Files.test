@@ -6,4 +6,4 @@ REF 'IO', 'Util' FROM 'Runtime'
 		the test has succeeded.
 }
 
-Type(Thread("\n", ReadFile("Files.test")))
+Type(Thread("\n", Read("Files.test")))

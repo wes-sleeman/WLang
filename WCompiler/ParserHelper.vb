@@ -235,11 +235,11 @@ Public Module {Filename}
 						Select Case Lexer.Current.Value.ToLower()
 							Case "num"
 								Match(TokenType._Variable)
-								indexers.Add("Try : Register = (Stack.Peek()).Length : Catch : Register = (Stack.Peek()).Count : End Try : Stack.Pop()")
+								indexers.Add("Try : Try : Register = (Stack.Peek()).Length : Catch : Register = (Stack.Peek()).Count : End Try : Catch : Register = 1 : End Try : Stack.Pop()")
 							Case "pos"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
-								indexers.Add("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
+								indexers.Add("Try : Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register) : Catch : Register = -1 : End Try")
 							Case "concat"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
