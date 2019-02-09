@@ -1,6 +1,6 @@
 ﻿Program			= {<Block>}
-Block			= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> }*
-LoopBlock		= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Break> }*
+Block			= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Func> }*
+LoopBlock		= { <FunctionCall> | <Conditional> | <Loop> | <Declaration> | <Assignment> | <Import> | <Func> | <Break> }*
 
 Expr			= <Term> { (+ | -) <Term> }*
 Term			= <SignedFactor> { (* | / | %) <SignedFactor> }*
@@ -18,6 +18,8 @@ Break			= Escape
 
 Import			= { <Reference> }
 Reference		= Ref <Ident> { From <FilePath> }
+
+Func			= Func <Ident> [ {<Block>} ]
 
 Declaration		= Item <Ident> { = <Expr> }
 Assignment		= <Ident> = <Expr>
