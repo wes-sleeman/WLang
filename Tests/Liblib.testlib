@@ -1,3 +1,0 @@
-REF 'IO' FROM 'Runtime'
-
-Type("Success!")
