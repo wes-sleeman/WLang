@@ -18,5 +18,5 @@ If Read() = '5'
 ? Else
 [
 	? Print a failure message
-	Type("Fail! Did you enter the correct data.")
+	Type("Fail! Did you enter the correct data?")
 ]

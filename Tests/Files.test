@@ -1,0 +1,9 @@
+REF 'IO', 'Util' FROM 'Runtime'
+
+{
+	Tests file reading.
+	If you can see this message
+		the test has succeeded.
+}
+
+Type(Thread("\n", Read("Files.test")))
