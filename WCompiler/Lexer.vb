@@ -1,5 +1,14 @@
 ﻿Friend Class Lexer
 	Public Property Current As IToken
+	Dim _line% = 1
+	Public Property Line As Integer
+		Get
+			Return _line
+		End Get
+		Private Set(value As Integer)
+			_line = value
+		End Set
+	End Property
 
 	Private ReadOnly Code As String
 	Private Index As Integer = 0
@@ -18,7 +27,7 @@
 
 		Select Case Code(Index)
 			Case "a"c To "z"c, "A"c To "Z"c, "_"
-				Dim ident$ = TakeWhileLike("[a-zA-Z_]")
+				Dim ident$ = TakeWhileLike("[a-zA-Z_1-9]")
 				Try
 					Return New [Boolean](ident)
 				Catch ex As ArgumentException
@@ -44,8 +53,13 @@
 				Index += 1
 				Return retval
 
-			Case vbCr, vbLf, vbCrLf, Environment.NewLine, vbTab, " "c
-				TakeWhileIn(vbCr, vbLf, vbCrLf, Environment.NewLine, vbTab, " "c)
+			Case vbCr, vbLf, vbCrLf, Environment.NewLine
+				Line += 1
+				TakeWhileIn(vbCr, vbLf, vbCrLf, Environment.NewLine)
+				Return TakeNext()
+
+			Case vbTab, " "c
+				TakeWhileIn(vbTab, " "c)
 				Return TakeNext()
 
 			Case "{"c
