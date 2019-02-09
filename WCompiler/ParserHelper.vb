@@ -65,9 +65,6 @@ Public Module {Filename}
 				End Try
 			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
 			End Try
-		Next
-
-		For Each type In GetType({Filename}).Assembly.GetTypes()
 			Try
 				Try
 					Return type.GetMethod(name, BindingFlags.Public Or BindingFlags.Static).Invoke(Nothing, ArgArr)
@@ -82,16 +79,22 @@ Public Module {Filename}
 			Try
 				Try
 					Return type.GetMethod(name).Invoke(Nothing, ArgArr)
-				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
+				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException OrElse TypeOf e Is NullReferenceException
 					Return type.GetMethod(name).Invoke(Nothing, {{ArgArr}})
+				Catch e As AmbiguousMatchException
+					Try
+						Return type.GetMethod(name, ArgArr.Select(Function(obj) If(TypeOf obj Is IEnumerable(Of Object), GetType(Object()), GetType(Object))).ToArray()).Invoke(Nothing, ArgArr)
+					Catch e2 As Exception When TypeOf e2 Is TargetParameterCountException OrElse TypeOf e2 Is ArgumentException OrElse TypeOf e2 Is NullReferenceException
+						Return type.GetMethod(name, {{ArgArr.GetType()}}).Invoke(Nothing, {{ArgArr}})
+					End Try
 				End Try
 			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
 			End Try
 		Next
-		Throw New MissingMethodException(""Unable to find method "" & name)
+		Throw New MissingMethodException(""Unable to find method "" & name & "". Did you forget a reference?"")
 	End Function
 
-	Public Sub {If([Lib], $"{Filename}(Optional args As Object() = Nothing)", "Main(args As String())")}
+	Public {If([Lib], $"Function {Filename}(Optional args As Object() = Nothing) As Object", "Sub Main(args As String())")}
 		Variable(""args"") = args
 
 		'BEGIN USER GENERATED CODE")
@@ -99,14 +102,14 @@ Public Module {Filename}
 	End Sub
 
 	Private Sub Teardown()
-		IndentLevel += 1
-		Emit($"'END USER GENERATED CODE")
-		If Not [Lib] Then
+		Emit($"{vbTab}'END USER GENERATED CODE")
+		If [Lib] Then
+			Emit("End Function")
+		Else
 			outputbuffer.Add(String.Empty)
-			Emit("Console.WriteLine(""Press any key to continue..."") : Console.ReadKey()")
+			Emit(vbTab & "Console.WriteLine(""Press any key to continue..."") : Console.ReadKey()")
+			Emit("End Sub")
 		End If
-		IndentLevel -= 1
-		Emit("End Sub")
 		IndentLevel = 0
 		For Each line In functionBuffer
 			If line.TrimStart().StartsWith("Friend") OrElse line.TrimStart().StartsWith("Public") Then outputbuffer.Add(String.Empty)

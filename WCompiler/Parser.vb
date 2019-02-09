@@ -185,6 +185,7 @@
 	End Sub
 
 	Private Sub [Return]()
+		Match(TokenType.Return)
 		Expr()
 		Emit("Return Register")
 	End Sub

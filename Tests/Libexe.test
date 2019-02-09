@@ -1,3 +1,4 @@
 REF 'Liblib'
+REF 'IO' FROM 'Runtime'
 
-Liblib()
+Type(Liblib())

@@ -10,7 +10,7 @@ REF 'IO' FROM 'Runtime'
 Type("Enter '5' followed by enter.")
 
 ? Reads and compares to '5'
-If Read() = 5
+If Read() = '5'
 [
 	? Print a success message
 	Type("Success!")
