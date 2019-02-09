@@ -29,12 +29,17 @@
 		End If
 	End Sub
 
+	Private InFunc As Boolean = False
 	Private Sub Emit(output$)
 		Dim tabBuffer$ = String.Empty
 		For cntr% = 1 To IndentLevel
 			tabBuffer &= vbTab
 		Next
-		outputbuffer.Add(tabBuffer & output)
+		If InFunc Then
+			functionBuffer.Add(tabBuffer & output)
+		Else
+			outputbuffer.Add(tabBuffer & output)
+		End If
 	End Sub
 
 	Private Sub Setup()
@@ -44,12 +49,35 @@ Public Module {Filename}
 	Dim Parent As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0
-	Dim FuncArgs As New List(Of Object)
-	ReadOnly Variable As New Dictionary(Of String, Object)
+	Private FuncArgs As New List(Of Object)
+	Private Variable As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
 	Function InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
 		Dim ArgArr = args.ToArray()
+
+		For Each type In GetType({Filename}).Assembly.GetTypes()
+			Try
+				Try
+					Return type.GetMethod(name, BindingFlags.NonPublic Or BindingFlags.Static).Invoke(Nothing, ArgArr)
+				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
+					Return type.GetMethod(name, BindingFlags.NonPublic Or BindingFlags.Static).Invoke(Nothing, {{ArgArr}})
+				End Try
+			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
+			End Try
+		Next
+
+		For Each type In GetType({Filename}).Assembly.GetTypes()
+			Try
+				Try
+					Return type.GetMethod(name, BindingFlags.Public Or BindingFlags.Static).Invoke(Nothing, ArgArr)
+				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
+					Return type.GetMethod(name, BindingFlags.Public Or BindingFlags.Static).Invoke(Nothing, {{ArgArr}})
+				End Try
+			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
+			End Try
+		Next
+
 		For Each type In Types
 			Try
 				Try
@@ -65,20 +93,26 @@ Public Module {Filename}
 
 	Public Sub {If([Lib], $"{Filename}(Optional args As Object() = Nothing)", "Main(args As String())")}
 		Variable(""args"") = args
-		Types.AddRange(GetType({Filename}).Assembly.GetTypes())
 
 		'BEGIN USER GENERATED CODE")
-		IndentLevel = 2
+		IndentLevel = 1
 	End Sub
 
 	Private Sub Teardown()
+		IndentLevel += 1
+		Emit($"'END USER GENERATED CODE")
+		If Not [Lib] Then
+			outputbuffer.Add(String.Empty)
+			Emit("Console.WriteLine(""Press any key to continue..."") : Console.ReadKey()")
+		End If
+		IndentLevel -= 1
+		Emit("End Sub")
 		IndentLevel = 0
-		Emit(
-$"		'END USER GENERATED CODE
-
-		{If(Not [Lib], "Console.WriteLine(""Press any key to continue..."") : Console.ReadKey()", String.Empty)}
-	End Sub
-End Module")
+		For Each line In functionBuffer
+			If line.TrimStart().StartsWith("Friend") OrElse line.TrimStart().StartsWith("Public") Then outputbuffer.Add(String.Empty)
+			Emit(line)
+		Next
+		Emit("End Module")
 	End Sub
 
 	Private Sub Expr(Optional inProp As Boolean = False)
@@ -236,8 +270,8 @@ End Module")
 	End Sub
 
 	Private Sub BooleanExpr()
-		If Lexer.Current.Type = TokenType.Boolean Then
-			Emit($"Register = {Match(TokenType.Boolean)}")
+		If Lexer.Current.Type = TokenType._Boolean Then
+			Emit($"Register = {Match(TokenType._Boolean)}")
 		ElseIf Lexer.Current.Type = TokenType.Not Then
 			Match(TokenType.Not)
 			BooleanExpr()
@@ -261,7 +295,7 @@ End Module")
 	End Sub
 
 	Private Sub [Boolean]()
-		Emit($"Register = {Match(TokenType.Boolean)}")
+		Emit($"Register = {Match(TokenType._Boolean)}")
 	End Sub
 
 	Private Sub Push()

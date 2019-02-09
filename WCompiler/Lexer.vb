@@ -27,7 +27,7 @@
 
 		Select Case Code(Index)
 			Case "a"c To "z"c, "A"c To "Z"c, "_"
-				Dim ident$ = TakeWhileLike("[a-zA-Z_]")
+				Dim ident$ = TakeWhileLike("[a-zA-Z_1-9]")
 				Try
 					Return New [Boolean](ident)
 				Catch ex As ArgumentException

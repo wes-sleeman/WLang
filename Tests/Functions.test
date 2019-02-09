@@ -1,0 +1,14 @@
+REF 'IO', 'Util' FROM 'Runtime'
+
+MyFunc("one", "two", "three")
+MyFunc2("one", "two", "three")
+
+Public Func MyFunc
+[
+	Type("Output public: " Thread(", " args))
+]
+
+Func MyFunc2
+[
+	Type("Output private: " Thread(", " args))
+]

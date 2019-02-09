@@ -32,7 +32,7 @@
 				Case Else
 					Throw New ArgumentException($"Invalid boolean {bool}.")
 			End Select
-			Type = TokenType.Boolean
+			Type = TokenType._Boolean
 		End Sub
 	End Structure
 
@@ -207,12 +207,15 @@
 		'Control flow
 		[If]
 		Repeat
-		[Boolean]
+		_Boolean
 		Escape
+		[Return]
 
 		'Declaration
 		Item
 		Ref
 		From
+		[Public]
+		Func
 	End Enum
 End Module

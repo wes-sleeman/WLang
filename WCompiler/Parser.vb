@@ -3,12 +3,14 @@
 
 	Private Property Lexer As Lexer
 	Private outputbuffer As List(Of String)
+	Private functionBuffer As List(Of String)
 	Private Filename As String
 	Private [Lib] As Boolean
 
 	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean) As String()
 		References = String.Empty
 		outputbuffer = New List(Of String)
+		functionBuffer = New List(Of String)
 		Parser.Lexer = Lexer
 
 		While filename.Contains(".") OrElse filename(0) Like "#"
@@ -30,8 +32,8 @@
 	End Sub
 
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
-		If InLoop OrElse InCond Then IndentLevel += 1
-		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond) AndAlso Lexer.Current.Type = TokenType._RightSquare)
+		IndentLevel += 1
+		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Break()
@@ -54,9 +56,18 @@
 
 				Case TokenType.Ref
 					Import()
+
+				Case TokenType.Func, TokenType.Public
+					Func()
+
+				Case TokenType.Return
+					[Return]()
+
+				Case Else
+					Match(TokenType._EOF)
 			End Select
 		Loop
-		If InLoop OrElse InCond Then IndentLevel -= 1
+		IndentLevel -= 1
 	End Sub
 
 	Private Sub [If]()
@@ -146,6 +157,36 @@
 				AddLib(Filename)
 			Next
 		End If
+	End Sub
+
+	Private Sub Func()
+		Dim callable = False
+		If Lexer.Current.Type = TokenType.Public Then
+			Match(TokenType.Public)
+			callable = True
+		End If
+		Match(TokenType.Func)
+		Dim funcName$ = Match(TokenType._Variable)
+		Dim inFuncCache As Boolean = InFunc, indentCache% = IndentLevel
+		InFunc = True
+		IndentLevel = 1
+		Emit($"{If(callable, "Public", "Friend")} Function {funcName}(ParamArray args() As Object) As Object")
+		Match(TokenType._LeftSquare)
+		IndentLevel = 2
+		Emit("Stack.Push(New Dictionary(Of String, Object)(Variable)) : Variable.Clear() : Variable(""args"") = args")
+		Emit("Try")
+		Block()
+		Emit("Finally : Variable = Stack.Pop() : End Try")
+		Match(TokenType._RightSquare)
+		IndentLevel = 1
+		Emit($"End Function")
+		InFunc = inFuncCache
+		IndentLevel = indentCache
+	End Sub
+
+	Private Sub [Return]()
+		Expr()
+		Emit("Return Register")
 	End Sub
 
 	Private Sub FunctionCall()
