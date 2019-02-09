@@ -46,7 +46,6 @@ Public Module {Filename}
 	Dim LoopEnd% = 0
 	Dim FuncArgs As New List(Of Object)
 	ReadOnly Variable As New Dictionary(Of String, Object)
-	ReadOnly Functions As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
 	Function InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
@@ -55,7 +54,7 @@ Public Module {Filename}
 			Try
 				Try
 					Return type.GetMethod(name).Invoke(Nothing, ArgArr)
-				Catch e As Exception When TypeOf e Is Reflection.TargetParameterCountException OrElse TypeOf e Is ArgumentException
+				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
 					Return type.GetMethod(name).Invoke(Nothing, {{ArgArr}})
 				End Try
 			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
@@ -70,87 +69,81 @@ Public Module {Filename}
 
 		'BEGIN USER GENERATED CODE")
 		IndentLevel = 2
-		Try
-
-		Catch ex As System.Reflection.TargetParameterCountException
-
-		End Try
 	End Sub
 
 	Private Sub Teardown()
 		IndentLevel = 0
 		Emit(
-"		'END USER GENERATED CODE
+$"		'END USER GENERATED CODE
 
-		Console.WriteLine(""Press any key to continue..."")
-		Console.ReadKey()
+		{If(Not [Lib], "Console.WriteLine(""Press any key to continue..."") : Console.ReadKey()", String.Empty)}
 	End Sub
 End Module")
 	End Sub
 
-	Private Sub Expr()
-		CompExpr()
+	Private Sub Expr(Optional inProp As Boolean = False)
+		CompExpr(inProp)
 
 		While Lexer.Current.Value Like "[|&]" OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
-			CompExpr()
+			CompExpr(inProp)
 			Pop(op)
 		End While
 	End Sub
 
-	Private Sub CompExpr()
-		MathExpr()
+	Private Sub CompExpr(inProp As Boolean)
+		MathExpr(inProp)
 
 		While Lexer.Current.Value Like "[<>]=" OrElse Lexer.Current.Value Like "[<>=]"
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
-			MathExpr()
+			MathExpr(inProp)
 			Pop(op)
 		End While
 	End Sub
 
-	Private Sub MathExpr()
-		Term()
+	Private Sub MathExpr(inProp As Boolean)
+		Term(inProp)
 
 		While Lexer.Current.Value Like "[+-]"
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
-			Term()
+			Term(inProp)
 			Pop(op)
 		End While
 	End Sub
 
-	Private Sub Term()
-		SignedFactor()
+	Private Sub Term(inProp As Boolean)
+		SignedFactor(inProp)
 
 		While Lexer.Current.Value Like "[*/%\]"
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
-			SignedFactor()
+			SignedFactor(inProp)
 			Pop(op)
 		End While
 	End Sub
 
-	Private Sub SignedFactor()
+	Private Sub SignedFactor(inProp As Boolean)
 		Dim op = TokenType._Cross
 		If Lexer.Current.Value Like "[+-]" Then
 			op = Lexer.Current.Type
 			Match(op)
 		End If
 
-		Factor()
+		Factor(inProp)
 
 		If op = TokenType._Hyphen Then
 			Emit("Register = -Register")
 		End If
 	End Sub
 
-	Private Sub Factor()
+	Private Sub Factor(inProp As Boolean)
 		Select Case Lexer.Current.Type
 			Case TokenType._IntLiteral
 				Emit($"Register = {Match(TokenType._IntLiteral)}")
@@ -181,44 +174,65 @@ End Module")
 				Match(TokenType._RightParen)
 		End Select
 
-		If Lexer.Current.Type = TokenType._Dot Then
-			Match(TokenType._Dot)
+		If Not inProp AndAlso Lexer.Current.Type = TokenType._Dot Then
 			CheckProperty()
 		End If
 	End Sub
 
-	Private Sub CheckProperty()
-		Select Case Lexer.Current.Type
-			Case TokenType._LeftParen
-				Push()
-				Expr()
-				Emit("Register = (Stack.Pop())(Register)")
+	Private Sub CheckProperty(Optional Assignment As Boolean = False, Optional Varname As String = "")
+		If Assignment AndAlso String.IsNullOrWhiteSpace(Varname) Then Throw New ArgumentNullException("Varname must be supplied assigning property check.")
 
-			Case TokenType._Variable
-				Select Case Lexer.Current.Value.ToLower()
-					Case "num"
-						Emit("Try : Register = Register.Length : Catch : Register = Register.Count : End Try")
-						Match(TokenType._Variable)
-					Case "pos"
-						Match(TokenType._Variable)
-						Push()
-						Expr()
-						Emit("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
-					Case "concat"
-						Match(TokenType._Variable)
-						Push()
-						Expr()
-						Emit("Register = If(TypeOf Stack.Peek() Is String OrElse Not TypeOf Stack.Peek() Is IEnumerable(Of Object), Stack.Pop() & Register, New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})))")
-					Case Else
-						Emit("Register = Register." & Match(TokenType._Variable))
-				End Select
+		Dim indexers As New List(Of String)
 
-			Case TokenType._IntLiteral
-				Emit($"Register = Register({Match(TokenType._IntLiteral)})")
+		If Assignment Then Push()
+		Do While Lexer.Current.Type = TokenType._Dot
+			Match(TokenType._Dot)
+			If Not Assignment Then Push()
+			Select Case Lexer.Current.Type
+				Case TokenType._LeftParen
+					Expr(inProp:=True)
+					If Assignment Then Push()
+					indexers.Add(If(Assignment, $"(Stack.Pop())", "Register = (Stack.Pop())(Register)"))
 
-			Case Else
-				Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
-		End Select
+				Case TokenType._Variable
+					If Assignment Then
+						indexers.Add($".{Match(TokenType._Variable)}")
+					Else
+						Select Case Lexer.Current.Value.ToLower()
+							Case "num"
+								Match(TokenType._Variable)
+								indexers.Add("Try : Register = (Stack.Peek()).Length : Catch : Register = (Stack.Peek()).Count : End Try : Stack.Pop()")
+							Case "pos"
+								Match(TokenType._Variable)
+								Expr(inProp:=True)
+								indexers.Add("Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register)")
+							Case "concat"
+								Match(TokenType._Variable)
+								Expr(inProp:=True)
+								indexers.Add("Register = If(TypeOf Stack.Peek() Is String OrElse Not TypeOf Stack.Peek() Is IEnumerable(Of Object), Stack.Pop() & Register, New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})))")
+							Case Else
+								indexers.Add("Register = (Stack.Pop())." & Match(TokenType._Variable))
+						End Select
+					End If
+
+				Case TokenType._IntLiteral
+					indexers.Add(If(Assignment, $"({Match(TokenType._IntLiteral)})", $"Register = (Stack.Pop())({Match(TokenType._IntLiteral)})"))
+
+				Case Else
+					Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
+			End Select
+			If Not Assignment Then
+				Emit(indexers(0))
+				indexers.Clear()
+			End If
+		Loop
+		If Assignment Then
+			Dim retval = $"Variables(""{Varname}"")"
+			For Each item In indexers
+				retval &= item
+			Next
+			Emit(retval & " = Stack.Pop()")
+		End If
 	End Sub
 
 	Private Sub BooleanExpr()

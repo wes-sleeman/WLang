@@ -120,24 +120,7 @@
 		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
 		Lexer.Advance()
 		If Lexer.Current.Type = TokenType._Dot Then
-			Match(TokenType._Dot)
-			Select Case Lexer.Current.Type
-				Case TokenType._LeftParen
-					Expr()
-					Push()
-					Match(TokenType._Equals)
-					Expr()
-					Emit($"Variable(""{varname}"")(Stack.Pop()) = Register")
-
-				Case TokenType._IntLiteral
-					Dim index% = Match(TokenType._IntLiteral)
-					Match(TokenType._Equals)
-					Expr()
-					Emit($"Variable(""{varname}"")({index}) = Register")
-
-				Case Else
-					Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
-			End Select
+			CheckProperty(True, varname)
 		Else
 			Match(TokenType._Equals)
 			Expr()
@@ -174,7 +157,7 @@
 				Throw New ArgumentException($"Assignment to undeclared variable '{funcName}' on line {Lexer.Line}.")
 			End If
 		End Try
-		Emit("Stack.Push(FuncArgs.ToList())")
+		Emit("Stack.Push(FuncArgs.ToList()) : FuncArgs.Clear()")
 		Dim args As New List(Of String)
 		Do
 			Select Case Lexer.Current.Type
