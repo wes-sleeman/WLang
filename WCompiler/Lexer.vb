@@ -55,7 +55,7 @@
 
 			Case vbCr, vbLf, vbCrLf, Environment.NewLine
 				Line += 1
-				TakeWhileIn(vbCr, vbLf, vbCrLf, Environment.NewLine)
+				Index += 1
 				Return TakeNext()
 
 			Case vbTab, " "c

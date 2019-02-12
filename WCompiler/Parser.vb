@@ -35,6 +35,7 @@
 
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
 		IndentLevel += 1
+		If Not InFunc Then Emit("LineNumber = " & Lexer.Line)
 		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
