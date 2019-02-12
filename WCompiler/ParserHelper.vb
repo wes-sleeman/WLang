@@ -95,7 +95,7 @@ Public Module {Filename}
 	End Function
 
 	Public {If([Lib], $"Function {Filename}(Optional args As Object() = Nothing) As Object", "Sub Main(args As String())")}
-		Dim LineNumber As ULong = 1
+		Dim LineNumber As ULong = 0
 		Variable(""args"") = args
 
 		Try
@@ -108,17 +108,16 @@ Public Module {Filename}
 		Emit(
 $"		'END USER GENERATED CODE
 
-	Catch ex As InvalidCastException
+	Catch ex As Exception
 " &
 If(Debug,
 "		Dim exMessage$() = ex.Message.Split({"" ""c }, StringSplitOptions.RemoveEmptyEntries)
-		Select Case exMessage(0)
-			Case ""Conversion""
+		If TypeOf ex Is InvalidCastException Then
 				Console.WriteLine(""Exception on line "" & LineNumber & "": Impossible operation on data "" & exMessage(3))
-
-			Case Else
+		
+		Else
 				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.Message)
-		End Select
+		End If
 		Environment.Exit(1)
 ",
 "		Console.WriteLine(""The application encountered an error. Please inform the developers."")

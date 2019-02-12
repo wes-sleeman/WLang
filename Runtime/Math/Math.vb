@@ -4,7 +4,7 @@ Public Module Math
 	End Function
 
 	Public Function Pow(Base As Object, Exponent As Object) As Object
-		Return System.Math.Pow(Base, Exponent)
+		Return System.Math.Pow(Base, If(System.Math.Round(Exponent) = Exponent, Exponent, CLng(Exponent)))
 	End Function
 
 	Public Function Sqrt(Value As Object) As Object
