@@ -25,3 +25,5 @@ Repeat 15
 	x = y
 	y = z
 ]
+
+Type("Success!")

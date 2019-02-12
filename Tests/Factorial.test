@@ -19,3 +19,5 @@ Repeat 15
 	? Print x to the console.
 	Type(x)
 ]
+
+Type("Success!")

@@ -6,8 +6,9 @@
 	Private functionBuffer As List(Of String)
 	Private Filename As String
 	Private [Lib] As Boolean
+	Private Debug As Boolean
 
-	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean) As String()
+	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean, debugBuild As Boolean) As String()
 		References = String.Empty
 		outputbuffer = New List(Of String)
 		functionBuffer = New List(Of String)
@@ -21,6 +22,7 @@
 
 		Parser.Filename = filename
 		[Lib] = isLib
+		Debug = debugBuild
 		Program()
 		Return outputbuffer.ToArray
 	End Function
@@ -66,6 +68,8 @@
 				Case Else
 					Match(TokenType._EOF)
 			End Select
+
+			If Not InFunc Then Emit("LineNumber += 1")
 		Loop
 		IndentLevel -= 1
 	End Sub

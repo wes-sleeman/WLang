@@ -4,7 +4,7 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.3.3" & vbCrLf)
+		Console.WriteLine("W Compiler Version 1.3.4" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then
@@ -12,9 +12,12 @@ Module Main
 			Main({""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".test"))).ToArray())
 			Return
 		End If
+		Dim conf = True
+#Else
+		Dim conf = False
 #End If
 
-		Dim cross = False, norun = False, [lib] = False, conf = True
+		Dim cross = False, norun = False, [lib] = False, debug = True
 		Console.WriteLine("Reading input file(s).")
 		For Each filename In args
 			If String.IsNullOrWhiteSpace(filename) Then Continue For
@@ -29,9 +32,21 @@ Module Main
 					Case "/lib"
 						[lib] = True
 						Console.WriteLine("Building to library")
+					Case "/exe"
+						[lib] = False
+						Console.WriteLine("Building to executable")
 					Case "/noconf", "/quit"
 						conf = False
 						Console.WriteLine("Automatically quitting after compilation")
+					Case "/conf", "/noquit"
+						conf = True
+						Console.WriteLine("Requiring confirmation before program termination")
+					Case "/debug", "/test"
+						debug = True
+						Console.WriteLine("Building in debug mode")
+					Case "/release", "/prod"
+						debug = False
+						Console.WriteLine("Building in release mode")
 					Case Else
 						Console.WriteLine("Invalid program flag " & filename)
 						Return
@@ -48,7 +63,7 @@ Module Main
 				Dim lex As New Lexer(File.ReadAllText(filename))
 
 				Console.WriteLine("Parsing")
-				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename), [lib])
+				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename), [lib], debug)
 
 				Dim emitpath$ = Path.ChangeExtension(filename, ".vb")
 				Console.WriteLine("Emitting")

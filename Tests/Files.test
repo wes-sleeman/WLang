@@ -2,8 +2,8 @@ REF 'IO', 'Util' FROM 'Runtime'
 
 {
 	Tests file reading.
-	If you can see this message
-		the test has succeeded.
+
+Success!
 }
 
-Type(Thread("\n", Read("Files.test")))
+Type(Read("Files.test").5)
