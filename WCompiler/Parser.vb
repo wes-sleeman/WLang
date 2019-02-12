@@ -69,6 +69,8 @@
 				Case Else
 					Match(TokenType._EOF)
 			End Select
+
+			If Not InFunc Then Emit("LineNumber += 1")
 		Loop
 		IndentLevel -= 1
 	End Sub
