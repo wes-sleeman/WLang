@@ -18,3 +18,5 @@ Repeat Args.Num
 	? Print the argument at # (iteration counter)
 	Type(Args.(#))
 ]
+
+Type("Success!")

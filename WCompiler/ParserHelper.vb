@@ -95,14 +95,36 @@ Public Module {Filename}
 	End Function
 
 	Public {If([Lib], $"Function {Filename}(Optional args As Object() = Nothing) As Object", "Sub Main(args As String())")}
+		Dim LineNumber As ULong = 1
 		Variable(""args"") = args
 
-		'BEGIN USER GENERATED CODE")
-		IndentLevel = 1
+		Try
+
+			'BEGIN USER GENERATED CODE")
+		IndentLevel = 2
 	End Sub
 
 	Private Sub Teardown()
-		Emit($"{vbTab}'END USER GENERATED CODE")
+		Emit(
+$"		'END USER GENERATED CODE
+
+	Catch ex As InvalidCastException
+" &
+If(Debug,
+"		Dim exMessage$() = ex.Message.Split({"" ""c }, StringSplitOptions.RemoveEmptyEntries)
+		Select Case exMessage(0)
+			Case ""Conversion""
+				Console.WriteLine(""Exception on line "" & LineNumber & "": Impossible operation on data "" & exMessage(3))
+
+			Case Else
+				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.Message)
+		End Select
+		Environment.Exit(1)
+",
+"		Console.WriteLine(""The application encountered an error. Please inform the developers."")
+		Environment.Exit(1)
+") &
+"	End Try")
 		If [Lib] Then
 			Emit("End Function")
 		Else
@@ -190,14 +212,17 @@ Public Module {Filename}
 
 			Case TokenType._Variable
 				Dim name$ = Match(TokenType._Variable, False)
-				If Varlist.Contains(name.ToLower) Then
-					Lexer.Advance()
-					Emit($"Register = Variable(""{name.ToLower}"")")
-				Else
-					FunctionCall()
-				End If
+                If Varlist.Contains(name.ToLower) Then
+                    Lexer.Advance()
+                    Emit($"Register = Variable(""{name.ToLower}"")")
+                Else
+                    FunctionCall()
+                End If
 
-			Case TokenType._Dollar
+            Case TokenType.Not, TokenType._Boolean
+                BooleanExpr()
+
+            Case TokenType._Dollar
 				Match(TokenType._Dollar)
 				Emit("Register = Parent")
 
