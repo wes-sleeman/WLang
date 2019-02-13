@@ -53,6 +53,20 @@ Public Module {Filename}
 	Private Variable As New Dictionary(Of String, Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
+	Function Concat() As List(Of Object)
+		If TypeOf Stack.Peek() Is String Then
+			Return If(Stack.Pop(), String.Empty) & If(Register, String.Empty)
+		Else
+			If Stack.Peek() Is Nothing Then
+				Stack.Pop()
+				If Register Is Nothing Then Return Nothing
+				Return CType(If(TypeOf Register Is IEnumerable(Of Object), Register, {{Register}}), IEnumerable(Of Object)).ToList()
+			Else
+				If Register Is Nothing Then Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {{Stack.Pop()}}), IEnumerable(Of Object))).ToList()
+				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {{Stack.Pop()}}), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {{Register}})).ToList()
+			End If
+		End If
+	End Function
 	Function InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
 		Dim ArgArr = args.ToArray()
 
@@ -211,17 +225,17 @@ If(Debug,
 
 			Case TokenType._Variable
 				Dim name$ = Match(TokenType._Variable, False)
-                If Varlist.Contains(name.ToLower) Then
-                    Lexer.Advance()
-                    Emit($"Register = Variable(""{name.ToLower}"")")
-                Else
-                    FunctionCall()
-                End If
+				If Varlist.Contains(name.ToLower) Then
+					Lexer.Advance()
+					Emit($"Register = Variable(""{name.ToLower}"")")
+				Else
+					FunctionCall()
+				End If
 
-            Case TokenType.Not, TokenType._Boolean
-                BooleanExpr()
+			Case TokenType.Not, TokenType._Boolean
+				BooleanExpr()
 
-            Case TokenType._Dollar
+			Case TokenType._Dollar
 				Match(TokenType._Dollar)
 				Emit("Register = Parent")
 
@@ -251,7 +265,9 @@ If(Debug,
 			If Not Assignment Then Push()
 			Select Case Lexer.Current.Type
 				Case TokenType._LeftParen
+					Match(TokenType._LeftParen)
 					Expr(inProp:=True)
+					Match(TokenType._RightParen)
 					If Assignment Then Push()
 					indexers.Add(If(Assignment, $"(Stack.Pop())", "Register = (Stack.Pop())(Register)"))
 
@@ -262,7 +278,7 @@ If(Debug,
 						Select Case Lexer.Current.Value.ToLower()
 							Case "num"
 								Match(TokenType._Variable)
-								indexers.Add("Try : Try : Register = (Stack.Peek()).Length : Catch : Register = (Stack.Peek()).Count : End Try : Catch : Register = 1 : End Try : Stack.Pop()")
+								indexers.Add("Try : Try : Register = (Stack.Peek()).Length : Catch : Register = (Stack.Peek()).Count : End Try : Catch : Register = If(Register Is Nothing, 0, 1) : End Try : Stack.Pop()")
 							Case "pos"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
@@ -270,7 +286,7 @@ If(Debug,
 							Case "concat"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
-								indexers.Add("Register = If(TypeOf Stack.Peek() Is String, Stack.Pop() & Register, New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})).ToList())")
+								indexers.Add("Register = Concat()")
 							Case Else
 								indexers.Add("Register = (Stack.Pop())." & Match(TokenType._Variable))
 						End Select
@@ -283,7 +299,10 @@ If(Debug,
 					Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot on line {Lexer.Line}. Did you forget to bracket a dynamic indexer?")
 			End Select
 			If Not Assignment Then
-				Emit(indexers(0))
+				While indexers.Count > 0
+					Emit(indexers(0))
+					indexers.RemoveAt(0)
+				End While
 				indexers.Clear()
 			End If
 		Loop
@@ -360,7 +379,8 @@ If(Debug,
 			Case TokenType._RightAngleEquals
 				op = ">="
 			Case TokenType._Equals
-				op = "="
+				Emit("Register = If(TypeOf Stack.Peek() Is IEnumerable(Of Object), CType(Stack.Pop(), IEnumerable(Of Object)).SequenceEqual(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})), If(TypeOf Register Is IEnumerable(Of Object), {Stack.Pop()}.SequenceEqual(Register), Stack.Pop() = Register))")
+				Return
 
 			'Boolean -> Boolean
 			Case TokenType._Ampersand
