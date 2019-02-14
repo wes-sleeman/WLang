@@ -39,7 +39,7 @@
 				End Try
 
 			Case "0"c To "9"c
-				Return New IntLiteral(TakeWhileLike("#"))
+				Return New IntLiteral(TakeWhileLike("[1-9.]"))
 
 			Case """"c
 				Index += 1

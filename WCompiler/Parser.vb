@@ -69,8 +69,6 @@
 				Case Else
 					Match(TokenType._EOF)
 			End Select
-
-			If Not InFunc Then Emit("LineNumber += 1")
 		Loop
 		IndentLevel -= 1
 	End Sub
@@ -191,8 +189,16 @@
 
 	Private Sub [Return]()
 		Match(TokenType.Return)
-		Expr()
-		Emit("Return Register")
+		Try
+			Expr()
+			Emit("Return Register")
+		Catch
+			If InFunc OrElse [Lib] Then
+				Emit("Return Nothing")
+			Else
+				Emit("Return")
+			End If
+		End Try
 	End Sub
 
 	Private Sub FunctionCall()
@@ -220,7 +226,7 @@
 			End Select
 		Loop
 		Match(TokenType._RightParen)
-		Emit($"Register = If(InvokeMethod(""{funcName}"", FuncArgs), Register)")
+		Emit($"Register = InvokeMethod(""{funcName}"", FuncArgs)")
 		Emit("FuncArgs = Stack.Pop()")
 	End Sub
 End Module
