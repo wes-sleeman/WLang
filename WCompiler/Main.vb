@@ -7,6 +7,7 @@ Module Main
 		Console.WriteLine("W Compiler Version 1.4.0" & vbCrLf)
 
 #If DEBUG Then
+		args = {"Quicksort.test"}
 		If args.Length = 0 Then
 			Main({"/lib", "/noconf"}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".testlib"))).ToArray())
 			Main({""}.Concat(Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "..\..\..\Tests"))).Where(Function(in$) [in].EndsWith(".test"))).ToArray())

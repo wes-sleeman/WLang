@@ -12,3 +12,6 @@ If Sqrt(4) = Abs(-2)
 	? Types "Success!"
 	Type("Success!")
 ]
+[
+	Type("FAILED")
+]

@@ -9,14 +9,14 @@ REF 'IO', 'Util' FROM 'Runtime'
 If Args.Num <= 0
 [
 	Type("No arguments found!")
-	Exit(1)
 ]
-
-? For the number of arguments
-Repeat Args.Num
 [
-	? Print the argument at # (iteration counter)
-	Type(Args.(#))
-]
+	? For the number of arguments
+	Repeat Args.Num
+	[
+		? Print the argument at # (iteration counter)
+		Type(Args.(#))
+	]
 
-Type("Success!")
+	Type("Success!")
+]

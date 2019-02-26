@@ -39,7 +39,13 @@
 				End Try
 
 			Case "0"c To "9"c
-				Return New IntLiteral(TakeWhileLike("[1-9.]"))
+				Dim num$ = TakeWhileLike("#")
+				If Code(Index) = "."c Then
+					num &= "."
+					Index += 1
+					num &= TakeWhileLike("#")
+				End If
+				Return New IntLiteral(num)
 
 			Case """"c
 				Index += 1

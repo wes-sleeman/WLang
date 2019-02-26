@@ -78,6 +78,10 @@
       <Project>{c1e4471b-0c73-4fc9-92bf-9a8cc0252b08}</Project>
       <Name>Math</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Net\Net.vbproj">
+      <Project>{3c944f46-cbb4-44d9-8d0d-4da44e18c28d}</Project>
+      <Name>Net</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Util\Util.vbproj">
       <Project>{89ab8f73-bb38-4b22-aa89-5d782c20c6aa}</Project>
       <Name>Util</Name>
@@ -89,13 +93,21 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy $(SolutionDir)Runtime\IO\$(OutDir)Runtime.IO.dll $(TargetDir)
+
 copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
+
+copy $(SolutionDir)Runtime\Net\$(OutDir)Runtime.Net.dll $(TargetDir)
 copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
 
+
 ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll $(TargetDir)*.dll
+
 copy Runtime.dll $(SolutionDir)Runtime
+
 del $(TargetDir)*.dll
+
 del $(TargetDir)*.pdb
+
 del $(TargetDir)*.xml</PostBuildEvent>
   </PropertyGroup>
 </Project>
