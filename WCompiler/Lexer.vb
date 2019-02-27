@@ -59,7 +59,10 @@
 				Index += 1
 				Return retval
 
-			Case vbCr, vbLf, vbCrLf, Environment.NewLine
+			Case vbCr
+				Index += 1
+				Return TakeNext()
+			Case vbLf, vbCrLf, Environment.NewLine
 				Line += 1
 				Index += 1
 				Return TakeNext()

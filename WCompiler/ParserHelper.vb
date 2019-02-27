@@ -307,11 +307,14 @@ If(Debug,
 			End If
 		Loop
 		If Assignment Then
-			Dim retval = $"Variables(""{Varname}"")"
+			Dim retval = $"Variable(""{Varname}"")"
 			For Each item In indexers
 				retval &= item
 			Next
-			Emit(retval & " = Stack.Pop()")
+			Match(TokenType._Equals)
+			Expr()
+			Emit(retval & " = Register")
+			Pop()
 		End If
 	End Sub
 
