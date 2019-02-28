@@ -98,7 +98,7 @@
 		End If
 		Match(TokenType._LeftSquare)
 		Emit("Stack.Push(Register)")
-		Emit("Stack.Push(LoopEnd) : LoopEnd = Register")
+		Emit($"Stack.Push(LoopEnd){ If(inf, "", ": LoopEnd = Register")}")
 		Emit("Stack.Push(Counter) : Counter = 0")
 		Emit(If(inf, "Do", $"Do While Counter < LoopEnd"))
 		Block(InLoop:=True)
