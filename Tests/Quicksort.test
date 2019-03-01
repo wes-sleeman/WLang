@@ -6,7 +6,6 @@ Repeat 10 [ correctData = correctData.concat(#) ]
 
 If Quicksort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 
-
 Func Quicksort
 [
 	If args.num = 0 [ Return ]
