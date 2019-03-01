@@ -228,7 +228,7 @@
 			End Select
 		Loop
 		Match(TokenType._RightParen)
-		Emit($"Register = InvokeMethod(""{funcName}"", FuncArgs)")
+		Emit($"Register = _InvokeMethod(""{funcName}"", FuncArgs)")
 		Emit("FuncArgs = Stack.Pop()")
 	End Sub
 End Module

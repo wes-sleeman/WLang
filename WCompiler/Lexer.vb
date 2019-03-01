@@ -19,7 +19,11 @@
 	End Sub
 
 	Sub Advance()
-		Current = TakeNext()
+		Try
+			Current = TakeNext()
+		Catch ex As ArgumentException
+			Throw New ArgumentException($"Line {Line}: " & ex.Message)
+		End Try
 	End Sub
 
 	Private Function TakeNext() As IToken
@@ -81,11 +85,23 @@
 				Return TakeNext()
 
 			Case "<"c, ">"c
-				If Code(Index + 1) = "="c Then
+				If Index <= Code.Length AndAlso Code(Index + 1) = "="c Then
 					Index += 2
 					Return New Symbol(Code(Index - 2) & "=")
+				ElseIf Index <= Code.Length AndAlso Code(Index) = "<"c AndAlso Code(Index + 1) = "["c Then
+					Index += 2
+					Return New Symbol("<[")
 				Else
 					Index += 1
+					Return New Symbol(Code(Index - 1))
+				End If
+
+			Case "]"c, "="c
+				Index += 1
+				If Index < Code.Length AndAlso Code(Index) = ">" Then
+					Index += 1
+					Return New Symbol(Code(Index - 2) & ">")
+				Else
 					Return New Symbol(Code(Index - 1))
 				End If
 

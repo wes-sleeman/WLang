@@ -46,14 +46,14 @@ Partial Module Parser
 		Emit($"Imports System : Imports System.Collections.Generic : Imports System.Reflection
 Public Module {Filename}
 	Dim Register As Object
-	Dim Parent As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0
 	Private FuncArgs As New List(Of Object)
 	Private Variable As New Dictionary(Of String, Object)
+	Private ProjectionOutput As New List(Of Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
-	Function Concat() As List(Of Object)
+	Function _Concat() As List(Of Object)
 		If TypeOf Stack.Peek() Is String Then
 			Return If(Stack.Pop(), String.Empty) & If(Register, String.Empty)
 		Else
@@ -67,7 +67,21 @@ Public Module {Filename}
 			End If
 		End If
 	End Function
-	Function InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
+	Function _Equality(Item1 As Object, Item2 As Object) As Boolean
+		Dim a As Object() = If(TypeOf Item1 Is IEnumerable(Of Object), If(TypeOf Item1 Is Object(), Item1, Item1.ToArray()), {{Item1}})
+		Dim b As Object() = If(TypeOf Item2 Is IEnumerable(Of Object), If(TypeOf Item2 Is Object(), Item2, Item2.ToArray()), {{Item2}})
+		If a.Length <> b.Length Then Return False
+		If a.SequenceEqual(b) Then Return True
+		For i% = 0 To a.Length - 1
+			If (IsNumeric(a(i)) AndAlso IsNumeric(b(i))) OrElse (TypeOf a(i) Is String OrElse TypeOf a(i) Is Char) AndAlso (TypeOf b(i) Is String OrElse TypeOf b(i) Is Char) Then
+				If CStr(a(i)) <> CStr(b(i)) Then Return False
+			ElseIf TypeOf a(i) Is IEnumerable(Of Object) AndAlso TypeOf b(i) Is IEnumerable(Of Object) Then
+				If Not _Equality(a(i), b(i)) Then Return False
+			End If
+        Next
+		Return True
+	End Function
+	Function _InvokeMethod(name$, args As IEnumerable(Of Object)) As Object
 		Dim ArgArr = args.ToArray()
 
 		For Each type In GetType({Filename}).Assembly.GetTypes()
@@ -237,11 +251,14 @@ If(Debug,
 
 			Case TokenType._Dollar
 				Match(TokenType._Dollar)
-				Emit("Register = Parent")
+				Emit("Register = ProjectionIterator")
 
 			Case TokenType._HashSign
 				Match(TokenType._HashSign)
 				Emit("Register = Counter")
+
+			Case TokenType._LeftAngleSquare
+				Projection()
 
 			Case Else
 				Match(TokenType._LeftParen)
@@ -286,7 +303,7 @@ If(Debug,
 							Case "concat"
 								Match(TokenType._Variable)
 								Expr(inProp:=True)
-								indexers.Add("Register = Concat()")
+								indexers.Add("Register = _Concat()")
 							Case Else
 								indexers.Add("Register = (Stack.Pop())." & Match(TokenType._Variable))
 						End Select
@@ -316,6 +333,22 @@ If(Debug,
 			Emit(retval & " = Register")
 			Pop()
 		End If
+	End Sub
+
+	Private Sub Projection()
+		Match(TokenType._LeftAngleSquare)
+		Expr()
+		Push()
+		Match(TokenType._RightEqualsAngle)
+		Emit("Stack.Push(New List(Of Object)(ProjectionOutput)) : ProjectionOutput.Clear()")
+		Emit("For Each ProjectionIterator As Object In _Concat()")
+		IndentLevel += 1
+		Expr()
+		Emit("ProjectionOutput.Add(Register)")
+		IndentLevel -= 1
+		Emit("Next")
+		Emit("Register = ProjectionOutput : ProjectionOutput = Stack.Pop()")
+		Match(TokenType._RightSquareAngle)
 	End Sub
 
 	Private Sub BooleanExpr()
@@ -382,7 +415,7 @@ If(Debug,
 			Case TokenType._RightAngleEquals
 				op = ">="
 			Case TokenType._Equals
-				Emit("Register = If(TypeOf Stack.Peek() Is IEnumerable(Of Object), CType(Stack.Pop(), IEnumerable(Of Object)).SequenceEqual(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})), If(TypeOf Register Is IEnumerable(Of Object), {Stack.Pop()}.SequenceEqual(Register), Stack.Pop() = Register))")
+				Emit("Register = _Equality(Stack.Pop(), Register)")
 				Return
 
 			'Boolean -> Boolean
