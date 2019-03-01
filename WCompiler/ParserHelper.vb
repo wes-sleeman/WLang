@@ -128,16 +128,16 @@ If(Debug,
 "		Dim exMessage$() = ex.Message.Split({"" ""c }, StringSplitOptions.RemoveEmptyEntries)
 		If TypeOf ex Is InvalidCastException Then
 				Console.WriteLine(""Exception on line "" & LineNumber & "": Impossible operation on data "" & exMessage(3))
-		
+		ElseIf TypeOf ex Is TargetInvocationException Then 
+				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.InnerException.Message)
 		Else
 				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.Message)
 		End If
-		Environment.Exit(1)
 ",
 "		Console.WriteLine(""The application encountered an error. Please inform the developers."")
-		Environment.Exit(1)
 ") &
-"	End Try")
+"		Environment.Exit(1)
+	End Try")
 		If [Lib] Then
 			Emit("End Function")
 		Else
