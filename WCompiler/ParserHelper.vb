@@ -266,7 +266,7 @@ If(Debug,
 			Select Case Lexer.Current.Type
 				Case TokenType._LeftParen
 					Match(TokenType._LeftParen)
-					Expr(inProp:=True)
+					Expr()
 					Match(TokenType._RightParen)
 					If Assignment Then Push()
 					indexers.Add(If(Assignment, $"(Stack.Pop())", "Register = (Stack.Pop())(Register)"))
@@ -390,6 +390,8 @@ If(Debug,
 				op = "And"
 			Case TokenType._Pipe
 				op = "Or"
+			Case TokenType._Caret
+				op = "Xor"
 			Case TokenType.And
 				op = "AndAlso"
 			Case TokenType.Or

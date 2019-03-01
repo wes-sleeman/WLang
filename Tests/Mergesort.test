@@ -12,8 +12,8 @@ Func Mergesort
 	? An array with a single item is trivially sorted
 	If args.num <= 1 [ Return args ]
 	
-	Item left = Collect()
-	Item right = Collect()
+	Item left
+	Item right
 	
 	? Split the array in half
 	Repeat args.num
@@ -34,7 +34,7 @@ Func Mergesort
 ? Merge two arrays
 Func Merge
 [
-	Item result = Collect()
+	Item result
 	Item left = args.0
 	Item right = args.1
 	
@@ -64,4 +64,4 @@ Func Merge
 ]
 
 ? Returns the array without the first item
-Func Skip [ Item out = Collect() Repeat args.num - 1 [ out = out.concat(args.(# + 1)) ] Return out ]
+Func Skip [ Item out Repeat args.num - 1 [ out = out.concat(args.(# + 1)) ] Return out ]

@@ -27,7 +27,7 @@
             <Keywords name="Keywords1">if&#x000D;&#x000A;repeat&#x000D;&#x000A;item&#x000D;&#x000A;pause&#x000D;&#x000A;escape&#x000D;&#x000A;return&#x000D;&#x000A;</Keywords>
             <Keywords name="Keywords2">ref&#x000D;&#x000A;from&#x000D;&#x000A;public&#x000D;&#x000A;func</Keywords>
             <Keywords name="Keywords3">$&#x000D;&#x000A;#&#x000D;&#x000A;args</Keywords>
-            <Keywords name="Keywords4">true&#x000D;&#x000A;false&#x000D;&#x000A;not&#x000D;&#x000A;and&#x000D;&#x000A;or&#x000D;&#x000A;&amp;&#x000D;&#x000A;|</Keywords>
+            <Keywords name="Keywords4">true&#x000D;&#x000A;false&#x000D;&#x000A;not&#x000D;&#x000A;and&#x000D;&#x000A;or&#x000D;&#x000A;&amp;&#x000D;&#x000A;|&#x000D;&#x000A;^</Keywords>
             <Keywords name="Keywords5"></Keywords>
             <Keywords name="Keywords6"></Keywords>
             <Keywords name="Keywords7"></Keywords>
