@@ -6,9 +6,11 @@ CompExpr		= <MathExpr> { <IntOp> <MathExpr> }*
 MathExpr		= <Term> { (+ | -) <Term> }*
 Term			= <SignedFactor> { (* | / | % | \) <SignedFactor> }*
 SignedFactor	= { + | - } <Factor>
-Factor			= (<IntLiteral> | <Ident>{.<Property>} | <FunctionCall> | (<Expr>))
+Factor			= (<Projection> | <IntLiteral> | <Ident>{.<Property>} | <FunctionCall> | (<Expr>))
 IntOp			= ( > | >= | < | <= | = )
 BoolOp			= ( And / Or / & / | )
+
+Projection		= <[ <Expr> => <Expr> ]>
 
 BooleanExpr		= ( <Boolean> | Not <BooleanExpr> | <Expr> )
 Boolean			= ( True | False )

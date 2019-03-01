@@ -85,6 +85,12 @@
 					Type = TokenType._LeftParen
 				Case ")"
 					Type = TokenType._RightParen
+				Case "<["
+					Type = TokenType._LeftAngleSquare
+				Case "]>"
+					Type = TokenType._RightSquareAngle
+				Case "=>"
+					Type = TokenType._RightEqualsAngle
 
 				Case "+"
 					Type = TokenType._Cross
@@ -173,6 +179,9 @@
 		_RightSquare
 		_LeftCurly
 		_RightCurly
+		_LeftAngleSquare
+		_RightSquareAngle
+		_RightEqualsAngle
 		_Dot
 
 		'Operators
