@@ -35,8 +35,8 @@
 
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
 		IndentLevel += 1
-		If Not InFunc Then Emit("LineNumber = " & Lexer.Line)
 		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
+			Emit("LineNumber = " & Lexer.Line)
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Break()
@@ -98,7 +98,7 @@
 		End If
 		Match(TokenType._LeftSquare)
 		Emit("Stack.Push(Register)")
-		Emit("Stack.Push(LoopEnd) : LoopEnd = Register")
+		Emit($"Stack.Push(LoopEnd){ If(inf, "", ": LoopEnd = Register")}")
 		Emit("Stack.Push(Counter) : Counter = 0")
 		Emit(If(inf, "Do", $"Do While Counter < LoopEnd"))
 		Block(InLoop:=True)
@@ -177,9 +177,11 @@
 		Match(TokenType._LeftSquare)
 		IndentLevel = 2
 		Emit("Stack.Push(New Dictionary(Of String, Object)(Variable)) : Variable.Clear() : Variable(""args"") = args")
+		Emit("Dim LineNumber% = " & Lexer.Line)
 		Emit("Try")
 		Block()
-		Emit("Finally : Variable = Stack.Pop() : End Try")
+		Emit("Catch ex As Exception : Throw New Exception(""Exception on line "" & LineNumber & "": "" & If(TypeOf ex Is TargetInvocationException, ex.InnerException.Message, ex.Message))")
+		Emit("Finally : Try : Variable = Stack.Pop() : Catch : End Try : End Try")
 		Match(TokenType._RightSquare)
 		IndentLevel = 1
 		Emit($"End Function")

@@ -128,16 +128,16 @@ If(Debug,
 "		Dim exMessage$() = ex.Message.Split({"" ""c }, StringSplitOptions.RemoveEmptyEntries)
 		If TypeOf ex Is InvalidCastException Then
 				Console.WriteLine(""Exception on line "" & LineNumber & "": Impossible operation on data "" & exMessage(3))
-		
+		ElseIf TypeOf ex Is TargetInvocationException Then 
+				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.InnerException.Message)
 		Else
 				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.Message)
 		End If
-		Environment.Exit(1)
 ",
 "		Console.WriteLine(""The application encountered an error. Please inform the developers."")
-		Environment.Exit(1)
 ") &
-"	End Try")
+"		Environment.Exit(1)
+	End Try")
 		If [Lib] Then
 			Emit("End Function")
 		Else
@@ -266,7 +266,7 @@ If(Debug,
 			Select Case Lexer.Current.Type
 				Case TokenType._LeftParen
 					Match(TokenType._LeftParen)
-					Expr(inProp:=True)
+					Expr()
 					Match(TokenType._RightParen)
 					If Assignment Then Push()
 					indexers.Add(If(Assignment, $"(Stack.Pop())", "Register = (Stack.Pop())(Register)"))
@@ -390,6 +390,8 @@ If(Debug,
 				op = "And"
 			Case TokenType._Pipe
 				op = "Or"
+			Case TokenType._Caret
+				op = "Xor"
 			Case TokenType.And
 				op = "AndAlso"
 			Case TokenType.Or

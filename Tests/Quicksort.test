@@ -6,7 +6,6 @@ Repeat 10 [ correctData = correctData.concat(#) ]
 
 If Quicksort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 
-
 Func Quicksort
 [
 	If args.num = 0 [ Return ]
@@ -24,5 +23,5 @@ Func Quicksort
 		[ highlist = highlist.concat(args.(# + 1)) ]
 	]
 
-	Return Quicksort(lowlist).Concat(pivot).Concat(Quicksort(highlist))
+	Return Quicksort(lowlist).Concat(pivot).Concat(Quicksort(highlist))
 ]

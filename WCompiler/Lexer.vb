@@ -40,7 +40,7 @@
 
 			Case "0"c To "9"c
 				Dim num$ = TakeWhileLike("#")
-				If Code(Index) = "."c Then
+				If Code(Index) = "."c AndAlso Code(Index + 1) Like "#" Then
 					num &= "."
 					Index += 1
 					num &= TakeWhileLike("#")
