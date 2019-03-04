@@ -1,29 +1,22 @@
 ﻿Friend Class Lexer
 	Public Property Current As IToken
-	Dim _line% = 1
-	Public Property Line As Integer
-		Get
-			Return _line
-		End Get
-		Private Set(value As Integer)
-			_line = value
-		End Set
-	End Property
 
-	Private ReadOnly Code As String
-	Private Index As Integer = 0
+	Private Code As String = String.Empty
+	Public Property Index As Integer = 0
 
-	Sub New(Code$)
+	Public Sub Reset(Code$)
 		Me.Code = Code
+		Index = 0
 		Advance()
 	End Sub
 
-	Sub Advance()
-		Try
-			Current = TakeNext()
-		Catch ex As ArgumentException
-			Throw New ArgumentException($"Line {Line}: " & ex.Message)
-		End Try
+	Public Sub Feed(Code$)
+		Me.Code &= Environment.NewLine & Code
+		If Current.Type = TokenType._EOF Then Advance()
+	End Sub
+
+	Public Sub Advance()
+		Current = TakeNext()
 	End Sub
 
 	Private Function TakeNext() As IToken
@@ -49,7 +42,7 @@
 
 			Case "0"c To "9"c
 				Dim num$ = TakeWhileNumeric()
-				If Code(Index) = "."c AndAlso IsNumeric(Code(Index + 1)) Then
+				If Index < Code.Length - 1 AndAlso Code(Index) = "."c AndAlso IsNumeric(Code(Index + 1)) Then
 					num &= "."
 					Index += 1
 					num &= TakeWhileNumeric()
@@ -68,12 +61,8 @@
 				Index += 1
 				Return retval
 
-			Case vbCr
+			Case vbCr, vbLf, vbCrLf, Environment.NewLine
 				Index += 1
-				Return TakeNext()
-			Case vbLf, vbCrLf, Environment.NewLine
-				Index += 1
-				Line += 1
 				Return TakeNext()
 
 			Case vbTab, " "c

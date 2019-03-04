@@ -94,19 +94,27 @@
   <PropertyGroup>
     <PostBuildEvent>copy $(SolutionDir)Runtime\IO\$(OutDir)Runtime.IO.dll $(TargetDir)
 
+
 copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
 
+
 copy $(SolutionDir)Runtime\Net\$(OutDir)Runtime.Net.dll $(TargetDir)
+
 copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
+
 
 
 ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll $(TargetDir)*.dll
 
+
 copy Runtime.dll $(SolutionDir)Runtime
+
 
 del $(TargetDir)*.dll
 
+
 del $(TargetDir)*.pdb
+
 
 del $(TargetDir)*.xml</PostBuildEvent>
   </PropertyGroup>

@@ -4,7 +4,7 @@ Module Main
 	Sub Main(args As String())
 		Dim VBCPATH$ = GetVBCPath()
 
-		Console.WriteLine("W Compiler Version 1.5.0" & vbCrLf)
+		Console.WriteLine("W 1.5.1 Compiler" & vbCrLf)
 
 #If DEBUG Then
 		If args.Length = 0 Then

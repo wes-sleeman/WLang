@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>WInteractive</RootNamespace>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>wi</AssemblyName>
+    <PreBuildEvent></PreBuildEvent>
+    <PostBuildEvent>del Runtime.dll
+
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Runtime.dll</PostBuildEvent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Runtime">
+      <HintPath>bin\Debug\netcoreapp3.0\Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
