@@ -7,6 +7,7 @@
 	Private Filename As String
 	Private [Lib] As Boolean
 	Private Debug As Boolean
+	Private InFunc As Boolean = False
 
 	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean, debugBuild As Boolean) As String()
 		References = String.Empty
@@ -223,7 +224,7 @@
 					Match(TokenType._Comma)
 
 				Case Else
-					Expr()
+					BooleanExpr()
 					Emit("FuncArgs.Add(If(TypeOf Register Is List(Of Object), Register.ToArray(), Register))")
 			End Select
 		Loop

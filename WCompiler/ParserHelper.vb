@@ -29,7 +29,6 @@ Partial Module Parser
 		End If
 	End Sub
 
-	Private InFunc As Boolean = False
 	Private Sub Emit(output$)
 		Dim tabBuffer$ = String.Empty
 		For cntr% = 1 To IndentLevel
@@ -53,9 +52,9 @@ Public Module {Filename}
 	Private ProjectionOutput As New List(Of Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
-	Function _Concat() As List(Of Object)
+	Function _Concat() As Object
 		If TypeOf Stack.Peek() Is String Then
-			Return If(Stack.Pop(), String.Empty) & If(Register, String.Empty)
+			Return If(Stack.Pop(), String.Empty).ToString() & If(Register, String.Empty).ToString()
 		Else
 			If Stack.Peek() Is Nothing Then
 				Stack.Pop()

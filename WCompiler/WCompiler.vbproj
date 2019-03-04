@@ -156,6 +156,7 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>del $(TargetDir)Runtime.dll
+
 copy $(SolutionDir)Runtime\Runtime.dll $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
 </Project>
