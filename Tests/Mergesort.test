@@ -28,15 +28,7 @@ Func Mergesort
 	right = Mergesort(right)
 	
 	? Merge the two halves
-	Return Merge(left, right)
-]
-
-? Merge two arrays
-Func Merge
-[
 	Item result
-	Item left = args.0
-	Item right = args.1
 	
 	Repeat
 	[

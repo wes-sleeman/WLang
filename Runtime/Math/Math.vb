@@ -3,12 +3,28 @@ Public Module Math
 		Return System.Math.Abs(Value)
 	End Function
 
+	Public Function Cos(Value As Object) As Object
+		Return System.Math.Cos(Value)
+	End Function
+
+	Public Function Degrees(Radians As Object) As Object
+		Return Radians * (180.0 / System.Math.PI)
+	End Function
+
 	Public Function Log(Value As Object, Base As Object) As Object
 		Return System.Math.Log(Value, Base)
 	End Function
 
 	Public Function Pow(Base As Object, Exponent As Object) As Object
 		Return System.Math.Pow(Base, If(System.Math.Round(Exponent) = Exponent, Exponent, CLng(Exponent)))
+	End Function
+
+	Public Function Radians(Degrees As Object) As Object
+		Return System.Math.PI * Degrees / 180.0
+	End Function
+
+	Public Function Sin(Value As Object) As Object
+		Return System.Math.Sin(Value)
 	End Function
 
 	Public Function Sqrt(Value As Object) As Object
@@ -29,5 +45,9 @@ Public Module Math
 			End If
 		Next
 		Return retval
+	End Function
+
+	Public Function Tan(Value As Object) As Object
+		Return System.Math.Tan(Value)
 	End Function
 End Module
