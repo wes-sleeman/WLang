@@ -138,6 +138,7 @@ Partial Public Class Engine
 		Match(TokenType._RightParen)
 		If Functions.ContainsKey(funcName.ToLower()) Then
 			ExecFunc(funcName.ToLower(), FuncArgs)
+			FuncArgs = Stack.Pop()
 		Else
 			Dim ArgArr = FuncArgs.ToArray()
 			For Each type In Types

@@ -155,17 +155,22 @@ Partial Public Class Engine
 		Match(TokenType._LeftAngleSquare)
 		Expr()
 		Push()
+
+		Dim lexerCache = Lexer.Index
 		Match(TokenType._RightEqualsAngle)
 		Stack.Push(New List(Of Object)(ProjectionOutput))
 		ProjectionOutput.Clear()
-		For Each PI As Object In _Concat()
+		For Each PI As Object In CType(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register}), IEnumerable(Of Object)).ToList()
 			ProjectionIterator = PI
+			Lexer.Index = lexerCache
+			Lexer.Advance()
 			Expr()
 			ProjectionOutput.Add(Register)
 		Next
 		Register = ProjectionOutput
 		ProjectionOutput = Stack.Pop()
 		Match(TokenType._RightSquareAngle)
+		Pop()
 	End Sub
 
 	Private Sub Push()
