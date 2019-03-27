@@ -12,13 +12,13 @@ Public Module Net
 		End Using
 	End Function
 
-	Public Sub Wpost(Data() As Object)
-		Using cli As New WebClient()
-			Try
-				cli.UploadString(Data(0), FormatArray(Data.Skip(1).ToArray()))
-			Catch
-				cli.UploadString("http://" & Data(0), FormatArray(Data.Skip(1).ToArray()))
-			End Try
-		End Using
-	End Sub
+    Public Function Wpost(Data() As Object) As Object
+        Using cli As New WebClient()
+            Try
+                Return cli.UploadString(Data(0), FormatArray(Data.Skip(1).ToArray()))
+            Catch
+                Return cli.UploadString("http://" & Data(0), FormatArray(Data.Skip(1).ToArray()))
+            End Try
+        End Using
+    End Function
 End Module
