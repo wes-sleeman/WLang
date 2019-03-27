@@ -3,23 +3,25 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28516.95
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "WCompiler", "WCompiler\WCompiler.vbproj", "{21F5F769-59AC-433B-99B8-4858FD5D1C06}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Compiler", "WCompiler\W.Compiler.vbproj", "{21F5F769-59AC-433B-99B8-4858FD5D1C06}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Runtime", "Runtime", "{038FB511-8882-45E2-BF6A-2FFAA0CCA0EA}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "IO", "Runtime\IO\IO.vbproj", "{3D727E63-90BD-4718-83D3-40ECAC83DF72}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime.IO", "Runtime\IO\W.Runtime.IO.vbproj", "{3D727E63-90BD-4718-83D3-40ECAC83DF72}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Math", "Runtime\Math\Math.vbproj", "{C1E4471B-0C73-4FC9-92BF-9A8CC0252B08}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime.Math", "Runtime\Math\W.Runtime.Math.vbproj", "{C1E4471B-0C73-4FC9-92BF-9A8CC0252B08}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Runtime", "Runtime\Runtime\Runtime.vbproj", "{DA86716D-5C5D-4F53-B190-205B43FFE6B8}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime", "Runtime\Runtime\W.Runtime.vbproj", "{DA86716D-5C5D-4F53-B190-205B43FFE6B8}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Util", "Runtime\Util\Util.vbproj", "{89AB8F73-BB38-4B22-AA89-5D782C20C6AA}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime.Util", "Runtime\Util\W.Runtime.Util.vbproj", "{89AB8F73-BB38-4B22-AA89-5D782C20C6AA}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Net", "Runtime\Net\Net.vbproj", "{3C944F46-CBB4-44D9-8D0D-4DA44E18C28D}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime.Net", "Runtime\Net\W.Runtime.Net.vbproj", "{3C944F46-CBB4-44D9-8D0D-4DA44E18C28D}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Shared", "Runtime\Shared\Shared.vbproj", "{D188396E-C0A6-4060-A226-C27908E4351A}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Runtime.Shared", "Runtime\Shared\W.Runtime.Shared.vbproj", "{D188396E-C0A6-4060-A226-C27908E4351A}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "WInteractive", "WInteractive\WInteractive.vbproj", "{E75F5B7C-14C6-4FCD-AFCE-E936FF5D18A8}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "W.Interactive", "WInteractive\W.Interactive.vbproj", "{E75F5B7C-14C6-4FCD-AFCE-E936FF5D18A8}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "W.Engine", "W.Engine\W.Engine.vbproj", "{6EFBB4DC-C702-4800-A635-68942226C68F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +61,10 @@ Global
 		{E75F5B7C-14C6-4FCD-AFCE-E936FF5D18A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E75F5B7C-14C6-4FCD-AFCE-E936FF5D18A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E75F5B7C-14C6-4FCD-AFCE-E936FF5D18A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFBB4DC-C702-4800-A635-68942226C68F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFBB4DC-C702-4800-A635-68942226C68F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFBB4DC-C702-4800-A635-68942226C68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFBB4DC-C702-4800-A635-68942226C68F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

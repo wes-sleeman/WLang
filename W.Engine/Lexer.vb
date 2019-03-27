@@ -4,6 +4,23 @@
 	Private Code As String = String.Empty
 	Public Property Index As Integer = 0
 
+	Public Sub New() : End Sub
+
+	Public Sub New(Code$)
+		Reset(Code)
+	End Sub
+
+	Public Sub New(other As Lexer)
+		other.Copy(onto:=Me)
+	End Sub
+
+	Public Function Copy(Optional onto As Lexer = Nothing) As Lexer
+		If onto Is Nothing Then onto = New Lexer()
+		onto.Reset(Code)
+		Do Until onto.Index = Index : onto.Advance() : Loop
+		Return onto
+	End Function
+
 	Public Sub Reset(Code$)
 		Me.Code = Code
 		Index = 0

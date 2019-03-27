@@ -11,8 +11,8 @@
 				Try
 					[Boolean]()
 				Catch ex As ArgumentException
-					Expr()
-				End Try
+                    Expr()
+                End Try
 			Catch ex As ArgumentException When recursionDepth < recursionLimit
 				BooleanExpr(recursionDepth + 1, recursionLimit)
 				Push()

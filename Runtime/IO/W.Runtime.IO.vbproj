@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3C944F46-CBB4-44D9-8D0D-4DA44E18C28D}</ProjectGuid>
+    <ProjectGuid>{3D727E63-90BD-4718-83D3-40ECAC83DF72}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Runtime</RootNamespace>
-    <AssemblyName>Runtime.Net</AssemblyName>
+    <AssemblyName>Runtime.IO</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
@@ -19,7 +19,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>Runtime.Net.xml</DocumentationFile>
+    <DocumentationFile>Runtime.IO.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -28,7 +28,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>Runtime.Net.xml</DocumentationFile>
+    <DocumentationFile>Runtime.IO.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -64,7 +64,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Net.vb" />
+    <Compile Include="IO.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -101,9 +101,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Shared\Shared.vbproj">
+    <ProjectReference Include="..\Shared\W.Runtime.Shared.vbproj">
       <Project>{d188396e-c0a6-4060-a226-c27908e4351a}</Project>
-      <Name>Shared</Name>
+      <Name>W.Runtime.Shared</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

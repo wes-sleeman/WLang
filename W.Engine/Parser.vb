@@ -75,7 +75,7 @@ Partial Public Class Engine
 
 	Private Sub ExecFunc(name$, args As Object)
 		Dim lexCache = Lexer
-		Lexer = New Lexer
+		Lexer = New Lexer(Lexer)
 
 		Stack.Push(New Dictionary(Of String, Object)(Variable))
 		Variable.Clear()
@@ -96,7 +96,15 @@ Partial Public Class Engine
 		Dim inFuncCache As Boolean = InFunc
 		InFunc = True
 		Dim code$ = String.Empty
+
+		If Lexer.Current.Type = TokenType._EOF Then
+			GetBlock()
+		End If
 		Match(TokenType._LeftSquare)
+		If Lexer.Current.Type = TokenType._EOF Then
+			GetBlock()
+		End If
+
 		Dim squareCount% = 0
 		Do Until Lexer.Current.Type = TokenType._EOF
 			If Lexer.Current.Type = TokenType._LeftSquare Then squareCount += 1

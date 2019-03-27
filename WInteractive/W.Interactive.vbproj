@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>WInteractive</RootNamespace>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>wi</AssemblyName>
+    <PreBuildEvent></PreBuildEvent>
+    <PostBuildEvent></PostBuildEvent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\W.Engine\W.Engine.vbproj" />
+  </ItemGroup>
+
+</Project>

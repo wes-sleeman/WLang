@@ -51,15 +51,15 @@
 
 	Public Function Eval(Code$) As String
 		Try
-			Try
-				Lexer.Reset(Code)
-				Block()
-			Catch Ex As ArgumentException
-				Lexer.Reset(Code)
-				BooleanExpr()
-			End Try
-			Return FormatOutput({If(Register, String.Empty)})
-		Catch ex As Exception
+            Try
+                Lexer.Reset(Code)
+                Block()
+            Catch Ex As ArgumentException
+                Lexer.Reset(Code)
+                BooleanExpr()
+            End Try
+            Return FormatOutput({If(Register, String.Empty)})
+        Catch ex As Exception
 				Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
 				Throw New Exception("Impossible operation on data")

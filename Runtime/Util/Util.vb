@@ -7,6 +7,10 @@
 		Return Data.ToList()
 	End Function
 
+	Public Function Dedup(ParamArray Data() As Object) As Object
+		Return Data.ToHashSet()
+	End Function
+
 	Public Function Thread(ParamArray Data() As Object) As Object
 		Dim Separator = Data(0)
 		Data = Data.Skip(1).ToArray()
