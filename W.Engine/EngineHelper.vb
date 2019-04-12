@@ -158,7 +158,6 @@ Partial Public Class Engine
 	Private Sub Projection()
 		Match(TokenType._LeftAngleSquare)
 		Expr()
-		Push()
 
 		Dim lexerCache = Lexer.Index
 		Match(TokenType._RightEqualsAngle)
@@ -174,7 +173,6 @@ Partial Public Class Engine
 		Register = ProjectionOutput
 		ProjectionOutput = Stack.Pop()
 		Match(TokenType._RightSquareAngle)
-		Pop()
 	End Sub
 
 	Private Sub Push()

@@ -2,10 +2,11 @@
 Imports System.Runtime.CompilerServices
 Imports System.Runtime.InteropServices
 
-Module Main
+Public Module Main
 	Sub Main(args As String())
 		Console.WriteLine($"W {Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString().Split({"."c}, StringSplitOptions.RemoveEmptyEntries).Take(3).Aggregate(Function(i, s) i & "." & s)} Compiler" & vbCrLf)
 
+		args = args.Select(Function(s$) If(s.StartsWith("-"), "/" & s.TrimStart({"-"c}), s)).ToArray()
 #If DEBUG Then
 		If args.Length = 0 Then
 			Main({"tmp.w"})

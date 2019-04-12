@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>WInteractive</RootNamespace>
+    <RootNamespace>W.Interactive</RootNamespace>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>wi</AssemblyName>
     <PreBuildEvent></PreBuildEvent>

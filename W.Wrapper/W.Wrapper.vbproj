@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>W.Wrapper</RootNamespace>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>W</AssemblyName>
+    <Version>2.0.0</Version>
+    <Authors>Weston Sleeman</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\W.Compiler\W.Compiler.vbproj" />
+    <ProjectReference Include="..\W.Interactive\W.Interactive.vbproj" />
+  </ItemGroup>
+
+</Project>
