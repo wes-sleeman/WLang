@@ -31,7 +31,7 @@ Public Module Math
 		Return System.Math.Sqrt(Value)
 	End Function
 
-	Public Function Sum(Data() As Object) As Object
+	Public Function Sum(ParamArray Data() As Object) As Object
 		Dim retval As Object = 0
 		For Each item In Data
 			If TypeOf item Is String OrElse TypeOf item IsNot IEnumerable(Of Object) Then

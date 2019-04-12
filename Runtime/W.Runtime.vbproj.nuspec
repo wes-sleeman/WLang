@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>W.Runtime</id>
+    <version>1.5.1</version>
+    <authors>Weston Sleeman</authors>
+    <owners>Weston Sleeman</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>The standard runtime for the W programming language</description>
+    <copyright>Copyright 2019</copyright>
+    <tags>W programming language</tags>
+  </metadata>
+  <files>
+      <file src="Runtime.dll" target="lib/net472" />
+  </files>
+</package>

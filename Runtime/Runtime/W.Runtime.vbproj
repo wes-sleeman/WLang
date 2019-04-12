@@ -1,121 +1,48 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{DA86716D-5C5D-4F53-B190-205B43FFE6B8}</ProjectGuid>
-    <OutputType>Exe</OutputType>
     <RootNamespace>Runtime</RootNamespace>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>Runtime</AssemblyName>
-    <FileAlignment>512</FileAlignment>
-    <MyType>Empty</MyType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
+    <PostBuildEvent>copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\IO\bin\Debug\Runtime.IO.dll 
+
+
+
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Math\bin\Debug\Runtime.Math.dll 
+
+
+
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Net\bin\Debug\Runtime.Net.dll 
+
+
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Util\bin\Debug\Runtime.Util.dll 
+
+
+
+
+ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll *.dll
+
+
+
+copy Runtime.dll D:\OneDrive\Programming\Compilers\WCompiler\Runtime
+
+
+
+del *.xml</PostBuildEvent>
+    <PackageId>W.Runtime</PackageId>
+    <Authors>Weston Sleeman</Authors>
+    <Company>Weston Sleeman</Company>
+    <Product>W.Runtime</Product>
+    <Description>The standard runtime for the W programming language.</Description>
+    <Copyright>Copyright 2019</Copyright>
+    <Version>1.5.1.1</Version>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>
-    </DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <DefineDebug>false</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>
-    </DocumentationFile>
-    <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionExplicit>On</OptionExplicit>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionCompare>Binary</OptionCompare>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionStrict>Off</OptionStrict>
-  </PropertyGroup>
-  <PropertyGroup>
-    <OptionInfer>On</OptionInfer>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Runtime.Build</StartupObject>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Import Include="Microsoft.VisualBasic" />
-    <Import Include="System" />
+    <ProjectReference Include="..\IO\W.Runtime.IO.vbproj" />
+    <ProjectReference Include="..\Math\W.Runtime.Math.vbproj" />
+    <ProjectReference Include="..\Net\W.Runtime.Net.vbproj" />
+    <ProjectReference Include="..\Util\W.Runtime.Util.vbproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="My Project\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IO\W.Runtime.IO.vbproj">
-      <Project>{3d727e63-90bd-4718-83d3-40ecac83df72}</Project>
-      <Name>W.Runtime.IO</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Math\W.Runtime.Math.vbproj">
-      <Project>{c1e4471b-0c73-4fc9-92bf-9a8cc0252b08}</Project>
-      <Name>W.Runtime.Math</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Net\W.Runtime.Net.vbproj">
-      <Project>{3c944f46-cbb4-44d9-8d0d-4da44e18c28d}</Project>
-      <Name>W.Runtime.Net</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Util\W.Runtime.Util.vbproj">
-      <Project>{89ab8f73-bb38-4b22-aa89-5d782c20c6aa}</Project>
-      <Name>W.Runtime.Util</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Build.vb" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>copy $(SolutionDir)Runtime\IO\$(OutDir)Runtime.IO.dll $(TargetDir)
 
-
-copy $(SolutionDir)Runtime\Math\$(OutDir)Runtime.Math.dll $(TargetDir)
-
-
-copy $(SolutionDir)Runtime\Net\$(OutDir)Runtime.Net.dll $(TargetDir)
-
-copy $(SolutionDir)Runtime\Util\$(OutDir)Runtime.Util.dll $(TargetDir)
-
-
-
-ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll $(TargetDir)*.dll
-
-
-copy Runtime.dll $(SolutionDir)Runtime
-
-
-del $(TargetDir)*.dll
-
-
-del $(TargetDir)*.pdb
-
-
-del $(TargetDir)*.xml</PostBuildEvent>
-  </PropertyGroup>
 </Project>

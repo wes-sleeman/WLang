@@ -1,17 +1,17 @@
 ﻿Partial Public Class Engine
-	Private ReadOnly Functions As New Dictionary(Of String, String)
-	Private Lexer As New Lexer
-	Private InFunc As Boolean = False
-	Private ReadOnly Varlist As New List(Of String)
+    Private ReadOnly Functions As New Dictionary(Of String, String)
+    Private Lexer As New Lexer
+    Private InFunc As Boolean = False
+    Private ReadOnly Varlist As New List(Of String)
 
-	Private Register As Object
-	Private Counter% = 0
-	Private LoopEnd% = 0
-	Private FuncArgs As New List(Of Object)
-	Private Variable As New Dictionary(Of String, Object)
-	Private ProjectionOutput As New List(Of Object)
-	Private ReadOnly Stack As New Stack(Of Object)
-	Private ReadOnly Types As New List(Of Type)
+    Private Register As Object
+    Private Counter% = 0
+    Private LoopEnd% = 0
+    Private FuncArgs As New List(Of Object)
+    Private Variable As New Dictionary(Of String, Object)
+    Private ProjectionOutput As New List(Of Object)
+    Private ReadOnly Stack As New Stack(Of Object)
+    Private ReadOnly Types As New List(Of Type)
 
 #Disable Warning IDE1006 ' Naming Styles
 	Private Function _Concat() As Object
@@ -49,18 +49,23 @@
 		AddLib("Runtime")
 	End Sub
 
+	Public Sub New([Imports]() As Type)
+		Me.New()
+		Types.AddRange([Imports])
+	End Sub
+
 	Public Function Eval(Code$) As String
 		Try
-            Try
-                Lexer.Reset(Code)
-                Block()
-            Catch Ex As ArgumentException
-                Lexer.Reset(Code)
-                BooleanExpr()
-            End Try
-            Return FormatOutput({If(Register, String.Empty)})
-        Catch ex As Exception
-				Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
+			Try
+				Lexer.Reset(Code)
+				Block()
+			Catch Ex As ArgumentException
+				Lexer.Reset(Code)
+				BooleanExpr()
+			End Try
+			Return FormatOutput({If(Register, String.Empty)})
+		Catch ex As Exception
+			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
 				Throw New Exception("Impossible operation on data")
 			ElseIf TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then

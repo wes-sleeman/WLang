@@ -15,10 +15,10 @@
 		functionBuffer = New List(Of String)
 		Parser.Lexer = Lexer
 
-		While filename.Contains(".") OrElse filename(0) Like "#"
+		While filename.Contains(".") OrElse Char.IsNumber(filename(0))
 			filename = filename.Trim()
 			If filename.Contains("."c) Then filename = filename.Substring(0, filename.IndexOf("."c))
-			If filename(0) Like "#" Then filename = filename.Substring(1)
+			If Char.IsNumber(filename(0)) Then filename = filename.Substring(1)
 		End While
 
 		Parser.Filename = filename

@@ -1,5 +1,5 @@
-﻿Module Build
-	Public Sub Main()
-		End
-	End Sub
+Module Build
+    Public Sub Main()
+        Environment.Exit(0)
+    End Sub
 End Module

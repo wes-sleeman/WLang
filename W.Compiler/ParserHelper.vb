@@ -43,7 +43,7 @@ Partial Module Parser
 
 	Private Sub Setup()
 		Emit($"Imports System : Imports System.Collections.Generic : Imports System.Reflection
-Public Module {Filename}
+Module {Filename}
 	Dim Register As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0
@@ -169,7 +169,7 @@ If(Debug,
 	Private Sub Expr(Optional inProp As Boolean = False)
 		CompExpr(inProp)
 
-		While Lexer.Current.Value Like "[|&]" OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
+		While "|&".Contains(Lexer.Current.Value) OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -181,7 +181,7 @@ If(Debug,
 	Private Sub CompExpr(inProp As Boolean)
 		MathExpr(inProp)
 
-		While Lexer.Current.Value Like "[<>]=" OrElse Lexer.Current.Value Like "[<>=]"
+		While {">", "<", "=", ">=", "<="}.Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -193,7 +193,7 @@ If(Debug,
 	Private Sub MathExpr(inProp As Boolean)
 		Term(inProp)
 
-		While Lexer.Current.Value Like "[+-]"
+		While "+-".Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -205,7 +205,7 @@ If(Debug,
 	Private Sub Term(inProp As Boolean)
 		SignedFactor(inProp)
 
-		While Lexer.Current.Value Like "[*/%\]"
+		While "*/%\".Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -216,7 +216,7 @@ If(Debug,
 
 	Private Sub SignedFactor(inProp As Boolean)
 		Dim op = TokenType._Cross
-		If Lexer.Current.Value Like "[+-]" Then
+		If "+-".Contains(Lexer.Current.Value) Then
 			op = Lexer.Current.Type
 			Match(op)
 		End If

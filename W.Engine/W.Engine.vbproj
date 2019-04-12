@@ -1,18 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <RootNamespace>W.Engine</RootNamespace>
     <TargetFramework>netcoreapp3.0</TargetFramework>
-    <PostBuildEvent>del Runtime.dll
-
-
-copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Runtime.dll</PostBuildEvent>
+    <Authors>Weston Sleeman</Authors>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Description>An interpreting engine for the W programming language.</Description>
+    <PackageProjectUrl>https://github.com/wessupermare/WCompiler/wiki</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wessupermare/WCompiler</RepositoryUrl>
+    <PackageTags>interpreter W programming</PackageTags>
+    <Version>1.5.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Runtime">
-      <HintPath>bin\Debug\netcoreapp3.0\Runtime.dll</HintPath>
-    </Reference>
+    <PackageReference Include="W.Runtime" Version="1.5.1.2" />
   </ItemGroup>
 
 </Project>
