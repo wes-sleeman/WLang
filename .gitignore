@@ -347,3 +347,4 @@ healthchecksdb
 Tests/*.vb
 Tests/*.exe
 Tests/*.dll
+*.nuspec
