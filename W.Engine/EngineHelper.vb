@@ -99,60 +99,60 @@ Partial Public Class Engine
 	End Function
 
 	Private Sub Pop(Optional optype As TokenType? = Nothing)
-        If optype Is Nothing Then
-            Register = Stack.Pop()
-            Return
-        End If
-        If Stack.Peek Is Nothing Then
-            Stack.Pop()
-            Stack.Push(False)
-        End If
-        Select Case optype.Value
-            'Numeric -> Numeric type operators
-            Case TokenType._Cross
-                Dim res As Double = 0
-                If Double.TryParse(Stack.Peek().ToString(), res) Then
-                    Stack.Pop()
-                    Register = res + Register
-                Else
-                    Register = Stack.Pop() + Register
-                End If
-            Case TokenType._Hyphen
-                Register = Stack.Pop() - Register
-            Case TokenType._Asterisk
-                Register = Stack.Pop() * Register
-            Case TokenType._Slash
-                Register = Stack.Pop() / Register
-            Case TokenType._BackSlash
-                Register = Stack.Pop() \ Register
-            Case TokenType._Percent
-                Register = Stack.Pop() Mod Register
+		If optype Is Nothing Then
+			Register = Stack.Pop()
+			Return
+		End If
+		If Stack.Peek Is Nothing Then
+			Stack.Pop()
+			Stack.Push(False)
+		End If
+		Select Case optype.Value
+			'Numeric -> Numeric type operators
+			Case TokenType._Cross
+				Dim res As Double = 0
+				If Double.TryParse(Stack.Peek().ToString(), res) Then
+					Stack.Pop()
+					Register = res + Register
+				Else
+					Register = Stack.Pop() + Register
+				End If
+			Case TokenType._Hyphen
+				Register = Stack.Pop() - Register
+			Case TokenType._Asterisk
+				Register = Stack.Pop() * Register
+			Case TokenType._Slash
+				Register = Stack.Pop() / Register
+			Case TokenType._BackSlash
+				Register = Stack.Pop() \ Register
+			Case TokenType._Percent
+				Register = Stack.Pop() Mod Register
 
-            'Numeric -> Boolean
-            Case TokenType._LeftAngle
-                Register = Stack.Pop() < Register
-            Case TokenType._LeftAngleEquals
-                Register = Stack.Pop() <= Register
-            Case TokenType._RightAngle
-                Register = Stack.Pop() > Register
-            Case TokenType._RightAngleEquals
-                Register = Stack.Pop() >= Register
-            Case TokenType._Equals
-                Register = _Equality(Stack.Pop(), Register)
+			'Numeric -> Boolean
+			Case TokenType._LeftAngle
+				Register = Stack.Pop() < Register
+			Case TokenType._LeftAngleEquals
+				Register = Stack.Pop() <= Register
+			Case TokenType._RightAngle
+				Register = Stack.Pop() > Register
+			Case TokenType._RightAngleEquals
+				Register = Stack.Pop() >= Register
+			Case TokenType._Equals
+				Register = _Equality(Stack.Pop(), Register)
 
-            'Boolean -> Boolean
-            Case TokenType._Ampersand
-                Register = Stack.Pop() And Register
-            Case TokenType._Pipe
-                Register = Stack.Pop() Or Register
-            Case TokenType._Caret
-                Register = Stack.Pop() Xor Register
-            Case TokenType.And
-                Register = Stack.Pop() AndAlso Register
-            Case TokenType.Or
-                Register = Stack.Pop() OrElse Register
-        End Select
-    End Sub
+			'Boolean -> Boolean
+			Case TokenType._Ampersand
+				Register = Stack.Pop() And Register
+			Case TokenType._Pipe
+				Register = Stack.Pop() Or Register
+			Case TokenType._Caret
+				Register = Stack.Pop() Xor Register
+			Case TokenType.And
+				Register = Stack.Pop() AndAlso Register
+			Case TokenType.Or
+				Register = Stack.Pop() OrElse Register
+		End Select
+	End Sub
 
 	Private ProjectionIterator As Object
 	Private Sub Projection()

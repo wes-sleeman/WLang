@@ -4,6 +4,7 @@
 	End Sub
 
 	Public Function Collect(ParamArray Data() As Object) As Object
+		If Data Is Nothing Then Return New List(Of Object)
 		Return Data.ToList()
 	End Function
 

@@ -91,6 +91,7 @@
 				retval.Add(Sterilise(item))
 			End If
 		Next
+		If retval.Count = 0 Then Return String.Empty
 		If retval.Count = 1 Then Return retval(0)
 		Return Runtime.Thread({", "}.Concat(retval).ToArray())
 	End Function
