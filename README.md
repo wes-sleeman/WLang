@@ -9,7 +9,7 @@ Installing W is easy! Follow the steps to get W working in no-time.
   2. Extract the file to the location of your choice.  
   3. (Windows only) _Double click_ (do not execute from the command line) Install.exe (may require admin privileges) to add the current directory to the user's PATH.  
   4. (Debian only) Install the provided `*.deb` file with `dpkg -i`.
-  5. Run the command `W` to insure setup completed successfully.
+  5. Run the command `W` to ensure setup completed successfully.
   5. Enjoy!   
 ---  
 ##  Getting Started  
