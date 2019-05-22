@@ -7,6 +7,7 @@
     <AssemblyName>wi</AssemblyName>
     <PreBuildEvent></PreBuildEvent>
     <PostBuildEvent></PostBuildEvent>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

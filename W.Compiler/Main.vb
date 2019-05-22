@@ -84,7 +84,7 @@ Public Module Main
 		If Not cross Then
 			Dim outpath$ = Path.ChangeExtension(Path.GetFullPath(executableFile), ".dll")
 			Console.WriteLine($"Compiling to {outpath}.")
-			Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.0 -v n -o {Path.GetDirectoryName(outpath)}".Exec()
+			Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.0 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
 
 			'Clean up
 			If debug Then File.Delete(Path.ChangeExtension(outpath, ".pdb"))
@@ -96,7 +96,7 @@ Public Module Main
 			If stdout.Contains("Build succeeded.") Then
 				If Not norun Then
 					Console.WriteLine("Running…")
-					Process.Start("dotnet", outpath)
+					Process.Start("dotnet", """" & outpath & """")
 				End If
 			Else
 				Console.WriteLine(stdout)
@@ -119,7 +119,7 @@ Public Module Main
 			proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "cmd.exe",
-				.Arguments = $"/C ""{escapedargs}""",
+				.Arguments = $"/C {escapedargs}",
 				.RedirectStandardOutput = True,
 				.UseShellExecute = False,
 				.CreateNoWindow = True
@@ -128,7 +128,7 @@ Public Module Main
 			proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "/bin/bash",
-				.Arguments = $"-c ""{escapedargs}""",
+				.Arguments = $"-c '{escapedargs}'",
 				.RedirectStandardOutput = True,
 				.UseShellExecute = False,
 				.CreateNoWindow = True
