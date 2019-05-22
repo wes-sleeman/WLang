@@ -59,6 +59,7 @@
 			Try
 				Lexer.Reset(Code)
 				Block()
+				Register = Nothing
 			Catch Ex As ArgumentException
 				Lexer.Reset(Code)
 				BooleanExpr()

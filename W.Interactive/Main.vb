@@ -1,6 +1,6 @@
 Public Module Program
 	Sub Main(args As String())
-		Console.WriteLine($"W {Reflection.Assembly.GetAssembly(GetType(Runtime.Util)).GetName().Version.ToString().Split({"."c}, StringSplitOptions.RemoveEmptyEntries).Take(3).Aggregate(Function(i, s) i & "." & s)} Interactive")
+		Console.WriteLine($"W {Reflection.Assembly.GetAssembly(GetType(Engine.Engine)).GetName().Version.ToString().Split({"."c}, StringSplitOptions.RemoveEmptyEntries).Take(3).Aggregate(Function(i, s) i & "." & s)} Interactive")
 		Dim ExecutionEngine As New Engine.Engine()
 
 		Dim killflag As Boolean = False
