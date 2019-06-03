@@ -1,19 +1,32 @@
 ﻿Partial Public Class Engine
-    Private ReadOnly Functions As New Dictionary(Of String, String)
-    Private Lexer As New Lexer
-    Private InFunc As Boolean = False
-    Private ReadOnly Varlist As New List(Of String)
+	Private ReadOnly Functions As New Dictionary(Of String, String)
+	Private Lexer As New Lexer
+	Private InFunc As Boolean = False
+	Private ReadOnly Varlist As New List(Of String)
 
-    Private Register As Object
-    Private Counter% = 0
-    Private LoopEnd% = 0
-    Private FuncArgs As New List(Of Object)
-    Private Variable As New Dictionary(Of String, Object)
-    Private ProjectionOutput As New List(Of Object)
-    Private ReadOnly Stack As New Stack(Of Object)
-    Private ReadOnly Types As New List(Of Type)
+	Private Register As Object
+	Private Counter% = 0
+	Private LoopEnd% = 0
+	Private FuncArgs As New List(Of Object)
+	Private Variable As New Dictionary(Of String, Object)
+	Private ProjectionOutput As New List(Of Object)
+	Private ReadOnly Stack As New Stack(Of Object)
+	Private ReadOnly Types As New List(Of Type)
 
 #Disable Warning IDE1006 ' Naming Styles
+	Private Function Defined(ParamArray Data() As Object) As Object
+		If Data.Length = 1 AndAlso TypeOf Data(0) IsNot String AndAlso TypeOf Data(0) Is IEnumerable(Of Object) Then Data = New List(Of Object)(CType(Data(0), IEnumerable(Of Object))).ToArray()
+		If Data.Length = 1 AndAlso TypeOf Data(0) Is String Then
+			Return Variable.ContainsKey(Data(0).ToLower())
+		Else
+			Dim retval As New List(Of Object)
+			For Each item In Data
+				retval.Add(Defined(item))
+			Next
+			Return retval
+		End If
+	End Function
+
 	Private Function _Concat() As Object
 		If TypeOf Stack.Peek() Is String Then
 			Return If(Stack.Pop(), String.Empty).ToString() & If(Register, String.Empty)
@@ -45,21 +58,34 @@
 	End Function
 #Enable Warning IDE1006 ' Naming Styles
 
+	''' <summary>
+	''' Instantiates a new interpretive engine.
+	''' </summary>
 	Public Sub New()
 		AddLib("Runtime")
 	End Sub
 
+	''' <summary>
+	''' Instatiates a new interpretive engine.
+	''' </summary>
+	''' <param name="[Imports]">An array of <see cref="Type"/> to import during engine setup.</param>
 	Public Sub New([Imports]() As Type)
 		Me.New()
 		Types.AddRange([Imports])
 	End Sub
 
-	Public Function Eval(Code$) As String
+	''' <summary>
+	''' Loads, executes, and (optionally) returns the value of a W block or expression.
+	''' </summary>
+	''' <param name="Code">The code to be executed.</param>
+	''' <param name="ForceReturn">If true, returns the most recent calculation from code blocks.</param>
+	''' <returns>The result of the most recent calculation or <c>null</c>.</returns>
+	Public Function Eval(Code$, Optional ForceReturn As Boolean = False) As String
 		Try
 			Try
 				Lexer.Reset(Code)
 				Block()
-				Register = Nothing
+				If Not ForceReturn Then Register = Nothing
 			Catch Ex As ArgumentException
 				Lexer.Reset(Code)
 				BooleanExpr()
@@ -69,7 +95,7 @@
 			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
 				Throw New Exception("Impossible operation on data")
-			ElseIf TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
+			ElseIf TypeOf ex Is InvalidCastException AndAlso exMessage(3) <> "not" Then
 				Throw New Exception("Impossible operation on data " & exMessage(3))
 			Else
 				Throw ex
@@ -97,6 +123,9 @@
 		Return Runtime.Thread({", "}.Concat(retval).ToArray())
 	End Function
 
+	''' <summary>
+	''' Gets a complete code block from the console.
+	''' </summary>
 	Public Sub GetBlock()
 		Dim depth% = 0
 		Do

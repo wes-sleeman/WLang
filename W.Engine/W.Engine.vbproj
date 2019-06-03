@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/wessupermare/WCompiler/wiki</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wessupermare/WCompiler</RepositoryUrl>
     <PackageTags>interpreter W programming</PackageTags>
-    <Version>2.0.1</Version>
+    <Version>2.0.2.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -112,7 +112,7 @@ Partial Public Class Engine
 				If squareCount = 0 Then Exit Do
 				squareCount -= 1
 			End If
-			code &= Match(Lexer.Current.Type) & " "
+			code &= If(Lexer.Current.Type = TokenType._StringLiteral, $"""{Match(Lexer.Current.Type)}""", Match(Lexer.Current.Type)) & " "
 		Loop
 		Match(TokenType._RightSquare)
 		InFunc = inFuncCache
@@ -144,7 +144,10 @@ Partial Public Class Engine
 			End Select
 		Loop
 		Match(TokenType._RightParen)
-		If Functions.ContainsKey(funcName.ToLower()) Then
+		If funcName.ToLower() = "defined" Then
+			Register = Defined(FuncArgs)
+			FuncArgs = Stack.Pop()
+		ElseIf Functions.ContainsKey(funcName.ToLower()) Then
 			ExecFunc(funcName.ToLower(), FuncArgs)
 			FuncArgs = Stack.Pop()
 		Else
