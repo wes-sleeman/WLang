@@ -52,6 +52,18 @@ Module {Filename}
 	Private ProjectionOutput As New List(Of Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
+	Function Defined(ParamArray Data() As Object) As Object
+		If Data.Length = 1 AndAlso TypeOf Data(0) IsNot String AndAlso TypeOf Data(0) Is IEnumerable(Of Object) Then Data = New List(Of Object)(CType(Data(0), IEnumerable(Of Object))).ToArray()
+		If Data.Length = 1 AndAlso TypeOf Data(0) Is String Then
+			Return Variable.ContainsKey(Data(0).ToLower())
+		Else
+			Dim retval As New List(Of Object)
+			For Each item In Data
+				retval.Add(Defined(item))
+			Next
+			Return retval
+		End If
+	End Function
 	Function _Concat() As Object
 		If TypeOf Stack.Peek() Is String Then
 			Return If(Stack.Pop(), String.Empty).ToString() & If(Register, String.Empty).ToString()

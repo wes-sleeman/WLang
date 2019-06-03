@@ -348,3 +348,5 @@ Tests/*.vb
 Tests/*.exe
 Tests/*.dll
 *.nuspec
+/logo.jpeg
+/logo.png

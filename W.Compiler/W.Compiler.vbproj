@@ -8,7 +8,7 @@
 
 
 copy $(SolutionDir)Runtime\Runtime.dll $(TargetDir)</PostBuildEvent>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Authors>Weston Sleeman</Authors>
     <Description>The official compiler for the W programming language.</Description>
     <StartupObject>W.Compiler.Main</StartupObject>

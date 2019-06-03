@@ -111,20 +111,19 @@ Public Module Main
 
 	<Extension()>
 	Friend Function Exec(cmd$) As String
-		Dim escapedargs$ = cmd.Replace("""", "\""")
-
 		Dim proc As New Process()
 
 		If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then
 			proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "cmd.exe",
-				.Arguments = $"/C {escapedargs}",
+				.Arguments = $"/C {cmd}",
 				.RedirectStandardOutput = True,
 				.UseShellExecute = False,
 				.CreateNoWindow = True
 			}
 		Else
+			Dim escapedargs$ = cmd.Replace("""", "\""")
 			proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "/bin/bash",
