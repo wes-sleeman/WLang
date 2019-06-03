@@ -80,6 +80,7 @@ Partial Public Class Engine
 		Stack.Push(New Dictionary(Of String, Object)(Variable))
 		Variable.Clear()
 		Variable("args") = args
+		Varlist.Add("args")
 		Lexer.Reset(Functions(name))
 		Try
 			Block()
@@ -95,7 +96,6 @@ Partial Public Class Engine
 		Dim funcName$ = Match(TokenType._Variable)
 		Dim inFuncCache As Boolean = InFunc
 		InFunc = True
-		Dim code$ = String.Empty
 
 		If Lexer.Current.Type = TokenType._EOF Then
 			GetBlock()
@@ -105,18 +105,19 @@ Partial Public Class Engine
 			GetBlock()
 		End If
 
-		Dim squareCount% = 0
+		Dim code$ = Lexer.Code.Substring(Lexer.Code.IndexOf("["c) + 1)
+		code = code.Substring(0, code.LastIndexOf("]"c)).Trim() & vbCrLf & "Return"
+
 		Do Until Lexer.Current.Type = TokenType._EOF
-			If Lexer.Current.Type = TokenType._LeftSquare Then squareCount += 1
-			If Lexer.Current.Type = TokenType._RightSquare Then
-				If squareCount = 0 Then Exit Do
-				squareCount -= 1
-			End If
-			code &= If(Lexer.Current.Type = TokenType._StringLiteral, $"""{Match(Lexer.Current.Type)}""", Match(Lexer.Current.Type)) & " "
+			Match(Lexer.Current.Type)
 		Loop
-		Match(TokenType._RightSquare)
 		InFunc = inFuncCache
-		Functions.Add(funcName.ToLower(), code)
+
+		If Functions.ContainsKey(funcName.ToLower()) Then
+			Functions(funcName.ToLower()) = code
+		Else
+			Functions.Add(funcName.ToLower(), code)
+		End If
 	End Sub
 
 	Private Sub FunctionCall()
@@ -196,9 +197,17 @@ Partial Public Class Engine
 		If bool Then
 			Block(InCond:=True)
 		Else
-			Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
-				Lexer.Advance()
-			Loop
+			Dim AdvanceLoop As Action = Sub()
+											Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
+												If Lexer.Current.Type = TokenType._LeftSquare Then
+													Lexer.Advance()
+													AdvanceLoop()
+												End If
+												Lexer.Advance()
+											Loop
+										End Sub
+
+			AdvanceLoop()
 		End If
 		Match(TokenType._RightSquare)
 		If Lexer.Current.Type = TokenType._LeftSquare Then

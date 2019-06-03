@@ -1,7 +1,16 @@
 ﻿Friend Class Lexer
 	Public Property Current As IToken
 
-	Private Code As String = String.Empty
+	Public Property Code As String
+		Get
+			Return _Code
+		End Get
+		Protected Set
+			_Code = Value
+		End Set
+	End Property
+	Private _Code As String = String.Empty
+
 	Public Property Index As Integer = 0
 
 	Public Sub New() : End Sub
