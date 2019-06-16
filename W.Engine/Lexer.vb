@@ -153,11 +153,11 @@
 
 	Private Function TakeWhileNotIn(ParamArray chars() As Char) As String
 		Dim retval$ = ""
-		Do
+		Do Until chars.Contains(Code(Index))
 			retval &= Code(Index)
 			Index += 1
 			If Index >= Code.Length Then Exit Do
-		Loop Until chars.Contains(Code(Index))
+		Loop
 		Return retval
 	End Function
 End Class

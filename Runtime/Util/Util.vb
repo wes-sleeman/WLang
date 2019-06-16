@@ -1,18 +1,22 @@
 ﻿Public Module Util
-	Public Sub [Exit](ReturnCode As Object)
-		Environment.Exit(ReturnCode)
+	Public Sub [Exit](ParamArray ReturnCode())
+		Environment.Exit(If(ReturnCode.Length = 0, 0, ReturnCode(0)))
 	End Sub
 
-	Public Function Collect(ParamArray Data() As Object) As Object
+	Public Function C(ParamArray Data())
+		Return Collect(Data)
+	End Function
+
+	Public Function Collect(ParamArray Data())
 		If Data Is Nothing Then Return New List(Of Object)
 		Return Data.ToList()
 	End Function
 
-	Public Function Dedup(ParamArray Data() As Object) As Object
-		Return Data.ToHashSet()
+	Public Function Dedup(ParamArray Data())
+		Return C(Data.ToHashSet())
 	End Function
 
-	Public Function Thread(ParamArray Data() As Object) As Object
+	Public Function Thread(ParamArray Data())
 		Dim Separator = Data(0)
 		Data = Data.Skip(1).ToArray()
 		If (Data.Length = 1) AndAlso (TypeOf Data(0) Is IEnumerable(Of Object) OrElse TypeOf Data(0) Is String) Then

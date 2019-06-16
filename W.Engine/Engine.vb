@@ -90,6 +90,7 @@
 				Block()
 				If Not ForceReturn Then Register = Nothing
 			End Try
+
 			Return FormatOutput({If(Register, String.Empty)})
 		Catch ex As Exception
 			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)

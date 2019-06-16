@@ -106,7 +106,7 @@
 
 	Private Sub SignedFactor(inProp As Boolean)
 		Dim op = TokenType._Cross
-		If "+-".Contains(Lexer.Current.Value) Then
+		If Not String.IsNullOrEmpty(Lexer.Current.Value) AndAlso "+-".Contains(Lexer.Current.Value) Then
 			op = Lexer.Current.Type
 			Match(op)
 		End If

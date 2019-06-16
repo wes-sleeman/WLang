@@ -127,7 +127,7 @@ Public Module Main
 			proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "/bin/bash",
-				.Arguments = $"-c '{escapedargs}'",
+				.Arguments = $"-c ""{escapedargs}""",
 				.RedirectStandardOutput = True,
 				.UseShellExecute = False,
 				.CreateNoWindow = True
