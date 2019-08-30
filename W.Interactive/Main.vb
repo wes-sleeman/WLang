@@ -32,8 +32,8 @@ Public Module Program
 		Do
 			Console.Write(Environment.NewLine & ">>> ")
 			Try
-				Print(ExecutionEngine.Eval(Console.ReadLine))
-			Catch ex As Exception
+                Print(ExecutionEngine.Eval(Console.ReadLine, ForceReturn:=True))
+            Catch ex As Exception
 				Console.WriteLine("Error " & ex.Message)
 			End Try
 		Loop

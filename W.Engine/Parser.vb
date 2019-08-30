@@ -4,87 +4,86 @@ Partial Public Class Engine
 
 	Private Sub Assignment()
 		Dim varname = Match(TokenType._Variable, False).ToLower()
-		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
-		Lexer.Advance()
-		If Lexer.Current.Type = TokenType._Dot Then
-			CheckAssignmentProperty(varname)
-		Else
-			Match(TokenType._Equals)
-			Expr()
-			Variable(varname) = Register
-		End If
-	End Sub
+        If Not Variable.ContainsKey(varname) Then Throw New MissingFieldException("No variable named " & varname)
+        Lexer.Advance()
+        If Lexer.Current.Type = TokenType._Dot Then
+            CheckAssignmentProperty(varname)
+        Else
+            Match(TokenType._Equals)
+            Expr()
+            Variable(varname) = Register
+        End If
+    End Sub
 
-	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
-		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
-			Select Case Lexer.Current.Type
-				Case TokenType.Escape
-					Match(TokenType.Escape)
-					Exit Do
+    Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
+        Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
+            Select Case Lexer.Current.Type
+                Case TokenType.Escape
+                    Match(TokenType.Escape)
+                    Exit Do
 
-				Case TokenType.If
-					[If]()
+                Case TokenType.If
+                    [If]()
 
-				Case TokenType.Repeat
-					[Loop]()
+                Case TokenType.Repeat
+                    [Loop]()
 
-				Case TokenType.Item
-					Declaration()
+                Case TokenType.Item
+                    Declaration()
 
-				Case TokenType._Variable
-					Try
-						Assignment()
-					Catch ex As MissingFieldException
-						FunctionCall()
-					End Try
+                Case TokenType._Variable
+                    Try
+                        Assignment()
+                    Catch ex As MissingFieldException
+                        FunctionCall()
+                    End Try
 
-				Case TokenType.Ref
-					Import()
+                Case TokenType.Ref
+                    Import()
 
-				Case TokenType.Func, TokenType.Public
-					Func()
+                Case TokenType.Func, TokenType.Public
+                    Func()
 
-				Case TokenType.Return
-					Match(TokenType.Return)
-					Try
-						Expr()
-						Return
-					Catch
-						Register = Nothing
-						Return
-					End Try
+                Case TokenType.Return
+                    Match(TokenType.Return)
+                    Try
+                        Expr()
+                        Return
+                    Catch
+                        Register = Nothing
+                        Return
+                    End Try
 
-				Case Else
-					Match(TokenType._EOF)
-			End Select
-		Loop
-	End Sub
+                Case Else
+                    Match(TokenType._EOF)
+            End Select
+        Loop
+    End Sub
 
-	Private Sub Declaration()
-		Match(TokenType.Item)
-		Dim varname = Match(TokenType._Variable).ToLower()
-		If Lexer.Current.Type = TokenType._Equals Then
-			Match(TokenType._Equals)
-			Expr()
-			Variable(varname) = Register
-		Else
-			Variable(varname) = Nothing
-		End If
-		Varlist.Add(varname)
-	End Sub
+    Private Sub Declaration()
+        Match(TokenType.Item)
+        Dim varname = Match(TokenType._Variable).ToLower()
+        If Lexer.Current.Type = TokenType._Equals Then
+            Match(TokenType._Equals)
+            Expr()
+            Variable(varname) = Register
+        Else
+            Variable(varname) = Nothing
+        End If
+    End Sub
 
-	Private Sub ExecFunc(name$, args As Object)
-		Dim lexCache = Lexer
-		Lexer = New Lexer(Lexer)
+    Private Sub ExecFunc(name$, args As Object)
+        Dim lexCache = Lexer
+        Lexer = New Lexer(Lexer)
 
-		Stack.Push(New Dictionary(Of String, Object)(Variable))
-		Variable.Clear()
-		Variable("args") = args
-		Lexer.Reset(Functions(name))
-		Try
-			Block()
-		Finally
-			Variable = Stack.Pop()
+        Stack.Push(New Dictionary(Of String, Object)(Variable))
+        Variable.Clear()
+        Variable("args") = args
+        Lexer.Reset(Functions(name))
+        Try
+            Block()
+        Finally
+            Variable = Stack.Pop()
 		End Try
 
 		Lexer = lexCache
@@ -148,8 +147,8 @@ Partial Public Class Engine
 			Register = Defined(FuncArgs)
 			FuncArgs = Stack.Pop()
 		ElseIf Functions.ContainsKey(funcName.ToLower()) Then
-			ExecFunc(funcName.ToLower(), FuncArgs)
-			FuncArgs = Stack.Pop()
+            ExecFunc(funcName.ToLower(), New List(Of Object)(FuncArgs))
+            FuncArgs = Stack.Pop()
 		Else
 			Dim ArgArr = FuncArgs.ToArray()
 			For Each type In Types

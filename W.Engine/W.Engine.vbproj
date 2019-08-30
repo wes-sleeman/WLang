@@ -12,8 +12,12 @@
     <Version>2.0.2.2</Version>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <MyType>Empty</MyType>
+  </PropertyGroup>
+  
   <ItemGroup>
-    <PackageReference Include="W.Runtime" Version="2.0.0.1" />
+    <PackageReference Include="W.Runtime" Version="2.0.3.3" />
   </ItemGroup>
 
 </Project>
