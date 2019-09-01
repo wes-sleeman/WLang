@@ -4,7 +4,7 @@ Partial Public Class Engine
 
 	Private Sub Assignment()
 		Dim varname = Match(TokenType._Variable, False).ToLower()
-		If Not Varlist.Contains(varname) Then Throw New MissingFieldException("No variable named " & varname)
+		If Not Variable.ContainsKey(varname) Then Throw New MissingFieldException("No variable named " & varname)
 		Lexer.Advance()
 		If Lexer.Current.Type = TokenType._Dot Then
 			CheckAssignmentProperty(varname)
@@ -70,7 +70,6 @@ Partial Public Class Engine
 		Else
 			Variable(varname) = Nothing
 		End If
-		Varlist.Add(varname)
 	End Sub
 
 	Private Sub ExecFunc(name$, args As Object)
@@ -80,7 +79,6 @@ Partial Public Class Engine
 		Stack.Push(New Dictionary(Of String, Object)(Variable))
 		Variable.Clear()
 		Variable("args") = args
-		Varlist.Add("args")
 		Lexer.Reset(Functions(name))
 		Try
 			Block()
@@ -149,7 +147,7 @@ Partial Public Class Engine
 			Register = Defined(FuncArgs)
 			FuncArgs = Stack.Pop()
 		ElseIf Functions.ContainsKey(funcName.ToLower()) Then
-			ExecFunc(funcName.ToLower(), FuncArgs)
+			ExecFunc(funcName.ToLower(), New List(Of Object)(FuncArgs))
 			FuncArgs = Stack.Pop()
 		Else
 			Dim ArgArr = FuncArgs.ToArray()

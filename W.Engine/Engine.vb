@@ -1,10 +1,9 @@
 ﻿Partial Public Class Engine
 	Private ReadOnly Functions As New Dictionary(Of String, String)
 	Private Lexer As New Lexer
-	Private InFunc As Boolean = False
-	Private ReadOnly Varlist As New List(Of String)
+    Private InFunc As Boolean = False
 
-	Private Register As Object
+    Private Register As Object
 	Private Counter% = 0
 	Private LoopEnd% = 0
 	Private FuncArgs As New List(Of Object)
