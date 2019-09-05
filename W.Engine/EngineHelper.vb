@@ -19,7 +19,7 @@ Partial Public Class Engine
 	End Sub
 
 	Private Sub [Boolean]()
-		Register = Match(TokenType._Boolean)
+		Register = CBool(Match(TokenType._Boolean))
 	End Sub
 
 	Private Sub CheckAssignmentProperty(Varname As String)
