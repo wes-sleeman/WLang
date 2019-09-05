@@ -16,7 +16,7 @@ Public Module Math
 	End Function
 
 	Public Function Pow(Base As Object, Exponent As Object) As Object
-		Return System.Math.Pow(Base, If(System.Math.Round(Exponent) = Exponent, Exponent, CLng(Exponent)))
+		Return System.Math.Pow(Base, If(System.Math.Round(Exponent) = Exponent, Exponent, CDbl(Exponent)))
 	End Function
 
 	Public Function Radians(Degrees As Object) As Object
