@@ -1,6 +1,6 @@
-﻿Friend Class Lexer
+﻿Public Class Lexer
 	Public Property Current As IToken
-	Dim _line% = 1
+	Dim _line% = 1, _depth% = 0
 	Public Property Line As Integer
 		Get
 			Return _line
@@ -10,15 +10,58 @@
 		End Set
 	End Property
 
-	Private ReadOnly Code As String
-	Private Index As Integer = 0
+	Public Property Depth As Integer
+		Get
+			Return _depth
+		End Get
+		Protected Set(value As Integer)
+			_depth = value
+		End Set
+	End Property
 
-	Sub New(Code$)
+	Public Property Code As String
+		Get
+			Return _Code
+		End Get
+		Protected Set
+			_Code = Value
+		End Set
+	End Property
+	Private _Code As String = String.Empty
+
+	Public Property Index As Integer = 0
+
+	Public Sub New()
+		Current = New EOF()
+	End Sub
+
+	Public Sub New(Code$)
+		Reset(Code)
+	End Sub
+
+	Public Sub New(other As Lexer)
+		other.Copy(onto:=Me)
+	End Sub
+
+	Public Function Copy(Optional onto As Lexer = Nothing) As Lexer
+		If onto Is Nothing Then onto = New Lexer()
+		onto.Reset(Code)
+		Do Until onto.Index = Index : onto.Advance() : Loop
+		Return onto
+	End Function
+
+	Public Sub Reset(Code$)
 		Me.Code = Code
+		Index = 0
 		Advance()
 	End Sub
 
-	Sub Advance()
+	Public Sub Feed(Code$)
+		Me.Code &= Environment.NewLine & Code
+		If Current.Type = TokenType._EOF Then Advance()
+	End Sub
+
+	Public Sub Advance()
 		Try
 			Current = TakeNext()
 		Catch ex As ArgumentException
@@ -39,17 +82,17 @@
 				Loop While Char.IsLetterOrDigit(Code(Index)) OrElse Code(Index) = "_"
 				Try
 					Return New [Boolean](ident)
-				Catch ex As ArgumentException
+				Catch
 					Try
 						Return New Keyword(ident)
-					Catch ex2 As ArgumentException
+					Catch
 						Return New Variable(ident)
 					End Try
 				End Try
 
 			Case "0"c To "9"c
 				Dim num$ = TakeWhileNumeric()
-				If Code(Index) = "."c AndAlso IsNumeric(Code(Index + 1)) Then
+				If Index < Code.Length - 1 AndAlso Code(Index) = "."c AndAlso IsNumeric(Code(Index + 1)) Then
 					num &= "."
 					Index += 1
 					num &= TakeWhileNumeric()
@@ -107,12 +150,16 @@
 					Index += 1
 					Return New Symbol(Code(Index - 2) & ">")
 				Else
-					Return New Symbol(Code(Index - 1))
+					Dim retval As New Symbol(Code(Index - 1))
+					If retval.Type = TokenType._RightSquare Then Depth -= 1
+					Return retval
 				End If
 
 			Case Else
 				Index += 1
-				Return New Symbol(Code(Index - 1))
+				Dim retval As New Symbol(Code(Index - 1))
+				If retval.Type = TokenType._LeftSquare Then Depth += 1
+				Return retval
 		End Select
 	End Function
 
@@ -138,11 +185,20 @@
 
 	Private Function TakeWhileNotIn(ParamArray chars() As Char) As String
 		Dim retval$ = ""
-		Do
+		Do Until chars.Contains(Code(Index))
 			retval &= Code(Index)
 			Index += 1
 			If Index >= Code.Length Then Exit Do
-		Loop Until chars.Contains(Code(Index))
+		Loop
 		Return retval
 	End Function
+End Class
+
+Friend Class ReturnException
+	Inherits Exception
+	Public ReadOnly Property ReturnValue As Object
+
+	Public Sub New(Retval As Object)
+		ReturnValue = Retval
+	End Sub
 End Class
