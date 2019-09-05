@@ -91,6 +91,8 @@
 			End Try
 
 			Return FormatOutput({If(Register, String.Empty)})
+		Catch ex As ReturnException
+			Throw New Exception($"Don't use return outside of a function call! Return value: {ex.ReturnValue}")
 		Catch ex As Exception
 			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then

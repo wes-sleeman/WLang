@@ -48,10 +48,13 @@ Partial Public Class Engine
 					Match(TokenType.Return)
 					Try
 						Expr()
-						Return
+						Throw New ReturnException(Register)
+					Catch Ex As ReturnException
+						'Propgate me!
+						Throw Ex
 					Catch
 						Register = Nothing
-						Return
+						Throw New ReturnException(Register)
 					End Try
 
 				Case Else
@@ -82,6 +85,8 @@ Partial Public Class Engine
 		Lexer.Reset(Functions(name))
 		Try
 			Block()
+		Catch ex As ReturnException
+			Register = ex.ReturnValue
 		Finally
 			Variable = Stack.Pop()
 		End Try
@@ -191,20 +196,19 @@ Partial Public Class Engine
 			GetBlock()
 		End If
 
+		Dim AdvanceLoop As Action = Sub()
+										Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
+											If Lexer.Current.Type = TokenType._LeftSquare Then
+												Lexer.Advance()
+												AdvanceLoop()
+											End If
+											Lexer.Advance()
+										Loop
+									End Sub
 		Dim bool = Register
 		If bool Then
 			Block(InCond:=True)
 		Else
-			Dim AdvanceLoop As Action = Sub()
-											Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
-												If Lexer.Current.Type = TokenType._LeftSquare Then
-													Lexer.Advance()
-													AdvanceLoop()
-												End If
-												Lexer.Advance()
-											Loop
-										End Sub
-
 			AdvanceLoop()
 		End If
 		Match(TokenType._RightSquare)
@@ -213,9 +217,7 @@ Partial Public Class Engine
 			If Not bool Then
 				Block(InCond:=True)
 			Else
-				Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
-					Lexer.Advance()
-				Loop
+				AdvanceLoop()
 			End If
 			Match(TokenType._RightSquare)
 		End If
