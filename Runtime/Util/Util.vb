@@ -12,11 +12,28 @@
 		Return Data.ToList()
 	End Function
 
-	Public Function Dedup(ParamArray Data())
-		Return C(Data.ToHashSet())
-	End Function
+    Public Function Dedup(ParamArray Data())
+        Return C(Data.ToHashSet())
+    End Function
 
-	Public Function Thread(ParamArray Data())
+    Public Function Split(ParamArray Data())
+        Dim Content = Data(0)
+        Data = Data.Skip(1).ToArray()
+
+        If Data.Length = 0 Then Data = {" "c, vbTab, vbCrLf, vbLf}
+
+        If TypeOf Content Is IEnumerable(Of Object) AndAlso TypeOf Content IsNot String Then
+            Dim retval As New List(Of String)
+            For Each item In Content
+                retval.AddRange(item.ToString().Split(Data.Select(Function(o) o.ToString()).ToArray(), StringSplitOptions.RemoveEmptyEntries))
+            Next
+            Return retval
+        Else
+            Return Content.ToString().Split(Data.Select(Function(o) o.ToString()).ToArray(), StringSplitOptions.RemoveEmptyEntries)
+        End If
+    End Function
+
+    Public Function Thread(ParamArray Data())
 		Dim Separator = Data(0)
 		Data = Data.Skip(1).ToArray()
 		If (Data.Length = 1) AndAlso (TypeOf Data(0) Is IEnumerable(Of Object) OrElse TypeOf Data(0) Is String) Then
