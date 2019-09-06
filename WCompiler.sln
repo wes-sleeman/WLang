@@ -27,6 +27,8 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "W.Wrapper", "W.Wrapper\W.Wr
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "W.Tests.Compiler", "Tests\W.Tests.Compiler\W.Tests.Compiler.vbproj", "{5444E195-DE50-44ED-9194-D7E8CCEEE0C9}"
 EndProject
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "W.Tests.Runtime", "Tests\W.Tests.Runtime\W.Tests.Runtime.vbproj", "{2AD9D1FC-C5FA-42C3-9EAE-AEF64E468C9D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,10 @@ Global
 		{5444E195-DE50-44ED-9194-D7E8CCEEE0C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5444E195-DE50-44ED-9194-D7E8CCEEE0C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5444E195-DE50-44ED-9194-D7E8CCEEE0C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AD9D1FC-C5FA-42C3-9EAE-AEF64E468C9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AD9D1FC-C5FA-42C3-9EAE-AEF64E468C9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AD9D1FC-C5FA-42C3-9EAE-AEF64E468C9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AD9D1FC-C5FA-42C3-9EAE-AEF64E468C9D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
