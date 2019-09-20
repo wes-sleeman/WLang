@@ -83,13 +83,16 @@
 		Try
 			Try
 				Lexer.Reset(Code)
+				BooleanExpr(recursionLimit:=10)
+			Catch Ex As StackOverflowException
+				Lexer.Reset(Code)
 				Block()
 				If Not ForceReturn Then Register = Nothing
-			Catch Ex As ArgumentException
-				Lexer.Reset(Code)
-				BooleanExpr()
 			End Try
+
 			Return FormatOutput({If(Register, String.Empty)})
+		Catch ex As ReturnException
+			Throw New Exception($"Don't use return outside of a function call! Return value: {ex.ReturnValue}")
 		Catch ex As Exception
 			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
@@ -127,14 +130,15 @@
 	''' </summary>
 	Public Sub GetBlock()
 		Dim depth% = 0
+		Dim input$
 		Do
 			Console.Write("... ")
-			Dim input$ = Console.ReadLine().TrimStart("...")
+			input = Console.ReadLine().TrimStart("...")
 
 			If input.Contains("[") Then depth += 1
 			If input.Contains("]") Then depth -= 1
 
 			Lexer.Feed(input)
-		Loop Until depth = 0
+		Loop Until depth = 0 AndAlso String.IsNullOrWhiteSpace(input)
 	End Sub
 End Class

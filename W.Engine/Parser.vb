@@ -4,86 +4,91 @@ Partial Public Class Engine
 
 	Private Sub Assignment()
 		Dim varname = Match(TokenType._Variable, False).ToLower()
-        If Not Variable.ContainsKey(varname) Then Throw New MissingFieldException("No variable named " & varname)
-        Lexer.Advance()
-        If Lexer.Current.Type = TokenType._Dot Then
-            CheckAssignmentProperty(varname)
-        Else
-            Match(TokenType._Equals)
-            Expr()
-            Variable(varname) = Register
-        End If
-    End Sub
+		If Not Variable.ContainsKey(varname) Then Throw New MissingFieldException("No variable named " & varname)
+		Lexer.Advance()
+		If Lexer.Current.Type = TokenType._Dot Then
+			CheckAssignmentProperty(varname)
+		Else
+			Match(TokenType._Equals)
+			Expr()
+			Variable(varname) = Register
+		End If
+	End Sub
 
-    Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
-        Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
-            Select Case Lexer.Current.Type
-                Case TokenType.Escape
-                    Match(TokenType.Escape)
-                    Exit Do
+	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
+		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
+			Select Case Lexer.Current.Type
+				Case TokenType.Escape
+					Match(TokenType.Escape)
+					Exit Do
 
-                Case TokenType.If
-                    [If]()
+				Case TokenType.If
+					[If]()
 
-                Case TokenType.Repeat
-                    [Loop]()
+				Case TokenType.Repeat
+					[Loop]()
 
-                Case TokenType.Item
-                    Declaration()
+				Case TokenType.Item
+					Declaration()
 
-                Case TokenType._Variable
-                    Try
-                        Assignment()
-                    Catch ex As MissingFieldException
-                        FunctionCall()
-                    End Try
+				Case TokenType._Variable
+					Try
+						Assignment()
+					Catch ex As MissingFieldException
+						FunctionCall()
+					End Try
 
-                Case TokenType.Ref
-                    Import()
+				Case TokenType.Ref
+					Import()
 
-                Case TokenType.Func, TokenType.Public
-                    Func()
+				Case TokenType.Func, TokenType.Public
+					Func()
 
-                Case TokenType.Return
-                    Match(TokenType.Return)
-                    Try
-                        Expr()
-                        Return
-                    Catch
-                        Register = Nothing
-                        Return
-                    End Try
+				Case TokenType.Return
+					Match(TokenType.Return)
+					Try
+						Expr()
+						Throw New ReturnException(Register)
+					Catch Ex As ReturnException
+						'Propgate me!
+						Throw Ex
+					Catch
+						Register = Nothing
+						Throw New ReturnException(Register)
+					End Try
 
-                Case Else
-                    Match(TokenType._EOF)
-            End Select
-        Loop
-    End Sub
+				Case Else
+					Match(TokenType._EOF)
+			End Select
+		Loop
+	End Sub
 
-    Private Sub Declaration()
-        Match(TokenType.Item)
-        Dim varname = Match(TokenType._Variable).ToLower()
-        If Lexer.Current.Type = TokenType._Equals Then
-            Match(TokenType._Equals)
-            Expr()
-            Variable(varname) = Register
-        Else
-            Variable(varname) = Nothing
-        End If
-    End Sub
+	Private Sub Declaration()
+		Match(TokenType.Item)
+		Dim varname = Match(TokenType._Variable).ToLower()
+		If Lexer.Current.Type = TokenType._Equals Then
+			Match(TokenType._Equals)
+			Expr()
+			Variable(varname) = Register
+		Else
+			Variable(varname) = Nothing
+		End If
+	End Sub
 
-    Private Sub ExecFunc(name$, args As Object)
-        Dim lexCache = Lexer
-        Lexer = New Lexer(Lexer)
+	Private Sub ExecFunc(name$, args As Object)
+		Dim lexCache = Lexer
+		Lexer = New Lexer(Lexer)
 
-        Stack.Push(New Dictionary(Of String, Object)(Variable))
-        Variable.Clear()
-        Variable("args") = args
-        Lexer.Reset(Functions(name))
-        Try
-            Block()
-        Finally
-            Variable = Stack.Pop()
+		Stack.Push(New Dictionary(Of String, Object)(Variable))
+		Variable.Clear()
+		Variable("args") = args
+		Lexer.Reset(Functions(name))
+		Try
+			Block()
+		Catch ex As ReturnException
+			Register = ex.ReturnValue
+		Finally
+			Variable = Stack.Pop()
 		End Try
 
 		Lexer = lexCache
@@ -94,7 +99,6 @@ Partial Public Class Engine
 		Dim funcName$ = Match(TokenType._Variable)
 		Dim inFuncCache As Boolean = InFunc
 		InFunc = True
-		Dim code$ = String.Empty
 
 		If Lexer.Current.Type = TokenType._EOF Then
 			GetBlock()
@@ -104,18 +108,19 @@ Partial Public Class Engine
 			GetBlock()
 		End If
 
-		Dim squareCount% = 0
+		Dim code$ = Lexer.Code.Substring(Lexer.Code.IndexOf("["c) + 1)
+		code = code.Substring(0, code.LastIndexOf("]"c)).Trim() & vbCrLf & "Return"
+
 		Do Until Lexer.Current.Type = TokenType._EOF
-			If Lexer.Current.Type = TokenType._LeftSquare Then squareCount += 1
-			If Lexer.Current.Type = TokenType._RightSquare Then
-				If squareCount = 0 Then Exit Do
-				squareCount -= 1
-			End If
-			code &= If(Lexer.Current.Type = TokenType._StringLiteral, $"""{Match(Lexer.Current.Type)}""", Match(Lexer.Current.Type)) & " "
+			Match(Lexer.Current.Type)
 		Loop
-		Match(TokenType._RightSquare)
 		InFunc = inFuncCache
-		Functions.Add(funcName.ToLower(), code)
+
+		If Functions.ContainsKey(funcName.ToLower()) Then
+			Functions(funcName.ToLower()) = code
+		Else
+			Functions.Add(funcName.ToLower(), code)
+		End If
 	End Sub
 
 	Private Sub FunctionCall()
@@ -147,8 +152,8 @@ Partial Public Class Engine
 			Register = Defined(FuncArgs)
 			FuncArgs = Stack.Pop()
 		ElseIf Functions.ContainsKey(funcName.ToLower()) Then
-            ExecFunc(funcName.ToLower(), New List(Of Object)(FuncArgs))
-            FuncArgs = Stack.Pop()
+			ExecFunc(funcName.ToLower(), New List(Of Object)(FuncArgs))
+			FuncArgs = Stack.Pop()
 		Else
 			Dim ArgArr = FuncArgs.ToArray()
 			For Each type In Types
@@ -191,13 +196,20 @@ Partial Public Class Engine
 			GetBlock()
 		End If
 
+		Dim AdvanceLoop As Action = Sub()
+										Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
+											If Lexer.Current.Type = TokenType._LeftSquare Then
+												Lexer.Advance()
+												AdvanceLoop()
+											End If
+											Lexer.Advance()
+										Loop
+									End Sub
 		Dim bool = Register
 		If bool Then
 			Block(InCond:=True)
 		Else
-			Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
-				Lexer.Advance()
-			Loop
+			AdvanceLoop()
 		End If
 		Match(TokenType._RightSquare)
 		If Lexer.Current.Type = TokenType._LeftSquare Then
@@ -205,9 +217,7 @@ Partial Public Class Engine
 			If Not bool Then
 				Block(InCond:=True)
 			Else
-				Do Until Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF
-					Lexer.Advance()
-				Loop
+				AdvanceLoop()
 			End If
 			Match(TokenType._RightSquare)
 		End If

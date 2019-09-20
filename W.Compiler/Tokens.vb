@@ -1,4 +1,4 @@
-﻿Module Tokens
+﻿Public Module Tokens
 	Interface IToken
 		ReadOnly Property Type As TokenType
 		ReadOnly Property Value As String

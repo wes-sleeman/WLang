@@ -19,7 +19,7 @@ Partial Public Class Engine
 	End Sub
 
 	Private Sub [Boolean]()
-		Register = Match(TokenType._Boolean)
+		Register = CBool(Match(TokenType._Boolean))
 	End Sub
 
 	Private Sub CheckAssignmentProperty(Varname As String)
@@ -70,13 +70,17 @@ Partial Public Class Engine
 						Case "pos"
 							Match(TokenType._Variable)
 							Expr(inProp:=True)
-							Try : Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register) : Catch : Register = -1 : End Try
+							If TypeOf Stack.Peek Is String Then
+								Try : Register = CStr(Stack.Pop()).IndexOf(Register) : Catch : Register = -1 : End Try
+							Else
+								Try : Register = New List(Of Object)(CType(Stack.Pop(), IEnumerable(Of Object))).IndexOf(Register) : Catch : Register = -1 : End Try
+							End If
 						Case "concat"
 							Match(TokenType._Variable)
 							Expr(inProp:=True)
 							Register = _Concat()
 						Case Else
-							Register = Stack.Peek().GetType().GetProperty(Match(TokenType._Variable)).GetValue(Stack.Pop())
+							Register = Stack.Peek().GetType().GetRuntimeProperty(Match(TokenType._Variable)).GetValue(Stack.Pop())
 					End Select
 
 				Case TokenType._IntLiteral

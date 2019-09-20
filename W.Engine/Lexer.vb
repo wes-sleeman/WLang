@@ -1,10 +1,39 @@
-﻿Friend Class Lexer
+﻿Public Class Lexer
 	Public Property Current As IToken
+	Dim _line% = 1, _depth% = 0
+	Public Property Line As Integer
+		Get
+			Return _line
+		End Get
+		Private Set(value As Integer)
+			_line = value
+		End Set
+	End Property
 
-	Private Code As String = String.Empty
+	Public Property Depth As Integer
+		Get
+			Return _depth
+		End Get
+		Protected Set(value As Integer)
+			_depth = value
+		End Set
+	End Property
+
+	Public Property Code As String
+		Get
+			Return _Code
+		End Get
+		Protected Set
+			_Code = Value
+		End Set
+	End Property
+	Private _Code As String = String.Empty
+
 	Public Property Index As Integer = 0
 
-	Public Sub New() : End Sub
+	Public Sub New()
+		Current = New EOF()
+	End Sub
 
 	Public Sub New(Code$)
 		Reset(Code)
@@ -33,7 +62,11 @@
 	End Sub
 
 	Public Sub Advance()
-		Current = TakeNext()
+		Try
+			Current = TakeNext()
+		Catch ex As ArgumentException
+			Throw New ArgumentException($"Line {Line}: " & ex.Message)
+		End Try
 	End Sub
 
 	Private Function TakeNext() As IToken
@@ -49,10 +82,10 @@
 				Loop While Char.IsLetterOrDigit(Code(Index)) OrElse Code(Index) = "_"
 				Try
 					Return New [Boolean](ident)
-				Catch ex As ArgumentException
+				Catch
 					Try
 						Return New Keyword(ident)
-					Catch ex2 As ArgumentException
+					Catch
 						Return New Variable(ident)
 					End Try
 				End Try
@@ -78,8 +111,12 @@
 				Index += 1
 				Return retval
 
-			Case vbCr, vbLf, vbCrLf, Environment.NewLine
+			Case vbCr
 				Index += 1
+				Return TakeNext()
+			Case vbLf, vbCrLf, Environment.NewLine
+				Index += 1
+				Line += 1
 				Return TakeNext()
 
 			Case vbTab, " "c
@@ -113,12 +150,16 @@
 					Index += 1
 					Return New Symbol(Code(Index - 2) & ">")
 				Else
-					Return New Symbol(Code(Index - 1))
+					Dim retval As New Symbol(Code(Index - 1))
+					If retval.Type = TokenType._RightSquare Then Depth -= 1
+					Return retval
 				End If
 
 			Case Else
 				Index += 1
-				Return New Symbol(Code(Index - 1))
+				Dim retval As New Symbol(Code(Index - 1))
+				If retval.Type = TokenType._LeftSquare Then Depth += 1
+				Return retval
 		End Select
 	End Function
 
@@ -144,11 +185,20 @@
 
 	Private Function TakeWhileNotIn(ParamArray chars() As Char) As String
 		Dim retval$ = ""
-		Do
+		Do Until chars.Contains(Code(Index))
 			retval &= Code(Index)
 			Index += 1
 			If Index >= Code.Length Then Exit Do
-		Loop Until chars.Contains(Code(Index))
+		Loop
 		Return retval
 	End Function
+End Class
+
+Friend Class ReturnException
+	Inherits Exception
+	Public ReadOnly Property ReturnValue As Object
+
+	Public Sub New(Retval As Object)
+		ReturnValue = Retval
+	End Sub
 End Class

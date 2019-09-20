@@ -6,13 +6,12 @@ Public Module Main
 	Sub Main(args As String())
 		Console.WriteLine($"W {Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString().Split({"."c}, StringSplitOptions.RemoveEmptyEntries).Take(3).Aggregate(Function(i, s) i & "." & s)} Compiler" & vbCrLf)
 
-		args = args.Select(Function(s$) If(s.StartsWith("-"), "/" & s.TrimStart({"-"c}), s)).ToArray()
-#If DEBUG Then
-		If args.Length = 0 Then
-			Main({"tmp.w"})
+		If args.Where(Function(s) Not s.StartsWith("/")).Count = 0 Then
+			Console.WriteLine("Needs something to compile! Pass in a W file to get started.")
 			Return
 		End If
-#End If
+		args = args.Select(Function(s$) If(s.StartsWith("-"), "/" & s.TrimStart({"-"c}), s)).ToArray()
+
 		Dim conf = False
 
 		'Create empty dotnet project to use as template.
@@ -52,10 +51,7 @@ Public Module Main
 			Try
 				filename = Path.GetFullPath(filename)
 				Console.WriteLine($"Building lexer for file <{filename}>.")
-				Dim lex As New Lexer(File.ReadAllText(filename))
-
-				Console.WriteLine("Parsing")
-				Dim code() = Parse(lex, Path.GetFileNameWithoutExtension(filename), [lib], debug)
+				Dim code() = LexAndParse(File.ReadAllText(filename), filename, [lib], debug)
 
 				Dim emitpath$ = Path.ChangeExtension(Path.Combine(".build", If([lib], Path.GetFileName(filename), "Program.vb")), ".vb")
 				Console.WriteLine("Emitting")
@@ -109,12 +105,18 @@ Public Module Main
 		End If
 	End Sub
 
+	Public Function LexAndParse(code$, filename$, [lib] As Boolean, debug As Boolean) As String()
+		Dim lex As New Lexer(code)
+
+		Console.WriteLine("Parsing")
+		Return Parse(lex, Path.GetFileNameWithoutExtension(filename), [lib], debug)
+	End Function
+
 	<Extension()>
 	Friend Function Exec(cmd$) As String
-		Dim proc As New Process()
-
-		If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then
-			proc.StartInfo = New ProcessStartInfo() With
+		Using proc As New Process()
+			If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then
+				proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "cmd.exe",
 				.Arguments = $"/C {cmd}",
@@ -122,22 +124,23 @@ Public Module Main
 				.UseShellExecute = False,
 				.CreateNoWindow = True
 			}
-		Else
-			Dim escapedargs$ = cmd.Replace("""", "\""")
-			proc.StartInfo = New ProcessStartInfo() With
+			Else
+				Dim escapedargs$ = cmd.Replace("""", "\""")
+				proc.StartInfo = New ProcessStartInfo() With
 			{
 				.FileName = "/bin/bash",
-				.Arguments = $"-c '{escapedargs}'",
+				.Arguments = $"-c ""{escapedargs}""",
 				.RedirectStandardOutput = True,
 				.UseShellExecute = False,
 				.CreateNoWindow = True
 			}
-		End If
+			End If
 
-		proc.Start()
-		Dim res$ = proc.StandardOutput.ReadToEnd()
-		proc.WaitForExit()
+			proc.Start()
+			Dim res$ = proc.StandardOutput.ReadToEnd()
+			proc.WaitForExit()
 
-		Return res
+			Return res
+		End Using
 	End Function
 End Module

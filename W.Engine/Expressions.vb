@@ -1,18 +1,14 @@
 ﻿Partial Public Class Engine
 	Private Sub BooleanExpr(Optional recursionDepth = 0, Optional recursionLimit = 25)
 		If Lexer.Current.Type = TokenType._Boolean Then
-			Register = Match(TokenType._Boolean)
+			[Boolean]()
 		ElseIf Lexer.Current.Type = TokenType.Not Then
 			Match(TokenType.Not)
 			BooleanExpr()
 			Register = Not Register
 		Else
 			Try
-				Try
-					[Boolean]()
-				Catch ex As ArgumentException
-                    Expr()
-                End Try
+				Expr()
 			Catch ex As ArgumentException When recursionDepth < recursionLimit
 				BooleanExpr(recursionDepth + 1, recursionLimit)
 				Push()
@@ -41,7 +37,7 @@
 	Private Sub Expr(Optional inProp As Boolean = False)
 		CompExpr(inProp)
 
-		While "|&".Contains(Lexer.Current.Value) OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
+		While {"|", "&"}.Contains(Lexer.Current.Value) OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -95,7 +91,7 @@
 	Private Sub MathExpr(inProp As Boolean)
 		Term(inProp)
 
-		While "+-".Contains(Lexer.Current.Value)
+		While {"+", "-"}.Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -106,7 +102,7 @@
 
 	Private Sub SignedFactor(inProp As Boolean)
 		Dim op = TokenType._Cross
-		If "+-".Contains(Lexer.Current.Value) Then
+		If {"+", "-"}.Contains(Lexer.Current.Value) Then
 			op = Lexer.Current.Type
 			Match(op)
 		End If
@@ -121,7 +117,7 @@
 	Private Sub Term(inProp As Boolean)
 		SignedFactor(inProp)
 
-		While "*/%\".Contains(Lexer.Current.Value)
+		While {"*", "/", "%", "\"}.Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
