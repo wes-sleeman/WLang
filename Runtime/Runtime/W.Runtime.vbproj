@@ -5,29 +5,11 @@
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <AssemblyName>Runtime</AssemblyName>
     <PostBuildEvent>copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\IO\bin\Debug\Runtime.IO.dll 
-
-
-
 copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Math\bin\Debug\Runtime.Math.dll 
-
-
-
 copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Net\bin\Debug\Runtime.Net.dll 
-
-
-copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Util\bin\Debug\Runtime.Util.dll 
-
-
-
-
-ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll *.dll
-
-
-
-copy Runtime.dll D:\OneDrive\Programming\Compilers\WCompiler\Runtime
-
-
-
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Util\bin\Debug\Runtime.Util.dll
+%USERPROFILE%\.nuget\packages\ilmerge\3.0.29\tools\net452\ILMerge.exe /out:Runtime.dll Runtime.IO.dll Runtime.Math.dll Runtime.Net.dll Runtime.Util.dll Shared.dll
+copy Runtime.dll ..\..\..\..\
 del *.xml</PostBuildEvent>
     <PackageId>W.Runtime</PackageId>
     <Authors>Weston Sleeman</Authors>
@@ -35,8 +17,12 @@ del *.xml</PostBuildEvent>
     <Product>W.Runtime</Product>
     <Description>The standard runtime for the W programming language.</Description>
     <Copyright>Copyright 2019</Copyright>
-    <Version>2.0.3.3</Version>
+    <Version>2.0.4.1</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ilmerge" Version="3.0.29" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\IO\W.Runtime.IO.vbproj" />

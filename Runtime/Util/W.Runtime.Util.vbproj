@@ -100,5 +100,11 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\W.Runtime.Shared.vbproj">
+      <Project>{d188396e-c0a6-4060-a226-c27908e4351a}</Project>
+      <Name>W.Runtime.Shared</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

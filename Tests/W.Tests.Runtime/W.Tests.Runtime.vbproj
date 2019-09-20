@@ -17,7 +17,6 @@
     <ProjectReference Include="..\..\Runtime\IO\W.Runtime.IO.vbproj" />
     <ProjectReference Include="..\..\Runtime\Math\W.Runtime.Math.vbproj" />
     <ProjectReference Include="..\..\Runtime\Net\W.Runtime.Net.vbproj" />
-    <ProjectReference Include="..\..\Runtime\Runtime\W.Runtime.vbproj" />
     <ProjectReference Include="..\..\Runtime\Shared\W.Runtime.Shared.vbproj" />
     <ProjectReference Include="..\..\Runtime\Util\W.Runtime.Util.vbproj" />
   </ItemGroup>
