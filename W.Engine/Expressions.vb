@@ -56,11 +56,11 @@
 
 			Case TokenType._Variable
 				Dim name$ = Match(TokenType._Variable, False)
-                If Variable.ContainsKey(name.ToLower) Then
-                    Lexer.Advance()
-                    Register = Variable(name.ToLower())
-                Else
-                    FunctionCall()
+				If Variable.ContainsKey(name.ToLower) Then
+					Lexer.Advance()
+					Register = Variable(name.ToLower())
+				Else
+					FunctionCall()
 				End If
 
 			Case TokenType.Not, TokenType._Boolean
@@ -79,7 +79,7 @@
 
 			Case Else
 				Match(TokenType._LeftParen)
-				Expr()
+				BooleanExpr()
 				Match(TokenType._RightParen)
 		End Select
 

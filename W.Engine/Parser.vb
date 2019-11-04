@@ -68,7 +68,7 @@ Partial Public Class Engine
 		Dim varname = Match(TokenType._Variable).ToLower()
 		If Lexer.Current.Type = TokenType._Equals Then
 			Match(TokenType._Equals)
-			Expr()
+			BooleanExpr()
 			Variable(varname) = Register
 		Else
 			Variable(varname) = Nothing
@@ -159,10 +159,6 @@ Partial Public Class Engine
 			For Each type In Types
 				Try
 					Try
-						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, ArgArr)
-						FuncArgs = Stack.Pop()
-						Return
-					Catch e As Exception When TypeOf e Is ArgumentException OrElse TypeOf e Is TargetParameterCountException
 						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, {ArgArr})
 						FuncArgs = Stack.Pop()
 						Return

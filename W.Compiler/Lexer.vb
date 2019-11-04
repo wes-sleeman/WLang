@@ -194,11 +194,15 @@
 	End Function
 End Class
 
-Friend Class ReturnException
+Public Class ReturnException
 	Inherits Exception
 	Public ReadOnly Property ReturnValue As Object
 
 	Public Sub New(Retval As Object)
 		ReturnValue = Retval
 	End Sub
+
+	Public Overrides Function ToString() As String
+		Return $"Don't use return outside of a function call! Return value: {ReturnValue}"
+	End Function
 End Class

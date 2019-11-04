@@ -50,6 +50,7 @@ Module {Filename}
 	Private FuncArgs As New List(Of Object)
 	Private Variable As New Dictionary(Of String, Object)
 	Private ProjectionOutput As New List(Of Object)
+	Private AssignmentQueue As New Queue(Of Object)
 	ReadOnly Stack As New Stack(Of Object)
 	ReadOnly Types As New List(Of Type)
 	Function Defined(ParamArray Data() As Object) As Object
@@ -71,10 +72,10 @@ Module {Filename}
 			If Stack.Peek() Is Nothing Then
 				Stack.Pop()
 				If Register Is Nothing Then Return Nothing
-				Return CType(If(TypeOf Register Is IEnumerable(Of Object), Register, {{Register}}), IEnumerable(Of Object)).ToList()
+				Return {{Register}}.ToList()
 			Else
 				If Register Is Nothing Then Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {{Stack.Pop()}}), IEnumerable(Of Object))).ToList()
-				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {{Stack.Pop()}}), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {{Register}})).ToList()
+				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {{Stack.Pop()}}), IEnumerable(Of Object))).Concat({{Register}}).ToList()
 			End If
 		End If
 	End Function
@@ -97,11 +98,7 @@ Module {Filename}
 
 		For Each type In GetType({Filename}).Assembly.GetTypes()
 			Try
-				Try
-					Return type.GetMethod(name, BindingFlags.NonPublic Or BindingFlags.Static).Invoke(Nothing, ArgArr)
-				Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
-					Return type.GetMethod(name, BindingFlags.NonPublic Or BindingFlags.Static).Invoke(Nothing, {{ArgArr}})
-				End Try
+				Return type.GetMethod(name, BindingFlags.NonPublic Or BindingFlags.Static).Invoke(Nothing, {{ArgArr}})
 			Catch ex As TypeLoadException : Catch ex As NullReferenceException : Catch ex As TargetParameterCountException
 			End Try
 			Try
@@ -155,6 +152,8 @@ If(Debug,
 				Console.WriteLine(""Exception on line "" & LineNumber & "": Impossible operation on data "" & exMessage(3))
 		ElseIf TypeOf ex Is TargetInvocationException Then 
 				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.InnerException.Message)
+		ElseIf TypeOf ex Is IndexOutOfRangeException Then
+			Console.WriteLine(""Exception on line "" & LineNumber & "": Index out of range"")
 		Else
 				Console.WriteLine(""Exception on line "" & LineNumber & "": "" & ex.Message)
 		End If
@@ -273,7 +272,7 @@ If(Debug,
 
 			Case Else
 				Match(TokenType._LeftParen)
-				Expr()
+				BooleanExpr()
 				Match(TokenType._RightParen)
 		End Select
 
@@ -287,7 +286,11 @@ If(Debug,
 
 		Dim indexers As New List(Of String)
 
-		If Assignment Then Push()
+		If Assignment Then
+			Push()
+			Emit("Stack.Push(New Queue(Of Object)(AssignmentQueue))")
+			Emit("AssignmentQueue.Clear()")
+		End If
 		Do While Lexer.Current.Type = TokenType._Dot
 			Match(TokenType._Dot)
 			If Not Assignment Then Push()
@@ -296,8 +299,8 @@ If(Debug,
 					Match(TokenType._LeftParen)
 					Expr()
 					Match(TokenType._RightParen)
-					If Assignment Then Push()
-					indexers.Add(If(Assignment, $"(Stack.Pop())", "Register = (Stack.Pop())(Register)"))
+					If Assignment Then Emit("AssignmentQueue.Enqueue(Register)")
+					indexers.Add(If(Assignment, $"(AssignmentQueue.Dequeue())", "Register = (Stack.Pop())(Register)"))
 
 				Case TokenType._Variable
 					If Assignment Then
@@ -340,8 +343,9 @@ If(Debug,
 				retval &= item
 			Next
 			Match(TokenType._Equals)
-			Expr()
+			BooleanExpr()
 			Emit(retval & " = Register")
+			Emit("AssignmentQueue = Stack.Pop()")
 			Pop()
 		End If
 	End Sub
@@ -354,7 +358,7 @@ If(Debug,
 		Emit("Stack.Push(New List(Of Object)(ProjectionOutput)) : ProjectionOutput.Clear()")
 		Emit("For Each ProjectionIterator As Object In _Concat()")
 		IndentLevel += 1
-		Expr()
+		BooleanExpr()
 		Emit("ProjectionOutput.Add(Register)")
 		IndentLevel -= 1
 		Emit("Next")

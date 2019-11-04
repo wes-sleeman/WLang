@@ -1,9 +1,9 @@
 ﻿Partial Public Class Engine
 	Private ReadOnly Functions As New Dictionary(Of String, String)
 	Private Lexer As New Lexer
-    Private InFunc As Boolean = False
+	Private InFunc As Boolean = False
 
-    Private Register As Object
+	Private Register As Object
 	Private Counter% = 0
 	Private LoopEnd% = 0
 	Private FuncArgs As New List(Of Object)
@@ -33,10 +33,10 @@
 			If Stack.Peek() Is Nothing Then
 				Stack.Pop()
 				If Register Is Nothing Then Return Nothing
-				Return CType(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register}), IEnumerable(Of Object)).ToList()
+				Return {Register}.ToList()
 			Else
 				If Register Is Nothing Then Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).ToList()
-				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register})).ToList()
+				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat({Register}).ToList()
 			End If
 		End If
 	End Function
@@ -78,6 +78,8 @@
 	''' </summary>
 	''' <param name="Code">The code to be executed.</param>
 	''' <param name="ForceReturn">If true, returns the most recent calculation from code blocks.</param>
+	''' <exception cref="ReturnException">Returned outside a function.</exception>
+	''' <exception cref="Exception">Interpretation error.</exception>
 	''' <returns>The result of the most recent calculation or <c>null</c>.</returns>
 	Public Function Eval(Code$, Optional ForceReturn As Boolean = False) As String
 		Try
@@ -91,12 +93,12 @@
 			End Try
 
 			Return FormatOutput({If(Register, String.Empty)})
-		Catch ex As ReturnException
-			Throw New Exception($"Don't use return outside of a function call! Return value: {ex.ReturnValue}")
 		Catch ex As Exception
 			Dim exMessage$() = ex.Message.Split({" "c}, StringSplitOptions.RemoveEmptyEntries)
 			If TypeOf ex Is InvalidCastException AndAlso exMessage(3) = "not" Then
 				Throw New Exception("Impossible operation on data")
+			ElseIf TypeOf ex Is IndexOutOfRangeException Then
+				Throw New Exception("Index out of range")
 			ElseIf TypeOf ex Is InvalidCastException AndAlso exMessage(3) <> "not" Then
 				Throw New Exception("Impossible operation on data " & exMessage(3))
 			Else
