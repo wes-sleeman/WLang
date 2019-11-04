@@ -6,16 +6,17 @@ Namespace W.Tests.Compiler
 	Public Class MainUnitTests
 		<Fact>
 		Sub TestEmptyMain()
-			Global.W.Compiler.Main.Main({})
-		End Sub
+            Global.W.Compiler.Main.Main(Array.Empty(Of String)())
+        End Sub
 
 		<Theory>
 		<InlineData("", "test.w", False, False)>
 		<InlineData("", "test.w", False, True)>
 		<InlineData("", "test.w", True, False)>
-		<InlineData("", "test.w", True, True)>
-		Sub TestEmptyProgram(code$, filename$, [lib] As Boolean, debug As Boolean)
-			Dim validResult$ = $"Imports System : Imports System.Collections.Generic : Imports System.Reflection
+        <InlineData("", "test.w", True, True)>
+        Sub TestEmptyProgram(code$, filename$, [lib] As Boolean, debug As Boolean)
+            Dim RemoveSpace = Function(s$) New String(s.Where(Function(x) Not Char.IsWhiteSpace(x)).ToArray()).ToLower()
+            Dim validResult$ = $"Imports System : Imports System.Collections.Generic : Imports System.Reflection
 Module {Path.GetFileNameWithoutExtension(filename)}
 	Dim Register As Object
 	Dim Counter% = 0
@@ -105,9 +106,10 @@ Module {Path.GetFileNameWithoutExtension(filename)}
 		Next
 		Throw New MissingMethodException(""Unable to find method "" & name & "". Did you forget a reference?"")
 	End Function"
-			Dim emission$ = LexAndParse(code, filename, [lib], debug).Aggregate(Function(s, i) s & vbLf & i).Replace(vbLf, Environment.NewLine)
-			Assert.Equal(validResult, emission.Substring(0, validResult.Length))
-			Assert.True(emission.StartsWith(validResult))
-		End Sub
-	End Class
+            validResult = RemoveSpace(validResult)
+            Dim emission$ = RemoveSpace(LexAndParse(code, filename, [lib], debug).Aggregate(Function(s, i) s & vbLf & i).Replace(vbLf, Environment.NewLine))
+            Assert.Equal(validResult, emission.Substring(0, validResult.Length))
+            Assert.True(emission.StartsWith(validResult))
+        End Sub
+    End Class
 End Namespace

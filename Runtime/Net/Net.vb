@@ -5,10 +5,10 @@ Public Module Net
 	Public Function Wget(Url As Object) As Object
 		Using cli As New WebClient()
 			Try
-				Return cli.DownloadString(Url.ToString())
-			Catch
-				Return cli.DownloadString("http://" & Url.ToString())
-			End Try
+                Return cli.DownloadString(Url.ToString()).Replace(vbCrLf, vbLf).Replace(vbLf, Environment.NewLine)
+            Catch
+                Return cli.DownloadString("http://" & Url.ToString()).Replace(vbCrLf, vbLf).Replace(vbLf, Environment.NewLine)
+            End Try
 		End Using
 	End Function
 
