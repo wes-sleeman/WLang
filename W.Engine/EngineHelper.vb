@@ -26,7 +26,7 @@ Partial Public Class Engine
 		Dim var = Variable(Varname)
 
 		If TypeOf var IsNot IEnumerable(Of Object) Then var = {var}
-		Variable(Varname) = CheckAssignmentRecursion(var)
+		Register = CheckAssignmentRecursion(var)
 	End Sub
 
 	Private Function CheckAssignmentRecursion(ByRef WorkingRegister As Object, Optional ByRef PrevReg As Object = Nothing) As Object
