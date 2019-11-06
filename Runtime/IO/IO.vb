@@ -55,6 +55,8 @@ Public Module IO
 	End Function
 
 	Public Function Read(ParamArray Paths())
+		If Paths.Length = 1 AndAlso TypeOf Paths(0) IsNot String AndAlso TypeOf Paths(0) Is IEnumerable(Of Object) Then Paths = Paths(0)
+
 		If Paths.Length = 0 Then
 			Return Console.ReadLine()
 		ElseIf Paths.Length = 1 Then
@@ -70,6 +72,32 @@ Public Module IO
 					retval.Add(File.ReadAllLines(Path.GetFullPath(Path.ToString())).ToList())
 				Catch
 					retval.Add(New List(Of Object))
+				End Try
+			Next
+			Return retval
+		End If
+	End Function
+
+	Public Function Delete(ParamArray Paths())
+		If Paths.Length = 1 AndAlso TypeOf Paths(0) IsNot String AndAlso TypeOf Paths(0) Is IEnumerable(Of Object) Then Paths = Paths(0)
+
+		If Paths.Length = 0 Then
+			Return New List(Of Object)
+		ElseIf Paths.Length = 1 Then
+			Try
+				File.Delete(Paths(0))
+				Return True
+			Catch
+				Return False
+			End Try
+		Else
+			Dim retval As New List(Of Object)
+			For Each Path In Paths
+				Try
+					File.Delete(Path)
+					retval.Add(True)
+				Catch
+					retval.Add(False)
 				End Try
 			Next
 			Return retval
