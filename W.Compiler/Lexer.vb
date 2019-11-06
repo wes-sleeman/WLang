@@ -206,3 +206,11 @@ Public Class ReturnException
 		Return $"Don't use return outside of a function call! Return value: {ReturnValue}"
 	End Function
 End Class
+
+Public Class EscapeException
+	Inherits Exception
+
+	Public Overrides Function ToString() As String
+		Return "Don't use escape outside of a loop!"
+	End Function
+End Class

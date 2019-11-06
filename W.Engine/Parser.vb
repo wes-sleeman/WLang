@@ -20,7 +20,7 @@ Partial Public Class Engine
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Match(TokenType.Escape)
-					Exit Do
+					Throw New EscapeException()
 
 				Case TokenType.If
 					[If]()
@@ -262,12 +262,22 @@ Partial Public Class Engine
 		Stack.Push(LoopEnd)
 		If inf Then LoopEnd = Integer.MaxValue Else LoopEnd = Register
 		Stack.Push(Counter) : Counter = 0
-		Do While Counter < LoopEnd
+		Try
+			Do While Counter < LoopEnd
+				Lexer.Index = lexerCache
+				Lexer.Advance()
+				Block(InLoop:=True)
+				Counter += 1
+			Loop
+		Catch esc As EscapeException
 			Lexer.Index = lexerCache
-			Lexer.Advance()
-			Block(InLoop:=True)
-			Counter += 1
-		Loop
+			Dim depth = 1
+			Do Until depth = 0 AndAlso Lexer.Current.Type = TokenType._RightSquare
+				Lexer.Advance()
+				If Lexer.Current.Type = TokenType._LeftSquare Then depth += 1
+				If Lexer.Current.Type = TokenType._RightSquare Then depth -= 1
+			Loop
+		End Try
 
 		Match(TokenType._RightSquare)
 		Counter = Stack.Pop()
