@@ -3,7 +3,7 @@ Imports Runtime.Shared
 
 Public Module IO
 	<CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification:="Shipped public API for reflection")>
-	Public Function CurDir(ParamArray _Data())
+	Public Function CurDir(ParamArray Data())
 		Return Environment.CurrentDirectory.Replace("\", "\\")
 	End Function
 

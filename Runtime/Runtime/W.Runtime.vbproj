@@ -20,7 +20,7 @@ del *.xml</PostBuildEvent>
     <Product>W.Runtime</Product>
     <Description>The standard runtime for the W programming language.</Description>
     <Copyright>Copyright 2019</Copyright>
-    <Version>2.0.5</Version>
+    <Version>2.0.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

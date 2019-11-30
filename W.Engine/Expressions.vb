@@ -25,7 +25,7 @@
 	Private Sub CompExpr(inProp As Boolean)
 		MathExpr(inProp)
 
-		While {">", "<", ">=", "<=", "="}.Contains(Lexer.Current.Value)
+		While {TokenType._RightAngle, TokenType._LeftAngle, TokenType._RightAngleEquals, TokenType._LeftAngleEquals, TokenType._Equals}.Contains(Lexer.Current.Type)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -37,7 +37,7 @@
 	Private Sub Expr(Optional inProp As Boolean = False)
 		CompExpr(inProp)
 
-		While {"|", "&"}.Contains(Lexer.Current.Value) OrElse Lexer.Current.Type = TokenType.And OrElse Lexer.Current.Type = TokenType.Or
+		While {TokenType._Pipe, TokenType._Ampersand, TokenType.And, TokenType.Or}.Contains(Lexer.Current.Type)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -91,7 +91,7 @@
 	Private Sub MathExpr(inProp As Boolean)
 		Term(inProp)
 
-		While {"+", "-"}.Contains(Lexer.Current.Value)
+		While {TokenType._Cross, TokenType._Hyphen}.Contains(Lexer.Current.Value)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)
@@ -102,7 +102,7 @@
 
 	Private Sub SignedFactor(inProp As Boolean)
 		Dim op = TokenType._Cross
-		If {"+", "-"}.Contains(Lexer.Current.Value) Then
+		If {TokenType._Cross, TokenType._Hyphen}.Contains(Lexer.Current.Type) Then
 			op = Lexer.Current.Type
 			Match(op)
 		End If
@@ -117,7 +117,7 @@
 	Private Sub Term(inProp As Boolean)
 		SignedFactor(inProp)
 
-		While {"*", "/", "%", "\"}.Contains(Lexer.Current.Value)
+		While {TokenType._Asterisk, TokenType._Slash, TokenType._Percent, TokenType._BackSlash}.Contains(Lexer.Current.Type)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)

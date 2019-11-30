@@ -17,7 +17,7 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="W.Runtime" Version="2.0.5" />
+    <PackageReference Include="W.Runtime" Version="2.0.5.1" />
   </ItemGroup>
 
 </Project>
