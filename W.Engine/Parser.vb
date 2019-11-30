@@ -159,6 +159,10 @@ Partial Public Class Engine
 			For Each type In Types
 				Try
 					Try
+						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, ArgArr)
+						FuncArgs = Stack.Pop()
+						Return
+					Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
 						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, {ArgArr})
 						FuncArgs = Stack.Pop()
 						Return
