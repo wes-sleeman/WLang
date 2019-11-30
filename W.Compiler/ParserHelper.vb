@@ -204,7 +204,7 @@ If(Debug,
 	Private Sub MathExpr(inProp As Boolean)
 		Term(inProp)
 
-		While {TokenType._Cross, TokenType._Hyphen}.Contains(Lexer.Current.Value)
+		While {TokenType._Cross, TokenType._Hyphen}.Contains(Lexer.Current.Type)
 			Push()
 			Dim op = Lexer.Current.Type
 			Match(op)

@@ -80,7 +80,7 @@ Public Module Main
 		If Not cross Then
 			Dim outpath$ = Path.ChangeExtension(Path.GetFullPath(executableFile), ".dll")
 			Console.WriteLine($"Compiling to {outpath}.")
-			Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.0 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
+			Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.1 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
 
 			'Clean up
 			If debug Then File.Delete(Path.ChangeExtension(outpath, ".pdb"))
@@ -89,7 +89,7 @@ Public Module Main
 			File.Delete(Path.ChangeExtension(outpath, ".deps.json"))
 			Directory.Delete(".build", True)
 
-			If stdout.Contains("Build succeeded.") Then
+			If Not stdout.Contains("Build FAILED") Then
 				If Not norun Then
 					Console.WriteLine("Running…")
 					Process.Start("dotnet", """" & outpath & """")
