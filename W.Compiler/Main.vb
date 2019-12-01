@@ -140,6 +140,8 @@ Public Module Main
 			Dim res$ = proc.StandardOutput.ReadToEnd()
 			proc.WaitForExit()
 
+			proc.Kill()
+
 			Return res
 		End Using
 	End Function

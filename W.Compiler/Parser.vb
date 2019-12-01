@@ -193,6 +193,7 @@
 	Private Sub [Return]()
 		Match(TokenType.Return)
 		Try
+			If Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF Then Throw New Exception()
 			BooleanExpr()
 			Emit("Return Register")
 		Catch

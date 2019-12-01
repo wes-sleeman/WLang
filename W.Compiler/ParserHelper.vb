@@ -366,7 +366,7 @@ If(Debug,
 		Match(TokenType._RightSquareAngle)
 	End Sub
 
-	Private Sub BooleanExpr()
+	Private Sub BooleanExpr(Optional recursionDepth = 0, Optional recursionLimit = 25)
 		If Lexer.Current.Type = TokenType._Boolean Then
 			Emit($"Register = {Match(TokenType._Boolean)}")
 		ElseIf Lexer.Current.Type = TokenType.Not Then
@@ -380,13 +380,15 @@ If(Debug,
 				Catch ex As ArgumentException
 					Expr()
 				End Try
-			Catch ex As ArgumentException
-				BooleanExpr()
+			Catch ex As ArgumentException When recursionDepth < recursionLimit
+				BooleanExpr(recursionDepth + 1, recursionLimit)
 				Push()
 				Dim op = Lexer.Current.Type
 				Match(op)
-				BooleanExpr()
+				BooleanExpr(recursionDepth + 1, recursionLimit)
 				Pop(op)
+			Catch ex As ArgumentException When recursionDepth >= recursionLimit
+				Throw New StackOverflowException("Invalid expression")
 			End Try
 		End If
 	End Sub
