@@ -1,5 +1,7 @@
 REF 'IO', 'Math', 'Util' FROM 'Runtime'
 
-If <[ Collect(0, 1, 2, 3, 4, 5) => Pow($, 2) ]> = Collect(0, 1, 4, 9, 16, 25)
+Item x = <[ Collect(0, 1, 2, 3, 4, 5) => Pow($, 2) ]>
+Item y = Collect(0, 1, 4, 9, 16, 25)
+If x = y
 [ Type("Success!") ]
 [ Type("FAILED") ]

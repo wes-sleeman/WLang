@@ -356,7 +356,7 @@ If(Debug,
 		Push()
 		Match(TokenType._RightEqualsAngle)
 		Emit("Stack.Push(New List(Of Object)(ProjectionOutput)) : ProjectionOutput.Clear()")
-		Emit("For Each ProjectionIterator As Object In _Concat()")
+		Emit("For Each ProjectionIterator As Object In CType(If(TypeOf Register Is IEnumerable(Of Object), Register, {Register}), IEnumerable(Of Object)).ToList()")
 		IndentLevel += 1
 		BooleanExpr()
 		Emit("ProjectionOutput.Add(Register)")
