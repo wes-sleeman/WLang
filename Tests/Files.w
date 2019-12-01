@@ -6,4 +6,4 @@ REF 'IO', 'Util' FROM 'Runtime'
 Success!
 }
 
-Type(Load("Files.test").5)
+Type(Read("Files.test").5)

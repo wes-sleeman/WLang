@@ -23,16 +23,21 @@ Partial Public Class Engine
 	End Sub
 
 	Private Sub CheckAssignmentProperty(Varname As String)
-		If TypeOf Register IsNot IEnumerable(Of Object) Then Register = {Register}
-		Register = CheckAssignmentRecursion(Register)
-		Match(TokenType._Equals)
-		Push()
-		Expr()
-		Variable(Varname) = Register(Stack.Pop())
+		Dim var = Variable(Varname)
+
+		If TypeOf var IsNot IEnumerable(Of Object) Then var = {var}
+		Register = CheckAssignmentRecursion(var)
 	End Sub
 
-	Private Function CheckAssignmentRecursion(ByRef WorkingRegister As Object) As Object
-		If Lexer.Current.Type <> TokenType._Dot Then Return WorkingRegister
+	Private Function CheckAssignmentRecursion(ByRef WorkingRegister As Object, Optional ByRef PrevReg As Object = Nothing) As Object
+		If Lexer.Current.Type <> TokenType._Dot Then
+			Match(TokenType._Equals)
+			Push()
+			Expr()
+			PrevReg(WorkingRegister) = Register
+			Return WorkingRegister
+		End If
+		If PrevReg IsNot Nothing Then WorkingRegister = PrevReg(WorkingRegister)
 		If TypeOf WorkingRegister IsNot IEnumerable(Of Object) Then Register = {Register}
 		Match(TokenType._Dot)
 		Select Case Lexer.Current.Type
@@ -41,10 +46,10 @@ Partial Public Class Engine
 				Expr()
 				Match(TokenType._RightParen)
 				Push()
-				Return CheckAssignmentRecursion(WorkingRegister(Stack.Pop()))
+				Return CheckAssignmentRecursion(Stack.Pop(), WorkingRegister)
 
 			Case TokenType._IntLiteral
-				Return CheckAssignmentRecursion(WorkingRegister(Double.Parse(Match(TokenType._IntLiteral))))
+				Return CheckAssignmentRecursion(WorkingRegister(Double.Parse(Match(TokenType._IntLiteral))), WorkingRegister)
 
 			Case Else
 				Throw New ArgumentException($"Unexpected {Lexer.Current.Value} after dot. Did you forget to bracket a dynamic indexer?")
@@ -171,7 +176,7 @@ Partial Public Class Engine
 			ProjectionIterator = PI
 			Lexer.Index = lexerCache
 			Lexer.Advance()
-			Expr()
+			BooleanExpr()
 			ProjectionOutput.Add(Register)
 		Next
 		Register = ProjectionOutput

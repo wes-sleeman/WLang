@@ -2,31 +2,16 @@
 
   <PropertyGroup>
     <RootNamespace>Runtime</RootNamespace>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Runtime</AssemblyName>
-    <PostBuildEvent>copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\IO\bin\Debug\Runtime.IO.dll 
+    <PostBuildEvent>copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\IO\bin\Debug\Runtime.IO.dll
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Math\bin\Debug\Runtime.Math.dll
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Net\bin\Debug\Runtime.Net.dll
+copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Util\bin\Debug\Runtime.Util.dll
 
-
-
-copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Math\bin\Debug\Runtime.Math.dll 
-
-
-
-copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Net\bin\Debug\Runtime.Net.dll 
-
-
-copy D:\OneDrive\Programming\Compilers\WCompiler\Runtime\Util\bin\Debug\Runtime.Util.dll 
-
-
-
-
-ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /targetplatform:v4 /ndebug /out:Runtime.dll *.dll
-
-
+ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /lib:"C:\Program Files\dotnet\shared\Microsoft.NETCore.App\3.1.0-preview3.19553.2" /targetplatform:v4 /ndebug /out:Runtime.dll *.dll
 
 copy Runtime.dll D:\OneDrive\Programming\Compilers\WCompiler\Runtime
-
-
 
 del *.xml</PostBuildEvent>
     <PackageId>W.Runtime</PackageId>
@@ -35,7 +20,7 @@ del *.xml</PostBuildEvent>
     <Product>W.Runtime</Product>
     <Description>The standard runtime for the W programming language.</Description>
     <Copyright>Copyright 2019</Copyright>
-    <Version>2.0.3.3</Version>
+    <Version>2.0.5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

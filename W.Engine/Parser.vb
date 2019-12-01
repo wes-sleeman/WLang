@@ -20,7 +20,7 @@ Partial Public Class Engine
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Match(TokenType.Escape)
-					Exit Do
+					Throw New EscapeException()
 
 				Case TokenType.If
 					[If]()
@@ -68,7 +68,7 @@ Partial Public Class Engine
 		Dim varname = Match(TokenType._Variable).ToLower()
 		If Lexer.Current.Type = TokenType._Equals Then
 			Match(TokenType._Equals)
-			Expr()
+			BooleanExpr()
 			Variable(varname) = Register
 		Else
 			Variable(varname) = Nothing
@@ -162,7 +162,7 @@ Partial Public Class Engine
 						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, ArgArr)
 						FuncArgs = Stack.Pop()
 						Return
-					Catch e As Exception When TypeOf e Is ArgumentException OrElse TypeOf e Is TargetParameterCountException
+					Catch e As Exception When TypeOf e Is TargetParameterCountException OrElse TypeOf e Is ArgumentException
 						Register = type.GetMethods().Where(Function(mi) mi.Name.ToLower() = funcName.ToLower()).FirstOrDefault().Invoke(Nothing, {ArgArr})
 						FuncArgs = Stack.Pop()
 						Return
@@ -266,12 +266,22 @@ Partial Public Class Engine
 		Stack.Push(LoopEnd)
 		If inf Then LoopEnd = Integer.MaxValue Else LoopEnd = Register
 		Stack.Push(Counter) : Counter = 0
-		Do While Counter < LoopEnd
+		Try
+			Do While Counter < LoopEnd
+				Lexer.Index = lexerCache
+				Lexer.Advance()
+				Block(InLoop:=True)
+				Counter += 1
+			Loop
+		Catch esc As EscapeException
 			Lexer.Index = lexerCache
-			Lexer.Advance()
-			Block(InLoop:=True)
-			Counter += 1
-		Loop
+			Dim depth = 1
+			Do Until depth = 0 AndAlso Lexer.Current.Type = TokenType._RightSquare
+				Lexer.Advance()
+				If Lexer.Current.Type = TokenType._LeftSquare Then depth += 1
+				If Lexer.Current.Type = TokenType._RightSquare Then depth -= 1
+			Loop
+		End Try
 
 		Match(TokenType._RightSquare)
 		Counter = Stack.Pop()

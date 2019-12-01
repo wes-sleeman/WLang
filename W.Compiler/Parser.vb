@@ -122,7 +122,7 @@
 		Dim varname = Match(TokenType._Variable).ToLower()
 		If Lexer.Current.Type = TokenType._Equals Then
 			Match(TokenType._Equals)
-			Expr()
+			BooleanExpr()
 			Emit($"Variable(""{varname}"") = Register")
 		Else
 			Emit($"Variable(""{varname}"") = Nothing")
@@ -138,7 +138,7 @@
 			CheckProperty(True, varname)
 		Else
 			Match(TokenType._Equals)
-			Expr()
+			BooleanExpr()
 			Emit($"Variable(""{varname}"") = Register")
 		End If
 	End Sub
@@ -193,7 +193,8 @@
 	Private Sub [Return]()
 		Match(TokenType.Return)
 		Try
-			Expr()
+			If Lexer.Current.Type = TokenType._RightSquare OrElse Lexer.Current.Type = TokenType._EOF Then Throw New Exception()
+			BooleanExpr()
 			Emit("Return Register")
 		Catch
 			If InFunc OrElse [Lib] Then
