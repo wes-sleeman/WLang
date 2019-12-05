@@ -8,6 +8,8 @@ If Quicksort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 
 Func Quicksort
 [
+	args = args.0
+	
 	If args.num = 0 [ Return ]
 	If args.num = 1 [ Return args.0 ]
 
@@ -22,6 +24,13 @@ Func Quicksort
 		[ lowlist = lowlist.concat(args.(# + 1)) ]
 		[ highlist = highlist.concat(args.(# + 1)) ]
 	]
+	
+	Item retval = Quicksort(lowlist).Concat(pivot)
+	Item h = Quicksort(highlist)
+	
+	If h.num = 1
+	[ retval = retval.concat(h) ]
+	[ Repeat h.num [ retval = retval.concat(h.(#)) ] ]
 
-	Return Quicksort(lowlist).Concat(pivot).Concat(Quicksort(highlist))
+	Return retval
 ]

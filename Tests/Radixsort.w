@@ -8,6 +8,8 @@ If RadixSort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 
 Func GetMax
 [
+	args = args.0
+	
 	Item mx = args.0
 	Repeat args.num - 1
 	[
@@ -44,6 +46,8 @@ Func CountSort
 
 Func RadixSort
 [
+	args = args.0
+	
 	Item m = GetMax(args)
 	Item exp = 1
 	

@@ -114,10 +114,14 @@
 							Return inp.Replace("\\", "ʍbɐcĸßℓɐßɥ").Replace("\r\n", vbCrLf).Replace("\r", vbCr).Replace("\n", Environment.NewLine).Replace("\b", vbBack).Replace("\t", vbTab).Replace("ʍbɐcĸßℓɐßɥ", "\")
 						End Function
 
-		If Data.Length = 1 AndAlso (TypeOf Data(0) Is String OrElse TypeOf Data(0) IsNot IEnumerable(Of Object)) Then Return Sterilise(Data(0))
+		If Data.Length = 1 AndAlso (TypeOf Data(0) Is String OrElse TypeOf Data(0) IsNot IEnumerable(Of Object)) _
+			AndAlso TypeOf Data(0) IsNot Dynamic.ExpandoObject _
+			AndAlso Data(0) IsNot Nothing Then Return Sterilise(Data(0))
 
 		Dim retval As New List(Of String)
-		For Each item In Data
+		For Each di In Data
+			Dim item = If(If(TypeOf di Is Dynamic.ExpandoObject, DynamicFormat(di), di), "<UNINITIALIZED>")
+
 			If (Not TypeOf item Is String) AndAlso TypeOf item Is IEnumerable Then
 				retval.Add($"({FormatOutput(CType(item, IEnumerable(Of Object)).ToArray())})")
 			Else
@@ -145,4 +149,14 @@
 			Lexer.Feed(input)
 		Loop Until depth = 0 AndAlso String.IsNullOrWhiteSpace(input)
 	End Sub
+
+	Private Function DynamicFormat(di As Dynamic.ExpandoObject) As String
+		If di.Count() = 0 Then Return "Dynamic {}"
+
+		Dim retval$ = String.Empty
+		For Each prop As KeyValuePair(Of String, Object) In di
+			retval &= $"{vbTab}{prop.Key}:{vbTab}{FormatOutput({prop.Value}).Split(Environment.NewLine).Select(Function(s$) vbTab & vbTab & s).Aggregate(Function(s, i) s & Environment.NewLine & i).Trim()}{Environment.NewLine}"
+		Next
+		Return ("Dynamic {" & Environment.NewLine & retval).TrimEnd() & Environment.NewLine & "}"
+	End Function
 End Class

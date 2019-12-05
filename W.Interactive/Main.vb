@@ -34,7 +34,7 @@ Public Module Program
 			Try
                 Print(ExecutionEngine.Eval(Console.ReadLine, ForceReturn:=True))
             Catch ex As Exception
-				Console.WriteLine("Error " & ex.Message)
+				Console.WriteLine("Error: " & ex.Message)
 			End Try
 		Loop
 	End Sub

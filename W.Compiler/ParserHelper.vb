@@ -42,8 +42,9 @@ Partial Module Parser
 	End Sub
 
 	Private Sub Setup()
-		Emit($"Imports System : Imports System.Collections.Generic : Imports System.Reflection
-Module {Filename}
+		Emit($"Option Strict Off
+Imports System : Imports System.Collections.Generic : Imports System.Reflection
+Public Module {Filename}
 	Dim Register As Object
 	Dim Counter% = 0
 	Dim LoopEnd% = 0

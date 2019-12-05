@@ -5,7 +5,10 @@ Item correctData
 Repeat 10 [ correctData = correctData.concat(#) ]
 
 Item maxdepth = Log(data.num, 2) * 0.5 \ 1
-If Introsort(data, maxdepth) = correctData [ Type("Success!") ] [ Type("FAILED") ]
+
+If Introsort(data, maxdepth) = correctData
+[ Type("Success!") ]
+[ Type("FAILED") ]
 
 Func Introsort
 [
@@ -28,7 +31,11 @@ Func Introsort
 		[ highlist = highlist.concat(args.(# + 1)) ]
 	]
 	
-	Return Introsort(lowlist, maxdepth - 1).concat(pivot).concat(Introsort(highlist, maxdepth - 1))
+	Item retval = Introsort(lowlist, maxdepth - 1).concat(pivot)
+	Item h = Introsort(highlist, maxdepth - 1)
+	Repeat h.num [ retval = retval.concat(h.(#)) ]
+	
+	Return retval
 ]
 
 Func Heapsort
@@ -36,7 +43,7 @@ Func Heapsort
 	Item i
 	Item tmp
 	
-	args = BuildMaxHeap(args)
+	args = BuildMaxHeap(args.0)
 	Item heapsize = args.num
 	
 	Repeat heapsize - 1
@@ -54,6 +61,7 @@ Func Heapsort
 
 Func BuildMaxHeap
 [
+	args = args.0
 	Repeat args.num \ 2 + 1
 	[
 		args = MaxHeapify(args, (args.num \ 2) - #, args.num)

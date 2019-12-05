@@ -9,6 +9,7 @@ If Mergesort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 
 Func Mergesort
 [
+	args = args.0
 	? An array with a single item is trivially sorted
 	If args.num <= 1 [ Return args ]
 	
@@ -56,4 +57,4 @@ Func Mergesort
 ]
 
 ? Returns the array without the first item
-Func Skip [ Item out Repeat args.num - 1 [ out = out.concat(args.(# + 1)) ] Return out ]
+Func Skip [ args = args.0 Item out Repeat args.num - 1 [ out = out.concat(args.(# + 1)) ] Return out ]

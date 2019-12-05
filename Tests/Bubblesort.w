@@ -4,10 +4,13 @@ Item data = Collect(4, 8, 2, 3, 5, 1, 6, 7, 9, 0)
 Item correctData
 Repeat 10 [ correctData = correctData.concat(#) ]
 
-If Bubblesort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
+If Bubblesort(data) = correctData
+[ Type("Success!") ]
+[ Type("FAILED") ]
 
 Func Bubblesort
 [
+	args = args.0	? Passed as a collection
 	Item n = args.num
 	
 	Repeat
