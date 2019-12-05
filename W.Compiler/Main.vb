@@ -14,10 +14,8 @@ Public Module Main
 
 		Dim conf = False
 
-		'Create empty dotnet project to use as template.
-		Call "dotnet new console -lang VB -o .build".Exec()
 
-		Dim cross = False, norun = False, [lib] = False, debug = True
+		Dim cross = False, norun = False, [lib] = False, debug = False, errorOccurred = False
 		Console.WriteLine("Reading input file(s).")
 		For Each filename In args
 			If String.IsNullOrWhiteSpace(filename) Then Continue For
@@ -41,6 +39,8 @@ Public Module Main
 					Case "/release", "/prod"
 						debug = False
 						Console.WriteLine("Building in release mode")
+					Case "/lib"
+						[lib] = True
 					Case Else
 						Console.WriteLine("Invalid program flag " & filename)
 						Return
@@ -48,56 +48,77 @@ Public Module Main
 				Continue For
 			End If
 
+
+			If Directory.Exists(".build") Then Directory.Delete(".build", True)
+			'Create empty dotnet project to use as template.
+			Call "dotnet new console -lang VB -o .build".Exec()
+
 			Try
 				filename = Path.GetFullPath(filename)
 				Console.WriteLine($"Building lexer for file <{filename}>.")
 				Dim code() = LexAndParse(File.ReadAllText(filename), filename, [lib], debug)
+
+				File.Delete(Path.Combine(".build", "Program.vb"))
 
 				Dim emitpath$ = Path.ChangeExtension(Path.Combine(".build", If([lib], Path.GetFileName(filename), "Program.vb")), ".vb")
 				Console.WriteLine("Emitting")
 				File.WriteAllLines(emitpath, code)
 
 				Console.WriteLine()
-				[lib] = True
 			Catch ex As FileNotFoundException
 				Console.WriteLine($"File {filename} not found!")
+				errorOccurred = True
 				Continue For
 			Catch ex As ArgumentException
 				Console.WriteLine($"Error: {ex.Message}")
+				errorOccurred = True
+				Continue For
+			Catch ex As StackOverflowException
+				Console.WriteLine("Error: Infinite recursion in expression. Are you sure this is valid W?")
+				errorOccurred = True
 				Continue For
 			End Try
-		Next
 
-		Call $"dotnet add {Path.Combine(".build", ".build.vbproj")} package W.Runtime".Exec()
-
-		Dim executableFile$ = args.Where(Function(s$) Not s.StartsWith("/")).First()
-		Dim projfile = File.ReadAllLines(Path.Combine(".build", ".build.vbproj")).ToList()
-		Dim insertIndex% = projfile.FindIndex(Function(s$) s.Contains("<OutputType>"))
-		projfile(insertIndex + 1) = projfile(insertIndex + 1).Replace("_build", Path.GetFileNameWithoutExtension(executableFile))
-		projfile.Insert(insertIndex, $"    <AssemblyName>{Path.GetFileNameWithoutExtension(executableFile)}</AssemblyName>")
-		File.WriteAllLines(Path.Combine(".build", ".build.vbproj"), projfile)
-
-		If Not cross Then
-			Dim outpath$ = Path.ChangeExtension(Path.GetFullPath(executableFile), ".dll")
-			Console.WriteLine($"Compiling to {outpath}.")
-			Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.1 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
-
-			'Clean up
-			If debug Then File.Delete(Path.ChangeExtension(outpath, ".pdb"))
-			If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then File.Delete(Path.ChangeExtension(outpath, ".exe"))
-			If RuntimeInformation.IsOSPlatform(OSPlatform.Linux) Then File.Delete(Path.GetFileNameWithoutExtension(outpath))
-			File.Delete(Path.ChangeExtension(outpath, ".deps.json"))
-			Directory.Delete(".build", True)
-
-			If Not stdout.Contains("Build FAILED") Then
-				If Not norun Then
-					Console.WriteLine("Running…")
-					Process.Start("dotnet", """" & outpath & """")
-				End If
-			Else
-				Console.WriteLine(stdout)
+			If errorOccurred Then
+				Directory.Delete(".build", True)
+				Console.WriteLine("Compilation terminated due to errors. See above.")
+				Return
 			End If
-		End If
+
+			Call $"dotnet add {Path.Combine(".build", ".build.vbproj")} package W.Runtime".Exec()
+
+			Dim projfile = File.ReadAllLines(Path.Combine(".build", ".build.vbproj")).ToList()
+			Dim insertIndex% = projfile.FindIndex(Function(s$) s.Contains("<OutputType>"))
+			projfile(insertIndex + 1) = projfile(insertIndex + 1).Replace("_build", Path.GetFileNameWithoutExtension(filename))
+			If [lib] Then projfile(insertIndex) = projfile(insertIndex).Replace("Exe", "Library")
+			projfile.Insert(insertIndex, $"    <AssemblyName>{Path.GetFileNameWithoutExtension(filename)}</AssemblyName>")
+
+			File.WriteAllLines(Path.Combine(".build", ".build.vbproj"), projfile)
+
+			If Not cross Then
+				Dim outpath$ = Path.ChangeExtension(Path.GetFullPath(filename), ".dll")
+				Console.WriteLine($"Compiling to {outpath}.")
+				Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.1 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
+
+				'Clean up
+				If Not debug Then
+					File.Delete(Path.ChangeExtension(outpath, ".pdb"))
+					If RuntimeInformation.IsOSPlatform(OSPlatform.Windows) Then File.Delete(Path.ChangeExtension(outpath, ".exe"))
+					If RuntimeInformation.IsOSPlatform(OSPlatform.Linux) Then File.Delete(Path.GetFileNameWithoutExtension(outpath))
+					File.Delete(Path.ChangeExtension(outpath, ".deps.json"))
+				End If
+				Directory.Delete(".build", True)
+
+				If Not stdout.Contains("Build FAILED") Then
+					If Not norun Then
+						Console.WriteLine("Running…")
+						Process.Start("dotnet", """" & outpath & """")
+					End If
+				Else
+					Console.WriteLine(stdout)
+				End If
+			End If
+		Next
 
 		If conf Then
 			Console.WriteLine($"Done!{vbCrLf}Press any key to continue…")

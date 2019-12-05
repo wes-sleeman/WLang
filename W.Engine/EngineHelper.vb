@@ -85,7 +85,11 @@ Partial Public Class Engine
 							Expr(inProp:=True)
 							Register = _Concat()
 						Case Else
-							Register = Stack.Peek().GetType().GetRuntimeProperty(Match(TokenType._Variable)).GetValue(Stack.Pop())
+							If TypeOf Register Is Dynamic.ExpandoObject Then
+								Register = CType(Stack.Pop(), IDictionary(Of String, Object))(Match(TokenType._Variable))
+							Else
+								Register = Stack.Peek().GetType().GetRuntimeProperty(Match(TokenType._Variable)).GetValue(Stack.Pop())
+							End If
 					End Select
 
 				Case TokenType._IntLiteral
