@@ -3,12 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>W.Compiler</RootNamespace>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <PostBuildEvent>del $(TargetDir)Runtime.dll
 
 
 copy $(SolutionDir)Runtime\Runtime.dll $(TargetDir)</PostBuildEvent>
-    <Version>2.1.0</Version>
+    <Version>2.1.0.3</Version>
     <Authors>Weston Sleeman</Authors>
     <Description>The official compiler for the W programming language.</Description>
     <StartupObject>W.Compiler.Main</StartupObject>

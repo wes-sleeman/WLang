@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <RootNamespace>W.Tests.Compiler</RootNamespace>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>

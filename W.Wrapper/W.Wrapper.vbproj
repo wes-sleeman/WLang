@@ -3,9 +3,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>W.Wrapper</RootNamespace>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <AssemblyName>W</AssemblyName>
-    <Version>2.1.0</Version>
+    <Version>2.1.0.3</Version>
     <Authors>Weston Sleeman</Authors>
   </PropertyGroup>
 

@@ -9,7 +9,7 @@ If Quicksort(data) = correctData [ Type("Success!") ] [ Type("FAILED") ]
 Func Quicksort
 [
 	args = args.0
-	
+
 	If args.num = 0 [ Return ]
 	If args.num = 1 [ Return args.0 ]
 

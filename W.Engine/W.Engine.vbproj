@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <RootNamespace>W.Engine</RootNamespace>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp5.0</TargetFramework>
     <Authors>Weston Sleeman</Authors>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Description>An interpreting engine for the W programming language.</Description>
     <PackageProjectUrl>https://github.com/wessupermare/WCompiler/wiki</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wessupermare/WCompiler</RepositoryUrl>
     <PackageTags>interpreter W programming</PackageTags>
-    <Version>2.1.0</Version>
+    <Version>2.1.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="W.Runtime" Version="2.1.0.1" />
+    <PackageReference Include="W.Runtime" Version="2.1.0.3" />
   </ItemGroup>
 
 </Project>
