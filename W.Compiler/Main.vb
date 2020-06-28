@@ -48,8 +48,8 @@ Public Module Main
 				Continue For
 			End If
 
-
 			If Directory.Exists(".build") Then Directory.Delete(".build", True)
+
 			'Create empty dotnet project to use as template.
 			Call "dotnet new console -lang VB -o .build".Exec()
 
@@ -93,12 +93,16 @@ Public Module Main
 			If [lib] Then projfile(insertIndex) = projfile(insertIndex).Replace("Exe", "Library")
 			projfile.Insert(insertIndex, $"    <AssemblyName>{Path.GetFileNameWithoutExtension(filename)}</AssemblyName>")
 
+			insertIndex = projfile.FindIndex(Function(s$) s.Contains("<TargetFramework>"))
+			Dim frameworkTarget$ = projfile(insertIndex).Substring(projfile(insertIndex).IndexOf("<Target") + "<TargetFramework>".Length)
+			frameworkTarget = frameworkTarget.Substring(0, frameworkTarget.IndexOf("</Target"))
+
 			File.WriteAllLines(Path.Combine(".build", ".build.vbproj"), projfile)
 
 			If Not cross Then
 				Dim outpath$ = Path.ChangeExtension(Path.GetFullPath(filename), ".dll")
 				Console.WriteLine($"Compiling to {outpath}.")
-				Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f netcoreapp3.1 -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
+				Dim stdout$ = $"dotnet publish .build -c {If(debug, "Debug", "Release")} -f {frameworkTarget} -v n -o ""{Path.GetDirectoryName(outpath)}""".Exec()
 
 				'Clean up
 				If Not debug Then
