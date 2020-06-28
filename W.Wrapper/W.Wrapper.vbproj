@@ -5,7 +5,7 @@
     <RootNamespace>W.Wrapper</RootNamespace>
     <TargetFramework>netcoreapp5.0</TargetFramework>
     <AssemblyName>W</AssemblyName>
-    <Version>2.1.1</Version>
+    <Version>2.1.1.1</Version>
     <Authors>Weston Sleeman</Authors>
   </PropertyGroup>
 

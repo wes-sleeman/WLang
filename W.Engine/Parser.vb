@@ -15,12 +15,13 @@ Partial Public Class Engine
 		End If
 	End Sub
 
+	Private IfRepDep% = 0
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
 		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
 			Select Case Lexer.Current.Type
 				Case TokenType.Escape
 					Match(TokenType.Escape)
-					Throw New EscapeException()
+					Throw New EscapeException(IfRepDep)
 
 				Case TokenType.If
 					[If]()
@@ -192,6 +193,7 @@ Partial Public Class Engine
 			GetBlock()
 		End If
 		Match(TokenType._LeftSquare)
+		IfRepDep += 1
 		If Lexer.Current.Type = TokenType._EOF Then
 			GetBlock()
 		End If
@@ -212,14 +214,17 @@ Partial Public Class Engine
 			AdvanceLoop()
 		End If
 		Match(TokenType._RightSquare)
+		IfRepDep -= 1
 		If Lexer.Current.Type = TokenType._LeftSquare Then
 			Match(TokenType._LeftSquare)
+			IfRepDep += 1
 			If Not bool Then
 				Block(InCond:=True)
 			Else
 				AdvanceLoop()
 			End If
 			Match(TokenType._RightSquare)
+			IfRepDep -= 1
 		End If
 	End Sub
 
@@ -245,6 +250,7 @@ Partial Public Class Engine
 
 	Private Sub [Loop]()
 		Match(TokenType.Repeat)
+		IfRepDep = 1
 		Dim inf As Boolean = True
 		If Lexer.Current.Type <> TokenType._LeftSquare AndAlso Lexer.Current.Type <> TokenType._EOF Then
 			Expr()
@@ -267,6 +273,7 @@ Partial Public Class Engine
 		If inf Then LoopEnd = Integer.MaxValue Else LoopEnd = Register
 		Stack.Push(Counter) : Counter = 0
 		Try
+			If LoopEnd = 0 Then Throw New EscapeException(IfRepDep)
 			Do While Counter < LoopEnd
 				Lexer.Index = lexerCache
 				Lexer.Advance()
@@ -275,7 +282,7 @@ Partial Public Class Engine
 			Loop
 		Catch esc As EscapeException
 			Lexer.Index = lexerCache
-			Dim depth = 1
+			Dim depth = esc.Depth
 			Do Until depth = 0 AndAlso Lexer.Current.Type = TokenType._RightSquare
 				Lexer.Advance()
 				If Lexer.Current.Type = TokenType._LeftSquare Then depth += 1

@@ -6,7 +6,7 @@
     <AssemblyName>Runtime</AssemblyName>
     <PostBuildEvent>
 
-ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /lib:"C:\Program Files\dotnet\shared\Microsoft.NETCore.App\5.0.0-preview.1.20120.5" /targetplatform:v4 /ndebug /out:Runtime.dll Runtime.dll *.dll
+ilmerge /wildcards /lib:"C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2" /lib:"C:\Program Files\dotnet\shared\Microsoft.NETCore.App\5.0.0-preview.3.20214.6" /targetplatform:v4 /ndebug /out:Runtime.dll Runtime.dll *.dll
 copy Runtime.dll D:\OneDrive\Programming\Compilers\WCompiler\Runtime
 
 
