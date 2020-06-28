@@ -10,9 +10,10 @@ Installing W is easy! Follow the steps to get W working in no-time.
   
 ###	Setup with APT  
 For easy updates on `apt` compatible systems (Debian, Ubuntu, etc.), consider adding the APT repo.  
-Run the following commands in a compatible shell (I use `bash`):  
+Run the following commands in a compatible shell (I use `bash`, use `sudo` as needed.):  
 ```
 wget -q -O - http://apt.wsleeman.com/KEY.gpg | apt-key add -
+echo "deb http://apt.wsleeman.com/ /" > /etc/apt/sources.list.d/wsleeman.list
 apt-get update
 apt-get install wlang
 ```  
