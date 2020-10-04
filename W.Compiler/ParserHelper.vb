@@ -9,7 +9,7 @@ Partial Module Parser
 		Return retval
 	End Function
 
-	Private IndentLevel% = 0
+	Private IndentLevel%
 
 	Private Sub AddLib(filepath$, Optional typename$ = Nothing)
 		If filepath.ToLower = "runtime" Then
@@ -257,8 +257,11 @@ If(Debug,
 					FunctionCall()
 				End If
 
-			Case TokenType.Not, TokenType._Boolean
+			Case TokenType.Not
 				BooleanExpr()
+
+			Case TokenType._Boolean
+				[Boolean]()
 
 			Case TokenType._Dollar
 				Match(TokenType._Dollar)
@@ -283,7 +286,7 @@ If(Debug,
 	End Sub
 
 	Private Sub CheckProperty(Optional Assignment As Boolean = False, Optional Varname As String = "")
-		If Assignment AndAlso String.IsNullOrWhiteSpace(Varname) Then Throw New ArgumentNullException("Varname must be supplied assigning property check.")
+		If Assignment AndAlso String.IsNullOrWhiteSpace(Varname) Then Throw New ArgumentNullException(NameOf(Varname))
 
 		Dim indexers As New List(Of String)
 
@@ -368,19 +371,13 @@ If(Debug,
 	End Sub
 
 	Private Sub BooleanExpr(Optional recursionDepth = 0, Optional recursionLimit = 25)
-		If Lexer.Current.Type = TokenType._Boolean Then
-			Emit($"Register = {Match(TokenType._Boolean)}")
-		ElseIf Lexer.Current.Type = TokenType.Not Then
+		If Lexer.Current.Type = TokenType.Not Then
 			Match(TokenType.Not)
 			BooleanExpr()
 			Emit($"Register = Not Register")
 		Else
 			Try
-				Try
-					[Boolean]()
-				Catch ex As ArgumentException
-					Expr()
-				End Try
+				Expr()
 			Catch ex As ArgumentException When recursionDepth < recursionLimit
 				BooleanExpr(recursionDepth + 1, recursionLimit)
 				Push()

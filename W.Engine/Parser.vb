@@ -15,7 +15,7 @@ Partial Public Class Engine
 		End If
 	End Sub
 
-	Private IfRepDep% = 0
+	Private IfRepDep%
 	Private Sub Block(Optional InLoop As Boolean = False, Optional InCond As Boolean = False)
 		Do Until Lexer.Current.Type = TokenType._EOF OrElse ((InLoop OrElse InCond OrElse InFunc) AndAlso Lexer.Current.Type = TokenType._RightSquare)
 			Select Case Lexer.Current.Type
@@ -52,7 +52,7 @@ Partial Public Class Engine
 						Throw New ReturnException(Register)
 					Catch Ex As ReturnException
 						'Propgate me!
-						Throw Ex
+						Throw
 					Catch
 						Register = Nothing
 						Throw New ReturnException(Register)

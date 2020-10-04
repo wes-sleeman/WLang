@@ -1,8 +1,6 @@
 ﻿Partial Public Class Engine
 	Private Sub BooleanExpr(Optional recursionDepth = 0, Optional recursionLimit = 25)
-		If Lexer.Current.Type = TokenType._Boolean Then
-			[Boolean]()
-		ElseIf Lexer.Current.Type = TokenType.Not Then
+		If Lexer.Current.Type = TokenType.Not Then
 			Match(TokenType.Not)
 			BooleanExpr()
 			Register = Not Register
@@ -63,8 +61,11 @@
 					FunctionCall()
 				End If
 
-			Case TokenType.Not, TokenType._Boolean
+			Case TokenType.Not
 				BooleanExpr()
+
+			Case TokenType._Boolean
+				[Boolean]()
 
 			Case TokenType._Dollar
 				Match(TokenType._Dollar)

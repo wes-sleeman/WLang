@@ -3,7 +3,7 @@ Imports Runtime.Shared
 
 Public Module Util
 	Public Sub [Exit](ParamArray ReturnCode())
-		Environment.Exit(If(ReturnCode.Length = 0, 0, ReturnCode(0)))
+		Environment.Exit(If(ReturnCode.Any(), ReturnCode(0), 0))
 	End Sub
 
 	''' <see cref="Collect"/>

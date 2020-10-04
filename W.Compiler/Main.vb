@@ -6,7 +6,7 @@ Public Module Main
 	Sub Main(args As String())
 		Console.WriteLine($"W {Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString().Split({"."c}, StringSplitOptions.RemoveEmptyEntries).Take(3).Aggregate(Function(i, s) i & "." & s)} Compiler" & vbCrLf)
 
-		If args.Where(Function(s) Not s.StartsWith("/")).Count = 0 Then
+		If Not args.Where(Function(s) Not s.StartsWith("/")).Any() Then
 			Console.WriteLine("Needs something to compile! Pass in a W file to get started.")
 			Return
 		End If

@@ -1,11 +1,11 @@
 ﻿Partial Public Class Engine
 	Private ReadOnly Functions As New Dictionary(Of String, String)
 	Private Lexer As New Lexer
-	Private InFunc As Boolean = False
+	Private InFunc As Boolean
 
 	Private Register As Object
-	Private Counter% = 0
-	Private LoopEnd% = 0
+	Private Counter%
+	Private LoopEnd%
 	Private FuncArgs As New List(Of Object)
 	Private Variable As New Dictionary(Of String, Object)
 	Private ProjectionOutput As New List(Of Object)
@@ -35,8 +35,8 @@
 				If Register Is Nothing Then Return Nothing
 				Return {Register}.ToList()
 			Else
-				If Register Is Nothing Then Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).ToList()
-				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso Not TypeOf Stack.Peek() Is String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat({Register}).ToList()
+				If Register Is Nothing Then Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso TypeOf Stack.Peek() IsNot String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).ToList()
+				Return New List(Of Object)(CType(If(TypeOf Stack.Peek() Is IEnumerable(Of Object) AndAlso TypeOf Stack.Peek() IsNot String, Stack.Pop(), {Stack.Pop()}), IEnumerable(Of Object))).Concat({Register}).ToList()
 			End If
 		End If
 	End Function
@@ -103,8 +103,7 @@
 				Throw New Exception("Index out of range")
 			ElseIf TypeOf ex Is InvalidCastException AndAlso exMessage(3) <> "not" Then
 				Throw New Exception("Impossible operation on data " & exMessage(3))
-			Else
-				Throw ex
+			Else : Throw
 			End If
 		End Try
 	End Function
@@ -122,7 +121,7 @@
 		For Each di In Data
 			Dim item = If(If(TypeOf di Is Dynamic.ExpandoObject, DynamicFormat(di), di), "<UNINITIALIZED>")
 
-			If (Not TypeOf item Is String) AndAlso TypeOf item Is IEnumerable Then
+			If (TypeOf item IsNot String) AndAlso TypeOf item Is IEnumerable Then
 				retval.Add($"({FormatOutput(CType(item, IEnumerable(Of Object)).ToArray())})")
 			Else
 				retval.Add(Sterilise(item))
@@ -151,7 +150,7 @@
 	End Sub
 
 	Private Function DynamicFormat(di As Dynamic.ExpandoObject) As String
-		If di.Count() = 0 Then Return "Dynamic {}"
+		If Not di.Any() Then Return "Dynamic {}"
 
 		Dim retval$ = String.Empty
 		For Each prop As KeyValuePair(Of String, Object) In di
