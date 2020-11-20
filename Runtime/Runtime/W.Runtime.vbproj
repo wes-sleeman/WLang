@@ -13,8 +13,10 @@ del *.xml</PostBuildEvent>
     <Company>Weston Sleeman</Company>
     <Product>W.Runtime</Product>
     <Description>The standard runtime for the W programming language.</Description>
-    <Copyright>Copyright 2019</Copyright>
-    <Version>2.1.2.1</Version>
+    <Copyright>Copyright 2020</Copyright>
+    <Version>2.1.3.1</Version>
+    <AssemblyVersion>2.1.3.1</AssemblyVersion>
+    <FileVersion>2.1.3.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +25,7 @@ del *.xml</PostBuildEvent>
 
   <ItemGroup>
     <ProjectReference Include="..\Class\W.Runtime.Class.vbproj" />
+    <ProjectReference Include="..\Crypto\W.Runtime.Crypto.vbproj" />
     <ProjectReference Include="..\IO\W.Runtime.IO.vbproj" />
     <ProjectReference Include="..\Math\W.Runtime.Math.vbproj" />
     <ProjectReference Include="..\Net\W.Runtime.Net.vbproj" />
