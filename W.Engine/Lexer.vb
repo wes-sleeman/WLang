@@ -209,6 +209,11 @@ End Class
 
 Public Class EscapeException
 	Inherits Exception
+	Public ReadOnly Property Depth
+	Public Sub New(depth%)
+		MyBase.New()
+		Me.Depth = depth
+	End Sub
 
 	Public Overrides Function ToString() As String
 		Return "Don't use escape outside of a loop!"

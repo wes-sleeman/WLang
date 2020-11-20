@@ -7,7 +7,7 @@
 	Private Filename As String
 	Private [Lib] As Boolean
 	Private Debug As Boolean
-	Private InFunc As Boolean = False
+	Private InFunc As Boolean
 
 	Function Parse(Lexer As Lexer, filename As String, isLib As Boolean, debugBuild As Boolean) As String()
 		References = String.Empty
